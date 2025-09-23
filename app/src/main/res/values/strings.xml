@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">AulaGo</string>
+
+    <string-array name="generos_array">
+        <item>Selecione seu gênero</item>
+        <item>Masculino</item>
+        <item>Feminino</item>
+        <item>Outro</item>
+        <item>Prefiro não informar</item>
+    </string-array>
+</resources>

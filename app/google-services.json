@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "178656484388",
+    "project_id": "aulago-d2ee2",
+    "storage_bucket": "aulago-d2ee2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:178656484388:android:d0ebe8c749c4d4d35a4cb1",
+        "android_client_info": {
+          "package_name": "com.example.aulago"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCl3AHSpkAb_oiNCHodPbWgmwa6eLj5vkg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
