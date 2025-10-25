@@ -17,7 +17,6 @@ public abstract class MaskUtil {
         CPF, FONE, DATA
     }
 
-    // Método principal para aplicar a máscara a um EditText
     public static TextWatcher insert(final EditText editText, final MaskType maskType) {
         return new TextWatcher() {
             boolean isUpdating;

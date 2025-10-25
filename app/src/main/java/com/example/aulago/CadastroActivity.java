@@ -108,11 +108,6 @@ public class CadastroActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Valida a senha contra as políticas de segurança do Firebase.
-     * @param senha A string da senha a ser validada.
-     * @return Uma string de erro, ou null se a senha for válida.
-     */
     private String validarSenha(String senha) {
         if (senha.length() < 6) {
             return "A senha deve ter no mínimo 6 caracteres.";
@@ -169,12 +164,10 @@ public class CadastroActivity extends AppCompatActivity {
         if (senha.isEmpty() && inputSenha.isEnabled()) camposVazios = true;
 
         if (camposVazios) {
-            // ALTERADO: Toast substituído por Snackbar
             Snackbar.make(mainLayout, "Preencha todos os campos obrigatórios da primeira etapa.", Snackbar.LENGTH_LONG).show();
             return;
         }
 
-        // Validação Simplificada: Apenas verifica se CPF, Data Nasc e Telefone estão vazios
         if (cpf.isEmpty() || dtNasc.isEmpty() || telefone.isEmpty()) {
             Snackbar.make(mainLayout, "Preencha todos os campos obrigatórios da primeira etapa.", Snackbar.LENGTH_LONG).show();
             return;
@@ -185,7 +178,7 @@ public class CadastroActivity extends AppCompatActivity {
         if (!isGoogleFlow) { // SOMENTE verifica a senha se NÃO for fluxo Google
             String erroSenha = validarSenha(senha);
             if (erroSenha != null) {
-                // Exibe o erro específico no TextInputLayout (Método recomendado)
+
                 textInputLayoutSenha.setError(erroSenha);
                 return;
             }

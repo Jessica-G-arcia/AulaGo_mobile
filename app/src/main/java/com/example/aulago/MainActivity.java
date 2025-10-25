@@ -104,18 +104,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void verificarExistenciaUsuarioELogar(String email, String senha) {
-        // 1. Tenta encontrar o usuário pelo e-mail no Firestore
-        // Nota: O Firestore não tem um índice direto por e-mail a menos que você crie um.
-        // A maneira mais garantida de verificar a existência no Firebase Auth é com um método interno,
-        // mas faremos uma checagem de baixo custo no Firestore se o login falhar.
-
-        // No entanto, o método mais limpo e direto é contar com as exceções do Auth,
-        // então vamos *reforçar* o tratamento de erro.
-
-        // Se o problema persiste, a solução mais robusta é usar a lógica de checagem do Firebase Admin SDK
-        // (que não é acessível pelo cliente Android) ou forçar a mensagem.
-
-        // Vamos garantir que a ordem de exceção seja respeitada forçando a execução da tarefa.
 
         auth.signInWithEmailAndPassword(email, senha)
                 .addOnCompleteListener(this, task -> {
@@ -168,7 +156,6 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // CHAMA O NOVO MÉTODO PARA REALIZAR A TENTATIVA DE LOGIN COM O TRATAMENTO REFORÇADO
         verificarExistenciaUsuarioELogar(email, senha);
     }
 
@@ -258,7 +245,7 @@ public class MainActivity extends AppCompatActivity {
 
                         } else {
                             // USUÁRIO EXISTENTE: Salva dados básicos (se necessário) e redireciona para a principal
-                            salvarUsuarioFirestoreSeNovo(user, acct); // (Se o doc existir, este método não faz nada)
+                            salvarUsuarioFirestoreSeNovo(user, acct);
 
                             Toast.makeText(this, "Login com Google realizado com sucesso!", Toast.LENGTH_SHORT).show();
                             redirecionarParaTelaPrincipal();
