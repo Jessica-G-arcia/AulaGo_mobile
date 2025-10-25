@@ -7,17 +7,15 @@
     android:layout_height="match_parent"
     android:background="#FFFFFF"
     android:padding="24dp"
-    android:paddingStart="24dp"
-    android:paddingEnd="24dp"
     tools:context=".MainActivity">
 
     <ImageView
         android:id="@+id/logoImage"
-        android:layout_width="500dp"
-        android:layout_height="182dp"
+        android:layout_width="394dp"
+        android:layout_height="124dp"
         android:contentDescription="Logo"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.503"
+        app:layout_constraintHorizontal_bias="0.516"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@mipmap/logo_aulago_foreground" />
@@ -26,12 +24,12 @@
         android:id="@+id/titleTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
         android:text="Faça seu login"
         android:textColor="@color/black"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/logoImage" />
 
@@ -41,16 +39,20 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
+        android:hint="Email"
         android:textColorHint="@color/black"
+        app:cursorColor="#FF9800"
+        app:boxStrokeColor="@color/edittext_box_stroke_color_selector"
+        app:hintTextColor="@color/edittext_box_stroke_color_selector"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/titleTextView"
-        android:hint="Email">
+        app:layout_constraintTop_toBottomOf="@id/titleTextView">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/inputEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
             android:inputType="textEmailAddress" />
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -60,63 +62,104 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:hint="Senha"
         android:textColorHint="@color/black"
+        app:cursorColor="#FF9800"
+        app:boxStrokeColor="@color/edittext_box_stroke_color_selector"
+        app:hintTextColor="@color/edittext_box_stroke_color_selector"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/textInputLayoutEmail"
-        app:passwordToggleEnabled="true"
-        android:hint="Senha">
+        app:passwordToggleEnabled="true">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/inputSenha"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
             android:inputType="textPassword" />
     </com.google.android.material.textfield.TextInputLayout>
+
+    <Switch
+        android:id="@+id/switchLembrarSenha"
+        android:layout_width="164dp"
+        android:layout_height="48dp"
+        android:text="Lembrar senha"
+        android:textColor="@color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textInputLayoutSenha" />
+
+    <TextView
+        android:id="@+id/txtEsqueciSenha"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:text="Esqueci minha senha"
+
+        android:gravity="center_vertical"
+
+        android:textColor="#DD6D2F"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/switchLembrarSenha"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayoutSenha"/>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnEntrar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
+        android:backgroundTint="#DD6D2F"
         android:text="Entrar"
         android:textSize="16sp"
-        android:backgroundTint="#DD6D2F"
+        android:textColor="@color/white"
         app:cornerRadius="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textInputLayoutSenha" />
+        app:layout_constraintTop_toBottomOf="@id/switchLembrarSenha" />
 
-<!--    <com.google.android.material.button.MaterialButton-->
-<!--        android:id="@+id/btnGoogleLogin"-->
-<!--        android:layout_width="0dp"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginTop="16dp"-->
-<!--        android:text="Entrar com Google"-->
-<!--        android:textSize="16sp"-->
-<!--        android:textColor="#000000"-->
-<!--        android:backgroundTint="#FFFFFF"-->
-<!--        app:strokeColor="#DD6D2F"-->
-<!--        app:strokeWidth="2dp"-->
-<!--        app:icon="@drawable/ic_google"-->
-<!--        app:iconGravity="textStart"-->
-<!--        app:iconTint="@null"-->
-<!--        app:cornerRadius="8dp"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toBottomOf="@id/btnEntrar" />-->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnGoogleLogin"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:backgroundTint="@android:color/white"
+        android:text="Entrar com Google"
+        android:textColor="@color/black"
+        app:icon="@drawable/logo_google"
+        app:iconSize="30dp"
+        app:iconTint="@null"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/dividorLogin"
+        app:strokeColor="#ffff" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnCriarConta"
         style="@style/Widget.MaterialComponents.Button.TextButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="56dp"
+        android:layout_marginTop="64dp"
         android:text="Criar nova conta"
         android:textColor="#DD6D2F"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnGoogleLogin" />
+
+    <TextView
+        android:id="@+id/dividorLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:text="------------ OU ------------"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnEntrar" />
 

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Cor quando o EditText está focado ou tem texto -->
+    <item android:color="@android:color/black" android:state_focused="true"/>
+    <item android:color="@android:color/black" android:state_activated="true"/> <!-- Usado quando há texto no campo -->
+    <!-- Cor padrão (pode ser a mesma ou diferente) -->
+    <item android:color="@android:color/black"/>
+</selector>
+    

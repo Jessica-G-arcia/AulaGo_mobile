@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">AulaGo</string>
+    
+    <string name="default_web_client_id" translatable="false">178656484388-ti2hsvfvf7ces70t585ncsdhgurlf89p.apps.googleusercontent.com</string>
 
     <string-array name="generos_array">
         <item>Selecione seu gênero</item>
