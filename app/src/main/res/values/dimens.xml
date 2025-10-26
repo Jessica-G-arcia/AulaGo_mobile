@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="meu_card_radius">20dp</dimen>
+    <dimen name="meu_card_radius_suave">8dp</dimen>
+
+</resources>
