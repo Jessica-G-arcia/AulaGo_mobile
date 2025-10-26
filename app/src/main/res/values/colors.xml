@@ -2,4 +2,22 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Cores principais AulaGo -->
+    <color name="laranja">#FB8501</color>
+    <color name="marinho">#023047</color>
+    <color name="amarelo">#FFB703</color>
+    <color name="azul">#219EBC</color>
+    <color name="sky">#8ECAE6</color>
+
+    <color name="aula_presencial">#FF9800</color> <!-- Verde -->
+    <color name="aula_online">#00BCD4</color> <!-- Ciano -->
+
+    <!-- Cores de fundo -->
+    <color name="background_light">#F5F5F5</color>
+    <color name="card_background">#FFFFFF</color>
+    <color name="divider_color">#E0E0E0</color>
+
+
+
 </resources>
