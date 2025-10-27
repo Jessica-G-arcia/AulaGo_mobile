@@ -12,6 +12,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AulaGo">
         <activity
+            android:name=".SolicitarSerProfessorActivity"
+            android:exported="false" />
+        <activity
+            android:name=".EditarPerfilActivity"
+            android:exported="false" />
+        <activity
             android:name=".CadastroActivity2"
             android:exported="false" />
         <activity
@@ -19,7 +25,7 @@
             android:exported="false" />
         <activity
             android:name=".CalendarActivity"
-            android:exported="true"/>
+            android:exported="true" />
         <activity
             android:name=".ProfessorPerfilActivity"
             android:exported="true"

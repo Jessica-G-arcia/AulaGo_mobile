@@ -23,6 +23,8 @@ public class CadastroActivity extends AppCompatActivity {
 
     // Constante para a chave da Intent
     public static final String KEY_DADOS_USUARIO = "dados_usuario";
+    public static final String KEY_SENHA = "senha";
+
 
     private EditText inputNome, inputCpf, inputDtNasc, inputTelefone, inputEmail, inputSenha;
     private Button btnContinuar, btnCancelar;
@@ -86,9 +88,16 @@ public class CadastroActivity extends AppCompatActivity {
         }
 
         // Cria o objeto de dados e passa para a próxima Activity
-        DadosUsuario dadosUsuario = new DadosUsuario(nome, cpf, dtNasc, telefone, email, senha);
+        DadosUsuario dadosUsuario = new DadosUsuario();
+        dadosUsuario.setNome(nome);
+        dadosUsuario.setCpf(cpf);
+        dadosUsuario.setDtNasc(dtNasc);
+        dadosUsuario.setTelefone(telefone);
+        dadosUsuario.setEmail(email);
+
         Intent intent = new Intent(this, CadastroActivity2.class);
         intent.putExtra(KEY_DADOS_USUARIO, dadosUsuario);
+        intent.putExtra(KEY_SENHA, senha);
         startActivity(intent);
     }
 

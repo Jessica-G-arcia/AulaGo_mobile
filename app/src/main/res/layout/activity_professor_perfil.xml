@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Banner -->
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="180dp">
@@ -20,16 +19,17 @@
                 android:background="@drawable/bg_banner" />
 
             <Button
-                android:id="@+id/buttonEditar"
+                android:id="@+id/btnEditar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end|bottom"
                 android:layout_margin="16dp"
-                app:backgroundTint="#FB8501"
                 android:text="Editar perfil"
-                android:textColor="@android:color/white" />
+                android:textColor="@android:color/white"
+                app:backgroundTint="#FB8501" />
 
             <ImageView
+                android:id="@+id/ivAvatar"
                 android:layout_width="72dp"
                 android:layout_height="72dp"
                 android:layout_gravity="bottom|start"
@@ -41,7 +41,6 @@
                 android:src="@mipmap/ic_aulago_foreground" />
         </FrameLayout>
 
-        <!-- Header -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -57,23 +56,45 @@
                 android:layout_weight="1"
                 android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/tvNomeProfessor"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Nome do professor"
-                    android:textSize="22sp"
-                    android:textStyle="bold" />
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingVertical="5dp"
-                    android:text="Entrou em janeiro 2026" />
+                    <TextView
+                        android:id="@+id/inputNome"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Carregando nome..."
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/statusProfessor"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="✓ Verificado"
+                        android:textColor="@android:color/white"
+                        android:textStyle="bold"
+                        android:visibility="gone"
+                        app:chipBackgroundColor="#4CAF50"
+                        app:chipIcon="@drawable/outline_check_circle_24"
+                        app:chipIconTint="@android:color/white" />
+
+                </LinearLayout>
+
+<!--                <TextView-->
+<!--                    android:id="@+id/tvEntrouEm"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:paddingVertical="5dp"-->
+<!--                    android:text="Entrou em..." />-->
+
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Info rows -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -81,20 +102,16 @@
             android:paddingLeft="16dp"
             android:paddingRight="16dp">
 
+
             <TextView
+                android:id="@+id/inputEspecialidade"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingVertical="5dp"
-                android:text="idiomas que ensina   •   cidade" />
+                android:text="Especialidade" />
 
             <TextView
-                android:id="@+id/tvEspecialidade"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingVertical="5dp"
-                android:text="especialidade" />
-
-            <TextView
+                android:id="@+id/inputModalidade"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingVertical="5dp"
@@ -107,18 +124,19 @@
                 android:orientation="horizontal"
                 android:weightSum="2">
 
-                <!-- Bloco: valor presencial -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="horizontal">
+
                     <TextView
-                        android:id="@+id/tvValorPresencial"
+                        android:id="@+id/inputValorPresencial"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="150"
+                        android:text="R$ 0"
                         android:textStyle="bold" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -126,18 +144,19 @@
                         android:text="Valor aula presencial" />
                 </LinearLayout>
 
-                <!-- Bloco: valor online -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="horizontal">
+
                     <TextView
-                        android:id="@+id/tvValorOnline"
+                        android:id="@+id/inputValorOnline"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="150"
+                        android:text="R$ 0"
                         android:textStyle="bold" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -147,7 +166,6 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Tabs -->
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabLayout"
             android:layout_width="match_parent"
@@ -165,11 +183,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Avaliações" />
-
-            
         </com.google.android.material.tabs.TabLayout>
 
-        <!-- Bio -->
         <LinearLayout
             android:id="@+id/groupBio"
             android:layout_width="match_parent"
@@ -178,32 +193,19 @@
             android:padding="16dp">
 
             <TextView
+                style="@style/TextAppearance.AppCompat.Caption"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Escreva sobre você" />
+                android:layout_marginTop="8dp"
+                android:textSize="14dp"
+                android:textStyle="italic"
+                android:text='Pense na bio como a capa de trás de um livro 📖.
 
-            <!-- Highlights -->
-<!--            <LinearLayout-->
-<!--                android:id="@+id/groupHighlights"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:orientation="vertical"-->
-<!--                android:padding="16dp">-->
+                É o resumo que faz o aluno pensar: "Uau, é disso que eu preciso!"' />
 
-<!--                <TextView-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:text="titulo do video"-->
-<!--                    android:textStyle="bold" />-->
 
-<!--                <TextView-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:text="breve descricao..." />-->
-<!--            </LinearLayout>-->
         </LinearLayout>
 
-        <!-- Avaliações -->
         <LinearLayout
             android:id="@+id/groupAvaliacoes"
             android:layout_width="match_parent"
@@ -212,91 +214,6 @@
             android:padding="16dp"
             android:visibility="gone">
 
-            <!-- Item da avaliação 1 -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp">
-
-                <ImageView
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:background="@drawable/img_avatar_circle"
-                    android:scaleType="centerCrop"
-                    android:src="@mipmap/ic_aulago_foreground"
-                    android:contentDescription="foto do aluno"
-                    android:layout_marginRight="12dp" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Nome do aluno  ★★★★★"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="comentario sobre a aula" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="data da avaliacao" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <!-- Item da avaliação 2 (exemplo) -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp">
-
-                <ImageView
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:background="@drawable/img_avatar_circle"
-                    android:scaleType="centerCrop"
-                    android:src="@mipmap/ic_aulago_foreground"
-                    android:contentDescription="foto do aluno"
-                    android:layout_marginRight="12dp" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Outro aluno  ★★★★☆"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="comentario sobre a aula" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="data da avaliacao" />
-                </LinearLayout>
-            </LinearLayout>
         </LinearLayout>
-
-
-
     </LinearLayout>
-
 </ScrollView>

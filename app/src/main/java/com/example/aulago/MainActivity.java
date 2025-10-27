@@ -97,6 +97,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void redirecionarParaTelaPrincipal() {
+
+        Intent intent = new Intent(MainActivity.this, ProfessorPerfilActivity.class);
+        startActivity(intent);
+        finish(); //criado para teste, depois será apagado
+
         // Redirecione para a tela principal do seu app, por exemplo, HomeActivity
         // Intent intent = new Intent(MainActivity.this, HomeActivity.class);
         // startActivity(intent);
