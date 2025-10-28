@@ -5,21 +5,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    android:background="#FFFFFF"
     tools:context=".CadastroActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/white"
-        android:padding="8dp"
-        android:paddingStart="24dp"
-        android:paddingEnd="24dp">
+        android:background="@android:color/white">
 
         <ImageView
             android:id="@+id/imageView"
-            android:layout_width="405dp"
-            android:layout_height="105dp"
+            android:layout_width="414dp"
+            android:layout_height="138dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -29,7 +29,6 @@
             android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:text="Crie sua conta"
             android:textColor="@android:color/black"
             android:textSize="24sp"
@@ -57,8 +56,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Nome completo"
-                android:textColor="@android:color/black"
-                android:inputType="textPersonName" />
+                android:inputType="textPersonName"
+                android:textColor="@android:color/black" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -184,7 +183,7 @@
             android:id="@+id/btnContinuar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="4dp"
             android:backgroundTint="#DD6D2F"
             android:text="Continuar"
             android:textColor="#FFFFFF"
