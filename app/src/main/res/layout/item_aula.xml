@@ -59,7 +59,8 @@
                 android:layout_marginTop="8dp"
                 android:text="Avaliar Aula"
                 android:visibility="gone"
-                tools:visibility="visible"/>
+                tools:visibility="visible"
+                app:backgroundTint="#FB8501"/>
 
         </LinearLayout>
 

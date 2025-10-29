@@ -156,7 +156,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="Salvar Alterações" />
+            android:text="Salvar Alterações"
+            android:backgroundTint="#FB8501"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -180,7 +181,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="Quero ser Professor"
-            android:visibility="gone" />
+            android:visibility="gone"
+            android:backgroundTint="#219EBC"/>
 
 
     </LinearLayout>

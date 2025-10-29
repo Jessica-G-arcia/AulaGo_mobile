@@ -72,7 +72,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Selecionar Documento (PDF ou Imagem)"
-            android:layout_marginTop="16dp"/>
+            android:layout_marginTop="16dp"
+            android:backgroundTint="#219EBC"/>
 
         <TextView
             android:id="@+id/tvDocumentoSelecionado"
@@ -87,6 +88,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Enviar para Análise"
-            android:layout_marginTop="24dp"/>
+            android:layout_marginTop="24dp"
+            android:backgroundTint="#219EBC"/>
     </LinearLayout>
 </ScrollView>
