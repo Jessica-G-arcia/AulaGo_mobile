@@ -24,9 +24,9 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(binding.appBarMain.toolbarLayout.toolbar);
 
         if (getSupportActionBar() != null) {
-            // 1. Desabilita a exibição do título
+            // desabilita a exibição do título
             getSupportActionBar().setDisplayShowTitleEnabled(false);
-            // 2. Define o texto do título como vazio (garantia extra)
+            // defiine o texto do título como vazio 
             getSupportActionBar().setTitle("");
         }
 
@@ -35,10 +35,9 @@ public class MainActivity extends AppCompatActivity {
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        // Encontra o ImageView da notificação pelo seu ID no layout da toolbar
+        //encontra o ImageView da notificação pelo seu ID no layout da toolbar
         ImageView notificationIcon = findViewById(R.id.iv_notifications);
 
-        // Configura o listener de clique
         notificationIcon.setOnClickListener(view -> {
             replaceFragment(new NotificationsFragment());
 
