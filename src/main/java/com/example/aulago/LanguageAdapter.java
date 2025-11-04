@@ -1,5 +1,6 @@
 package com.example.aulago;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,10 +12,15 @@ import java.util.List;
 
 public class LanguageAdapter extends RecyclerView.Adapter<LanguageAdapter.LanguageViewHolder> {
 
-    private final List<Language> languageList;
+    private List<Language> languageList;
 
     public LanguageAdapter(List<Language> languageList) {
         this.languageList = languageList;
+    }
+
+    public void updateList(List<Language> newList) {
+        this.languageList = newList;
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -28,7 +34,16 @@ public class LanguageAdapter extends RecyclerView.Adapter<LanguageAdapter.Langua
     public void onBindViewHolder(@NonNull LanguageViewHolder holder, int position) {
         Language language = languageList.get(position);
         holder.languageName.setText(language.getName());
-        holder.flagImage.setImageResource(language.getFlagResourceId());
+        String flagRef = language.getFlagRef();
+        int flagId = getResourceId(holder.itemView.getContext(), flagRef);
+        if (flagId != 0) { // Se encontrou o drawable
+            holder.flagImage.setImageResource(flagId);
+        }
+    }
+
+    private int getResourceId(Context context, String name) {
+        if (name == null) return 0;
+        return context.getResources().getIdentifier(name, "drawable", context.getPackageName());
     }
 
     @Override

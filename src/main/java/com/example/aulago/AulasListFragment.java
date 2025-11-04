@@ -85,7 +85,6 @@ public class AulasListFragment extends Fragment {
                             Aula aula = document.toObject(Aula.class);
                             listaFiltrada.add(aula);
                         }
-                        // 5. Usa o método filterList do seu adapter para atualizar a UI
                         adapter.filterList(listaFiltrada);
                     } else {
                         Log.e("FirebaseError", "Erro ao buscar aulas: ", task.getException());

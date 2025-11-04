@@ -15,11 +15,19 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.example.aulago.databinding.FragmentHomeBinding;
 import java.util.ArrayList;
 import java.util.List;
+import android.util.Log;
+// Imports do Firebase
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 public class HomeFragment extends Fragment {
 
     // ViewBinding para o layout do fragmento (fragment_home.xml)
     private FragmentHomeBinding binding;
+    private FirebaseFirestore db;
+    private LanguageAdapter languageAdapter;
+    private AlunoAdapter alunoAdapter;
+    private HomeAulaAdapter homeAulaAdapter;
 
     @Nullable
     @Override
@@ -36,9 +44,11 @@ public class HomeFragment extends Fragment {
         // Define o título na Toolbar da MainActivity
         if (((AppCompatActivity) requireActivity()).getSupportActionBar() != null) {
             ((AppCompatActivity) requireActivity()).getSupportActionBar();
-            // Habilita o título se você quiser ver "Início"
             ((AppCompatActivity) requireActivity()).getSupportActionBar().setDisplayShowTitleEnabled(true);
         }
+
+        // Inicialize o Firestore
+        db = FirebaseFirestore.getInstance();
 
         // Chama os métodos para configurar cada carrossel
         setupLanguagesCarousel();
@@ -48,27 +58,29 @@ public class HomeFragment extends Fragment {
 
 
     private void setupLanguagesCarousel() {
-        List<Language> languages = new ArrayList<>();
-        languages.add(new Language("Inglês", R.drawable.us_flag));
-        languages.add(new Language("Espanhol", R.drawable.spain_flag));
-        languages.add(new Language("Francês", R.drawable.france_flag));
-        languages.add(new Language("Alemão", R.drawable.germany_flag));
-        languages.add(new Language("Mandarim", R.drawable.china_flag));
+//        List<Language> languages = new ArrayList<>();
+//        languages.add(new Language("Inglês", R.drawable.us_flag));
+//        languages.add(new Language("Espanhol", R.drawable.spain_flag));
+//        languages.add(new Language("Francês", R.drawable.france_flag));
+//        languages.add(new Language("Alemão", R.drawable.germany_flag));
+//        languages.add(new Language("Mandarim", R.drawable.china_flag));
 
-        LanguageAdapter adapter = new LanguageAdapter(languages);
+        languageAdapter = new LanguageAdapter(new ArrayList<>());
 
-        // Acessa as views diretamente pelo binding do fragmento
+        //
+        // Inicialize o adapter com lista vazia
+        languageAdapter = new LanguageAdapter(new ArrayList<>());
         RecyclerView recyclerView = binding.recyclerLanguages;
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(adapter);
+        recyclerView.setAdapter(languageAdapter);
 
         ImageButton scrollLeftButton = binding.btnScrollLeft;
         ImageButton scrollRightButton = binding.btnScrollRight;
 
         scrollRightButton.setOnClickListener(v -> {
             int lastVisible = layoutManager.findLastVisibleItemPosition();
-            if (lastVisible < adapter.getItemCount() - 1) {
+            if (lastVisible < languageAdapter.getItemCount() - 1) {
                 recyclerView.smoothScrollToPosition(lastVisible + 1);
             }
         });
@@ -79,44 +91,73 @@ public class HomeFragment extends Fragment {
                 recyclerView.smoothScrollToPosition(firstVisible - 1);
             }
         });
+
+        // 5. Busque os dados do Firebase
+        db.collection("home_languages")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        List<Language> languages = new ArrayList<>();
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            languages.add(document.toObject(Language.class));
+                        }
+                        languageAdapter.updateList(languages);
+                    } else {
+                        Log.e("FirebaseError", "Erro ao buscar languages: ", task.getException());
+                    }
+                });
     }
 
     private void setupAlunosCarousel() {
-        List<Aluno> alunos = new ArrayList<>();
-        alunos.add(new Aluno(
-                R.drawable.aluna1,
-                5.0f,
-                "Rafaela Gonçalves",
-                "Inglês",
-                "Rafaela tem um aprendizado rápido, super educada. Aluna sensacional!",
-                "Rogério Lima"
-        ));
-        // Adicione mais alunos se precisar
+//        List<Aluno> alunos = new ArrayList<>();
+//        alunos.add(new Aluno(
+//                R.drawable.aluna1,
+//                5.0f,
+//                "Rafaela Gonçalves",
+//                "Inglês",
+//                "Rafaela tem um aprendizado rápido, super educada. Aluna sensacional!",
+//                "Rogério Lima"
+//        ));
 
-        AlunoAdapter adapter = new AlunoAdapter(alunos);
-        ViewPager2 viewPager = binding.viewpagerAlunos; // Acesso pelo binding do fragmento
-        viewPager.setAdapter(adapter);
+        // Inicialize o adapter com lista vazia
+        alunoAdapter = new AlunoAdapter(new ArrayList<>());
+        ViewPager2 viewPager = binding.viewpagerAlunos;
+        viewPager.setAdapter(alunoAdapter);
+
+        // Busque os dados do Firebase
+        db.collection("home_alunos")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        List<Aluno> alunos = new ArrayList<>();
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            alunos.add(document.toObject(Aluno.class));
+                        }
+                        alunoAdapter.updateList(alunos); // Atualiza o adapter
+                    } else {
+                        Log.e("FirebaseError", "Erro ao buscar alunos: ", task.getException());
+                    }
+                });
     }
 
     private void setupAulasCarousel() {
-        List<Aula> aulas = new ArrayList<>();
-        aulas.add(new Aula("Lucas Marques", "Sorocaba - SP", "8:00 às 9:00 - Presencial", "01/04/2025", "Inglês", 0, false));
-        aulas.add(new Aula("Ana Clara", "Sorocaba - SP", "9:30 às 10:30 - Online", "01/04/2025", "Espanhol", 0, false));
-        aulas.add(new Aula("Pedro Henrique", "São Paulo - SP", "11:00 às 12:00 - Online", "01/04/2025", "Francês", 0, false));
+//        List<Aula> aulas = new ArrayList<>();
+//        aulas.add(new Aula("Lucas Marques", "Sorocaba - SP", "8:00 às 9:00 - Presencial", "01/04/2025", "Inglês", 0, false));
+//        aulas.add(new Aula("Ana Clara", "Sorocaba - SP", "9:30 às 10:30 - Online", "01/04/2025", "Espanhol", 0, false));
+//        aulas.add(new Aula("Pedro Henrique", "São Paulo - SP", "11:00 às 12:00 - Online", "01/04/2025", "Francês", 0, false));
 
-        HomeAulaAdapter adapter = new HomeAulaAdapter(aulas);
-
-        RecyclerView recyclerViewAulas = binding.recyclerAulas; // Acesso pelo binding do fragmento
+        homeAulaAdapter = new HomeAulaAdapter(new ArrayList<>());
+        RecyclerView recyclerViewAulas = binding.recyclerAulas;
         LinearLayoutManager layoutManagerAulas = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         recyclerViewAulas.setLayoutManager(layoutManagerAulas);
-        recyclerViewAulas.setAdapter(adapter);
+        recyclerViewAulas.setAdapter(homeAulaAdapter);
 
         ImageButton aulasScrollLeftButton = binding.btnAulasLeft;
         ImageButton aulasScrollRightButton = binding.btnAulasRight;
 
         aulasScrollRightButton.setOnClickListener(v -> {
             int lastVisible = layoutManagerAulas.findLastVisibleItemPosition();
-            if (lastVisible < adapter.getItemCount() - 1) {
+            if (lastVisible < homeAulaAdapter.getItemCount() - 1) {
                 recyclerViewAulas.smoothScrollToPosition(lastVisible + 1);
             }
         });
@@ -127,12 +168,26 @@ public class HomeFragment extends Fragment {
                 recyclerViewAulas.smoothScrollToPosition(firstVisible - 1);
             }
         });
+
+        // 5. Busque os dados do Firebase
+        db.collection("home_aulas")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        List<Aula> aulas = new ArrayList<>();
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            aulas.add(document.toObject(Aula.class));
+                        }
+                        homeAulaAdapter.updateList(aulas);
+                    } else {
+                        Log.e("FirebaseError", "Erro ao buscar home_aulas: ", task.getException());
+                    }
+                });
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        // Limpa o binding para evitar vazamento de memória
         binding = null;
     }
 }

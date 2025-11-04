@@ -30,5 +30,5 @@ public class Aula {
     public String getData() { return data; }
     public String getIdioma() { return idioma; }
     public float getAvaliacao() { return avaliacao; }
-    public boolean isConcluida() { return concluida; }
+    public boolean getIsConcluida() { return concluida; }
 }

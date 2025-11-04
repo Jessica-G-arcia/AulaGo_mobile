@@ -10,10 +10,15 @@ import java.util.List;
 
 public class HomeAulaAdapter extends RecyclerView.Adapter<HomeAulaAdapter.AulaViewHolder> {
 
-    private final List<Aula> aulaList;
+    private List<Aula> aulaList;
 
     public HomeAulaAdapter(List<Aula> aulaList) {
         this.aulaList = aulaList;
+    }
+
+    public void updateList(List<Aula> newList) {
+        this.aulaList = newList;
+        notifyDataSetChanged();
     }
 
     @NonNull
