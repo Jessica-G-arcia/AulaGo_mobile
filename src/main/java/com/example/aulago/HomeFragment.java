@@ -41,13 +41,12 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Define o título na Toolbar da MainActivity
+        // define o título na Toolbar da MainActivity
         if (((AppCompatActivity) requireActivity()).getSupportActionBar() != null) {
             ((AppCompatActivity) requireActivity()).getSupportActionBar();
             ((AppCompatActivity) requireActivity()).getSupportActionBar().setDisplayShowTitleEnabled(true);
         }
 
-        // Inicialize o Firestore
         db = FirebaseFirestore.getInstance();
 
         // Chama os métodos para configurar cada carrossel
@@ -67,7 +66,7 @@ public class HomeFragment extends Fragment {
 
         languageAdapter = new LanguageAdapter(new ArrayList<>());
 
-        //
+        
         // Inicialize o adapter com lista vazia
         languageAdapter = new LanguageAdapter(new ArrayList<>());
         RecyclerView recyclerView = binding.recyclerLanguages;
@@ -92,7 +91,7 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        // 5. Busque os dados do Firebase
+        // Busca os dados do Firebase
         db.collection("home_languages")
                 .get()
                 .addOnCompleteListener(task -> {
@@ -119,12 +118,11 @@ public class HomeFragment extends Fragment {
 //                "Rogério Lima"
 //        ));
 
-        // Inicialize o adapter com lista vazia
+        // inicializa o adapter com lista vazia
         alunoAdapter = new AlunoAdapter(new ArrayList<>());
         ViewPager2 viewPager = binding.viewpagerAlunos;
         viewPager.setAdapter(alunoAdapter);
-
-        // Busque os dados do Firebase
+        
         db.collection("home_alunos")
                 .get()
                 .addOnCompleteListener(task -> {
@@ -169,7 +167,6 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        // 5. Busque os dados do Firebase
         db.collection("home_aulas")
                 .get()
                 .addOnCompleteListener(task -> {
