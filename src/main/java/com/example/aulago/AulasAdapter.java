@@ -64,7 +64,6 @@ public class AulasAdapter extends RecyclerView.Adapter<AulasAdapter.AulaViewHold
         notifyDataSetChanged();
     }
 
-    // ViewHolder que "segura" os componentes do layout item_aula_agendada.xml
     public static class AulaViewHolder extends RecyclerView.ViewHolder {
         TextView tvNomeAluno, tvLocal, tvHorario, tvIdioma, tvData;
         RatingBar ratingBar;
