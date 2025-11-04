@@ -26,7 +26,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         notifyDataSetChanged();
     }
 
-    // NOVO MÉTODO: O Fragment usará este método para nos dizer qual filtro está ativo
+    //Fragment usará este método para nos dizer qual filtro está ativo
     public void setCurrentFilter(String filter) {
         this.currentFilter = filter;
     }
@@ -47,7 +47,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         holder.date.setText(notification.getDate());
         holder.timeAgo.setText(notification.getTimeAgo());
 
-        // A bolinha só aparece se a notificação NÃO for lida E o filtro ativo for "Não lidas"
+        //A bolinha só aparece se a notificação NÃO for lida E o filtro ativo for "Não lidas"
         boolean isUnread = !notification.getIsRead();
         boolean isUnreadFilterActive = "unread".equals(currentFilter);
 
