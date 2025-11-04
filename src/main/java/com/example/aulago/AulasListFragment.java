@@ -48,15 +48,14 @@ public class AulasListFragment extends Fragment {
         RecyclerView recyclerView = view.findViewById(R.id.recyclerViewAulasFragment);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
-        // Inicialize o adapter com uma lista vazia
-        // O AulasAdapter já tem o método filterList, que vamos usar
+        // Inicializa o adapter com uma lista vazia
         adapter = new AulasAdapter(new ArrayList<>());
         recyclerView.setAdapter(adapter);
 
-        // Inicialize o Firestore
+        // Inicializa o Firestore
         db = FirebaseFirestore.getInstance();
 
-        // 3. Chame a nova função para carregar os dados
+        // Chama a nova função para carregar os dados
         carregarDadosDoFirebase(isConcluida);
 
 //        List<Aula> todasAsAulas = carregarDadosDeExemplo();
@@ -76,7 +75,7 @@ public class AulasListFragment extends Fragment {
         List<Aula> listaFiltrada = new ArrayList<>();
 
         db.collection("aulas")
-                .whereEqualTo("concluida", isConcluida) // A MÁGICA! Filtra no Firebase
+                .whereEqualTo("concluida", isConcluida)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
