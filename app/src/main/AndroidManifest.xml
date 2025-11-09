@@ -13,23 +13,46 @@
         android:theme="@style/Theme.AulaGo">
         <activity
             android:name=".SolicitarSerProfessorActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:label="Solicitar Ser Professor" />
+
         <activity
-            android:name=".EditarPerfilActivity"
-            android:exported="false" />
+            android:name=".EditarPerfilAlunoActivity"
+            android:exported="false"
+            android:label="Editar Perfil de Aluno" />
+
         <activity
             android:name=".CadastroActivity2"
             android:exported="false" />
+
         <activity
             android:name=".CadastroActivity"
             android:exported="false" />
+
         <activity
             android:name=".CalendarActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:label="Calendário"/>
+
+        <activity
+            android:name=".EditarPerfilProfessorActivity"
+            android:exported="true"
+            android:label="Editar Perfil de Professor" />
+
+        <activity android:name=".AlunoPerfilActivity"
+            android:exported="true"
+            android:label="Perfil do Aluno" />
+
+        <activity
+            android:name=".EditarDadosPessoaisActivity"
+            android:exported="false"
+            android:label="Editar Dados Pessoais" />
+
         <activity
             android:name=".ProfessorPerfilActivity"
             android:exported="true"
             android:label="Perfil do Professor" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true">

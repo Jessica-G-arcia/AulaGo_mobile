@@ -2,6 +2,7 @@ package com.example.aulago;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class DadosUsuario implements Serializable {
@@ -17,6 +18,7 @@ public class DadosUsuario implements Serializable {
     private String complemento;
     private String bairro;
     private String cidade;
+    private String estado;
     private String cep;
 
     // Campos para roles
@@ -27,15 +29,13 @@ public class DadosUsuario implements Serializable {
     private String tipoCertificacao;
     private String numeroCertificado;
     private String instituicaoCertificacao;
-    private String nomeCompletoCertificado; // <-- CAMPO ADICIONADO
+    private String nomeCompletoCertificado;
     private String pontuacaoCertificado; // Para TOEFL/IELTS
     private String certificadoUrl;
-    private Long dataSolicitacao;
     private String statusSolicitacao; // "pendente_analise", "aprovado", "rejeitado"
 
     // Campos de Aprovação/Rejeição
     private boolean professorVerificado;
-    private Long dataAprovacao;
     private String motivoRejeicao;
     private String idiomaProfessor; // "ingles"
 
@@ -47,44 +47,109 @@ public class DadosUsuario implements Serializable {
     }
 
     // Getters e Setters (Resumidos por brevidade)
-    public String getUid() { return uid; }
-    public void setUid(String uid) { this.uid = uid; }
+    public String getUid() {
+        return uid;
+    }
 
-    public String getNome() { return nome; }
-    public void setNome(String nome) { this.nome = nome; }
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public String getNome() {
+        return nome;
+    }
 
-    public String getTelefone() { return telefone; }
-    public void setTelefone(String telefone) { this.telefone = telefone; }
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
 
-    public String getGenero() { return genero; }
-    public void setGenero(String genero) { this.genero = genero; }
+    public String getEmail() {
+        return email;
+    }
 
-    public String getDtNasc() { return dtNasc; }
-    public void setDtNasc(String dtNasc) { this.dtNasc = dtNasc; }
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-    public String getCpf() { return cpf; }
-    public void setCpf(String cpf) { this.cpf = cpf; }
+    public String getTelefone() {
+        return telefone;
+    }
 
-    public String getEndereco() { return endereco; }
-    public void setEndereco(String endereco) { this.endereco = endereco; }
+    public void setTelefone(String telefone) {
+        this.telefone = telefone;
+    }
 
-    public String getNumero() { return numero; }
-    public void setNumero(String numero) { this.numero = numero; }
+    public String getGenero() {
+        return genero;
+    }
 
-    public String getComplemento() { return complemento; }
-    public void setComplemento(String complemento) { this.complemento = complemento; }
+    public void setGenero(String genero) {
+        this.genero = genero;
+    }
 
-    public String getBairro() { return bairro; }
-    public void setBairro(String bairro) { this.bairro = bairro; }
+    public String getDtNasc() {
+        return dtNasc;
+    }
 
-    public String getCidade() { return cidade; }
-    public void setCidade(String cidade) { this.cidade = cidade; }
+    public void setDtNasc(String dtNasc) {
+        this.dtNasc = dtNasc;
+    }
 
-    public String getCep() { return cep; }
-    public void setCep(String cep) { this.cep = cep; }
+    public String getCpf() {
+        return cpf;
+    }
+
+    public void setCpf(String cpf) {
+        this.cpf = cpf;
+    }
+
+    public String getEndereco() {
+        return endereco;
+    }
+
+    public void setEndereco(String endereco) {
+        this.endereco = endereco;
+    }
+
+    public String getNumero() {
+        return numero;
+    }
+
+    public void setNumero(String numero) {
+        this.numero = numero;
+    }
+
+    public String getComplemento() {
+        return complemento;
+    }
+
+    public void setComplemento(String complemento) {
+        this.complemento = complemento;
+    }
+
+    public String getBairro() {
+        return bairro;
+    }
+
+    public void setBairro(String bairro) {
+        this.bairro = bairro;
+    }
+
+    public String getCidade() {
+        return cidade;
+    }
+
+    public void setCidade(String cidade) {
+        this.cidade = cidade;
+    }
+
+    public String getCep() {
+        return cep;
+    }
+
+    public void setCep(String cep) {
+        this.cep = cep;
+    }
 
     public List<String> getRoles() {
         if (roles == null) {
@@ -93,48 +158,100 @@ public class DadosUsuario implements Serializable {
         }
         return roles;
     }
-    public void setRoles(List<String> roles) { this.roles = roles; }
 
-    public List<String> getRolesPendentes() { return rolesPendentes; }
-    public void setRolesPendentes(List<String> rolesPendentes) { this.rolesPendentes = rolesPendentes; }
+    public void setRoles(List<String> roles) {
+        this.roles = roles;
+    }
 
-    public String getTipoCertificacao() { return tipoCertificacao; }
-    public void setTipoCertificacao(String tipoCertificacao) { this.tipoCertificacao = tipoCertificacao; }
+    public List<String> getRolesPendentes() {
+        return rolesPendentes;
+    }
 
-    public String getNumeroCertificado() { return numeroCertificado; }
-    public void setNumeroCertificado(String numeroCertificado) { this.numeroCertificado = numeroCertificado; }
+    public void setRolesPendentes(List<String> rolesPendentes) {
+        this.rolesPendentes = rolesPendentes;
+    }
 
-    public String getInstituicaoCertificacao() { return instituicaoCertificacao; }
-    public void setInstituicaoCertificacao(String instituicaoCertificacao) { this.instituicaoCertificacao = instituicaoCertificacao; }
+    public String getTipoCertificacao() {
+        return tipoCertificacao;
+    }
+
+    public void setTipoCertificacao(String tipoCertificacao) {
+        this.tipoCertificacao = tipoCertificacao;
+    }
+
+    public String getNumeroCertificado() {
+        return numeroCertificado;
+    }
+
+    public void setNumeroCertificado(String numeroCertificado) {
+        this.numeroCertificado = numeroCertificado;
+    }
+
+    public String getInstituicaoCertificacao() {
+        return instituicaoCertificacao;
+    }
+
+    public void setInstituicaoCertificacao(String instituicaoCertificacao) {
+        this.instituicaoCertificacao = instituicaoCertificacao;
+    }
 
     // <-- GETTER E SETTER ADICIONADOS -->
-    public String getNomeCompletoCertificado() { return nomeCompletoCertificado; }
-    public void setNomeCompletoCertificado(String nomeCompletoCertificado) { this.nomeCompletoCertificado = nomeCompletoCertificado; }
+    public String getNomeCompletoCertificado() {
+        return nomeCompletoCertificado;
+    }
 
-    public String getPontuacaoCertificado() { return pontuacaoCertificado; }
-    public void setPontuacaoCertificado(String pontuacaoCertificado) { this.pontuacaoCertificado = pontuacaoCertificado; }
+    public void setNomeCompletoCertificado(String nomeCompletoCertificado) {
+        this.nomeCompletoCertificado = nomeCompletoCertificado;
+    }
 
-    public String getCertificadoUrl() { return certificadoUrl; }
-    public void setCertificadoUrl(String certificadoUrl) { this.certificadoUrl = certificadoUrl; }
+    public String getPontuacaoCertificado() {
+        return pontuacaoCertificado;
+    }
 
-    public String getStatusSolicitacao() { return statusSolicitacao; }
-    public void setStatusSolicitacao(String statusSolicitacao) { this.statusSolicitacao = statusSolicitacao; }
+    public void setPontuacaoCertificado(String pontuacaoCertificado) {
+        this.pontuacaoCertificado = pontuacaoCertificado;
+    }
+
+    public String getCertificadoUrl() {
+        return certificadoUrl;
+    }
+
+    public void setCertificadoUrl(String certificadoUrl) {
+        this.certificadoUrl = certificadoUrl;
+    }
+
+    public String getStatusSolicitacao() {
+        return statusSolicitacao;
+    }
+
+    public void setStatusSolicitacao(String statusSolicitacao) {
+        this.statusSolicitacao = statusSolicitacao;
+    }
 
 
-    public boolean isProfessorVerificado() { return professorVerificado; }
-    public void setProfessorVerificado(boolean professorVerificado) { this.professorVerificado = professorVerificado; }
+    public boolean isProfessorVerificado() {
+        return professorVerificado;
+    }
 
-    public Long getDataSolicitacao() { return dataSolicitacao; }
-    public void setDataSolicitacao(Long dataSolicitacao) { this.dataSolicitacao = dataSolicitacao; }
+    public void setProfessorVerificado(boolean professorVerificado) {
+        this.professorVerificado = professorVerificado;
+    }
 
-    public Long getDataAprovacao() { return dataAprovacao; }
-    public void setDataAprovacao(Long dataAprovacao) { this.dataAprovacao = dataAprovacao; }
+    public String getMotivoRejeicao() {
+        return motivoRejeicao;
+    }
 
-    public String getMotivoRejeicao() { return motivoRejeicao; }
-    public void setMotivoRejeicao(String motivoRejeicao) { this.motivoRejeicao = motivoRejeicao; }
+    public void setMotivoRejeicao(String motivoRejeicao) {
+        this.motivoRejeicao = motivoRejeicao;
+    }
 
-    public String getIdiomaProfessor() { return idiomaProfessor; }
-    public void setIdiomaProfessor(String idiomaProfessor) { this.idiomaProfessor = idiomaProfessor; }
+    public String getIdiomaProfessor() {
+        return idiomaProfessor;
+    }
+
+    public void setIdiomaProfessor(String idiomaProfessor) {
+        this.idiomaProfessor = idiomaProfessor;
+    }
 
     // Métodos auxiliares
     public boolean isProfessor() {
@@ -147,5 +264,13 @@ public class DadosUsuario implements Serializable {
 
     public boolean temSolicitacaoPendente() {
         return "pendente_analise".equals(statusSolicitacao);
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
     }
 }

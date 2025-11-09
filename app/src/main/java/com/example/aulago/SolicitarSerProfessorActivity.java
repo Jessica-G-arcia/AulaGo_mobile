@@ -4,8 +4,10 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log; // Import necessário
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -32,7 +34,7 @@ public class SolicitarSerProfessorActivity extends AppCompatActivity {
 
     private static final int PICK_DOCUMENT = 100;
 
-    private Spinner spinnerCertificacao;
+    private AutoCompleteTextView spinnerCertificacao;
     private EditText etNumeroCertificado, etInstituicao, etNomeCompleto, etPontuacao;
     private LinearLayout layoutPontuacao;
     private TextView tvDocumentoSelecionado;
@@ -47,7 +49,7 @@ public class SolicitarSerProfessorActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_solicitar_ser_professor); // (XML da conversa anterior)
+        setContentView(R.layout.activity_solicitar_ser_professor);
 
         auth = FirebaseAuth.getInstance();
         storage = FirebaseStorage.getInstance();
@@ -59,7 +61,7 @@ public class SolicitarSerProfessorActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        spinnerCertificacao = findViewById(R.id.spinnerCertificacao);
+        spinnerCertificacao = (AutoCompleteTextView) findViewById(R.id.spinnerCertificacao);
         etNumeroCertificado = findViewById(R.id.etNumeroCertificado);
         etInstituicao = findViewById(R.id.etInstituicao);
         etNomeCompleto = findViewById(R.id.etNomeCompleto);
@@ -79,9 +81,9 @@ public class SolicitarSerProfessorActivity extends AppCompatActivity {
     }
 
     private void setupSpinner() {
-        // (Use o seu array de certificações)
+        // (Seu código de spinner está ótimo)
         String[] certificacoes = {"Selecione", "TOEFL", "IELTS", "Cambridge CAE", "CELTA"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, certificacoes);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, certificacoes);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerCertificacao.setAdapter(adapter);
 
@@ -102,43 +104,79 @@ public class SolicitarSerProfessorActivity extends AppCompatActivity {
         });
     }
 
+    // --- CORREÇÃO 1: MÉTODO DE SELEÇÃO ATUALIZADO ---
     private void selecionarDocumento() {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        // Usa ACTION_OPEN_DOCUMENT para permissões corretas
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.setType("*/*");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+
         String[] mimeTypes = {"application/pdf", "image/jpeg", "image/png"};
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
+
+        // Pede permissão de leitura persistente
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
         startActivityForResult(Intent.createChooser(intent, "Selecione o certificado"), PICK_DOCUMENT);
     }
 
+    // --- CORREÇÃO 2: onActivityResult ATUALIZADO ---
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PICK_DOCUMENT && resultCode == RESULT_OK && data != null) {
+        if (requestCode == PICK_DOCUMENT && resultCode == RESULT_OK && data != null && data.getData() != null) {
             documentoUri = data.getData();
+
+            // --- LINHA CRÍTICA ADICIONADA ---
+            // "Pega" a permissão de leitura para o URI, para que o Firebase possa acessá-lo
+            try {
+                getContentResolver().takePersistableUriPermission(
+                        documentoUri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                );
+            } catch (SecurityException e) {
+                Log.e("SolicitarProfessor", "Falha ao pegar permissão persistente.", e);
+            }
+            // --- FIM DA ADIÇÃO ---
+
             tvDocumentoSelecionado.setText("Documento selecionado!");
         }
     }
 
+    // --- CORREÇÃO 3: validarEEnviar ATUALIZADO ---
     private void validarEEnviar() {
-        // (Faça suas validações de campos vazios aqui) ...
+        // (Validações de campos vazios)
+        String nome = etNomeCompleto.getText().toString();
+        // ... (valide outros campos se precisar)
+        if (nome.isEmpty()) {
+            Toast.makeText(this, "Preencha seu nome completo.", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         if (documentoUri == null) {
             Toast.makeText(this, "Selecione o documento do certificado", Toast.LENGTH_SHORT).show();
             return;
         }
+
+        // --- CORREÇÃO DA LÓGICA ---
+        // Deve chamar a função de UPLOAD, não a de SELEÇÃO
         enviarDocumentoEAtualizarFirestore();
     }
 
+    // --- MÉTODO DE UPLOAD (QUE ESTAVA FALTANDO NO SEU CÓDIGO COLADO) ---
     private void enviarDocumentoEAtualizarFirestore() {
         progressDialog.setMessage("Enviando documento...");
         progressDialog.show();
 
         FirebaseUser currentUser = auth.getCurrentUser();
-        if (currentUser == null) { /* ... tratar erro ... */
+        if (currentUser == null) {
+            progressDialog.dismiss();
+            Toast.makeText(this, "Erro: Usuário não está logado.", Toast.LENGTH_SHORT).show();
             return;
         }
 
         String uid = currentUser.getUid();
+        // Seu nome de arquivo está ótimo
         String nomeArquivo = "certificado_" + uid + "_" + UUID.randomUUID().toString();
         StorageReference docRef = storage.getReference().child("certificados_professores/" + uid + "/" + nomeArquivo);
 
@@ -150,6 +188,8 @@ public class SolicitarSerProfessorActivity extends AppCompatActivity {
                 }))
                 .addOnFailureListener(e -> {
                     progressDialog.dismiss();
+                    // Este é o erro que você estava vendo
+                    Log.e("UploadErro", "Erro completo: ", e);
                     Toast.makeText(this, "Erro ao enviar documento: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
@@ -157,26 +197,22 @@ public class SolicitarSerProfessorActivity extends AppCompatActivity {
     private void salvarSolicitacaoFirestore(String uid, String docUrl) {
         progressDialog.setMessage("Registrando solicitação...");
 
+        // Seu mapa de dados está perfeito
         Map<String, Object> solicitacao = new HashMap<>();
-        // Dados da solicitação
-        solicitacao.put("tipoCertificacao", spinnerCertificacao.getSelectedItem().toString());
+        solicitacao.put("tipoCertificacao", spinnerCertificacao.getText().toString());
         solicitacao.put("numeroCertificado", etNumeroCertificado.getText().toString().trim());
         solicitacao.put("instituicaoCertificacao", etInstituicao.getText().toString().trim());
         solicitacao.put("nomeCompletoCertificado", etNomeCompleto.getText().toString().trim());
         solicitacao.put("certificadoUrl", docUrl);
         solicitacao.put("dataSolicitacao", FieldValue.serverTimestamp());
         solicitacao.put("pontuacaoCertificado", etPontuacao.getText().toString().trim());
-
-        // --- ESTE É O CAMPO MAIS IMPORTANTE PARA A LÓGICA ---
         solicitacao.put("statusSolicitacao", "pendente_analise");
-
-        // Limpa campos de admin antigos, caso seja um reenvio
         solicitacao.put("motivoRejeicao", FieldValue.delete());
         solicitacao.put("professorVerificado", false);
 
-        // Usamos SetOptions.merge() para não apagar os dados existentes (nome, cpf, etc.)
+        // O uso do SetOptions.merge() está correto
         db.collection("users").document(uid)
-                .set(solicitacao, SetOptions.merge()) // Usa merge para não apagar dados
+                .set(solicitacao, SetOptions.merge())
                 .addOnSuccessListener(aVoid -> {
                     progressDialog.dismiss();
                     mostrarDialogoSucesso();
@@ -188,10 +224,11 @@ public class SolicitarSerProfessorActivity extends AppCompatActivity {
     }
 
     private void mostrarDialogoSucesso() {
+        // Este diálogo está perfeito
         new AlertDialog.Builder(this)
                 .setTitle("✓ Solicitação Enviada!")
                 .setMessage("Sua solicitação será analisada pela equipe.")
-                .setPositiveButton("OK", (dialog, which) -> finish()) // Fecha a tela de solicitação
+                .setPositiveButton("OK", (dialog, which) -> finish())
                 .setCancelable(false)
                 .show();
     }

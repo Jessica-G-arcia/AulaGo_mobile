@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
     <LinearLayout
+        android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@android:color/white"
         android:orientation="vertical"
         android:padding="16dp">
 
@@ -18,21 +23,45 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Preencha os dados conforme seu certificado de proficiência em inglês."
-            android:layout_marginTop="8dp"/>
+            android:layout_marginTop="8dp"
+            android:text="Preencha os dados conforme seu certificado de proficiência em inglês." />
 
-        <EditText
-            android:id="@+id/etNomeCompleto"
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Seu nome completo (como no certificado)"
-            android:layout_marginTop="16dp"/>
+            android:layout_marginTop="16dp"
+            app:boxStrokeColor="@color/azul"
+            app:cursorColor="@color/azul"
+            app:hintTextColor="@color/azul">
 
-        <Spinner
-            android:id="@+id/spinnerCertificacao"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etNomeCompleto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Seu nome completo (como no certificado)"
+                android:inputType="textPersonName|textCapWords" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"/>
+            android:layout_marginTop="8dp"
+            android:hint="Tipo de Certificação"
+            app:boxStrokeColor="@color/azul"
+            app:cursorColor="@color/azul"
+            app:hintTextColor="@color/azul"
+            app:endIconTint="@color/azul"
+            app:boxBackgroundColor="@android:color/white"
+            >
+
+            <AutoCompleteTextView
+                android:id="@+id/spinnerCertificacao"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <LinearLayout
             android:id="@+id/layoutPontuacao"
@@ -40,55 +69,87 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:visibility="gone">
+
             <TextView
                 android:id="@+id/tvInfoPontuacao"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Info Pontuação"/>
-            <EditText
-                android:id="@+id/etPontuacao"
+                android:text="Info Pontuação" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="numberDecimal"
-                android:hint="Sua pontuação"/>
+                app:boxStrokeColor="@color/azul"
+                app:cursorColor="@color/azul"
+                app:hintTextColor="@color/azul">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etPontuacao"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Sua pontuação"
+                    android:inputType="numberDecimal" />
+            </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
-        <EditText
-            android:id="@+id/etNumeroCertificado"
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Número de registro do certificado"
-            android:layout_marginTop="8dp"/>
+            android:layout_marginTop="8dp"
+            app:boxStrokeColor="@color/azul"
+            app:cursorColor="@color/azul"
+            app:hintTextColor="@color/azul">
 
-        <EditText
-            android:id="@+id/etInstituicao"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etNumeroCertificado"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Número de registro do certificado"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Instituição emissora (Ex: Cambridge)"
-            android:layout_marginTop="8dp"/>
+            android:layout_marginTop="8dp"
+            app:boxStrokeColor="@color/azul"
+            app:cursorColor="@color/azul"
+            app:hintTextColor="@color/azul">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etInstituicao"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Instituição emissora (Ex: Cambridge)"
+                android:inputType="textCapWords" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <Button
             android:id="@+id/btnSelecionarDocumento"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Selecionar Documento (PDF ou Imagem)"
             android:layout_marginTop="16dp"
-            android:backgroundTint="#219EBC"/>
+            android:backgroundTint="#219EBC"
+            android:text="Selecionar Documento (PDF ou Imagem)" />
 
         <TextView
             android:id="@+id/tvDocumentoSelecionado"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Nenhum documento selecionado"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="4dp"/>
+            android:layout_marginTop="4dp"
+            android:text="Nenhum documento selecionado" />
 
         <Button
             android:id="@+id/btnEnviar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Enviar para Análise"
             android:layout_marginTop="24dp"
-            android:backgroundTint="#219EBC"/>
+            android:backgroundTint="#219EBC"
+            android:text="Enviar para Análise" />
+
     </LinearLayout>
 </ScrollView>

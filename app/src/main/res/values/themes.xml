@@ -2,7 +2,35 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.AulaGo" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/laranja</item>
+    </style>
+
+    <style name="CustomCalendarViewTheme" parent="Theme.Material3.DayNight">
+
+        <!-- Cor principal do calendário -->
+        <item name="colorPrimary">@color/azul</item>
+
+        <!-- Cor de fundo do item selecionado -->
+        <item name="android:colorControlActivated">@color/azul50</item>
+
+        <!-- Cor quando pressionado -->
+        <item name="android:colorControlHighlight">@color/azul</item>
+    </style>
+
+    <style name="CalendarViewWeekCustomText" parent="TextAppearance.AppCompat.Caption">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="ShapeAppearance.Material3.Circle" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="CalendarViewDateCustomText" parent="TextAppearance.AppCompat.Body1">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">14sp</item>
     </style>
 
     <style name="Theme.AulaGo" parent="Base.Theme.AulaGo" />

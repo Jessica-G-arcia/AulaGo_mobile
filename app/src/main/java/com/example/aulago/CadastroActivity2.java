@@ -1,88 +1,101 @@
 package com.example.aulago;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
-import android.os.Build; // IMPORT NECESSÁRIO
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.Toast;
+import android.util.Log;
+import android.view.inputmethod.EditorInfo;
+import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+import com.google.android.material.snackbar.Snackbar;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+// Importe o HashMap e Map para a lógica de salvar
+import java.util.HashMap;
+import java.util.Map;
+
+import com.google.firebase.firestore.FieldValue;
+
+
 public class CadastroActivity2 extends AppCompatActivity {
 
-    private EditText inputEndereco, inputNumero, inputComplemento, inputCep, inputBairro, inputCidade;
-    private Spinner spinnerGenero;
+    private EditText inputCep, inputEndereco, inputBairro, inputCidade, inputEstado;
+    private EditText inputNumero, inputComplemento;
+    private AutoCompleteTextView spinnerGenero;
     private Button btnCadastrar, btnCancelar;
     private FirebaseAuth auth;
     private FirebaseFirestore db;
+    private DadosUsuario dadosUsuario; // Objeto para armazenar os dados
 
-    // Variáveis para guardar os dados recebidos
-    private DadosUsuario dadosUsuario;
-    private String senha; // <-- ADICIONADO: Variável local para a senha
+    // CORREÇÃO: A senha deve ser uma variável separada, não parte do objeto
+    private String senha;
 
-    private ProgressDialog mProgressDialog;
-
-    // Defina as chaves (devem ser as MESMAS da CadastroActivity)
-    public static final String KEY_DADOS_USUARIO = "DADOS_USUARIO_KEY";
-    public static final String KEY_SENHA = "SENHA_KEY";
+    private View mainLayout;
+    private boolean isGoogleFlow = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // EdgeToEdge.enable(this); // EdgeToEdge não é necessário com o ajuste de layout abaixo
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_cadastro2);
 
-        // --- CORREÇÃO AO RECEBER DADOS ---
-        // Recupera o objeto de dados da Activity anterior
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // Forma nova e segura (Android 13+)
-            dadosUsuario = getIntent().getSerializableExtra(KEY_DADOS_USUARIO, DadosUsuario.class);
-        } else {
-            // Forma antiga (necessária para APIs < 33)
-            dadosUsuario = (DadosUsuario) getIntent().getSerializableExtra(KEY_DADOS_USUARIO);
-        }
+        isGoogleFlow = getIntent().getBooleanExtra(CadastroActivity.KEY_FLUXO_GOOGLE, false);
+        dadosUsuario = (DadosUsuario) getIntent().getSerializableExtra(CadastroActivity.KEY_DADOS_USUARIO);
 
-        // Recupera a SENHA separadamente
-        senha = getIntent().getStringExtra(KEY_SENHA);
+        // CORREÇÃO: Pega a senha separadamente
+        senha = getIntent().getStringExtra(CadastroActivity.KEY_SENHA);
 
         // Verifica se os dados essenciais vieram
-        if (dadosUsuario == null || senha == null || senha.isEmpty()) {
-            Toast.makeText(this, "Erro ao carregar dados. Tente novamente.", Toast.LENGTH_LONG).show();
-            finish(); // Volta para a tela anterior se houver erro
+        // (Se for fluxo de email, a senha é essencial)
+        if (dadosUsuario == null || (!isGoogleFlow && (senha == null || senha.isEmpty()))) {
+            Snackbar.make(findViewById(R.id.main), "Erro de dados. Retorne à tela anterior.", Snackbar.LENGTH_LONG).show();
+            finish();
             return;
         }
-        // --- FIM DA CORREÇÃO ---
 
-        // Inicializa as views da segunda tela
         inicializarViews();
         configurarListeners();
-        ajustarLayout(); // Ajuste de layout para EdgeToEdge
+        ajustarLayout();
+        configurarListenerCep();
 
-        // Inicializa o Firebase
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        configurarSpinner();
+        configurarDropdown();
     }
 
     private void inicializarViews() {
+        mainLayout = findViewById(R.id.main);
         inputEndereco = findViewById(R.id.inputEndereco);
         inputNumero = findViewById(R.id.inputNumero);
         inputComplemento = findViewById(R.id.inputComplemento);
         inputCep = findViewById(R.id.inputCep);
         inputBairro = findViewById(R.id.inputBairro);
         inputCidade = findViewById(R.id.inputCidade);
+        inputEstado = findViewById(R.id.inputEstado);
         spinnerGenero = findViewById(R.id.spinnerGenero);
         btnCadastrar = findViewById(R.id.btnCadastrar);
         btnCancelar = findViewById(R.id.btnCancelar);
@@ -90,10 +103,57 @@ public class CadastroActivity2 extends AppCompatActivity {
 
     private void configurarListeners() {
         btnCadastrar.setOnClickListener(v -> realizarCadastroCompleto());
-        btnCancelar.setOnClickListener(v -> {
-            // Apenas fecha esta activity, voltando para a Tela 1
-            finish();
+        btnCancelar.setOnClickListener(v -> finish());
+    }
+
+    private void configurarListenerCep() {
+        // (Seu código ViaCEP está ótimo e não precisa de mudanças)
+        inputCep.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                buscarEnderecoPorCep();
+                return true;
+            }
+            return false;
         });
+
+        inputCep.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) {
+                buscarEnderecoPorCep();
+            }
+        });
+    }
+
+    private void buscarEnderecoPorCep() {
+        String cep = inputCep.getText().toString().trim().replace("-", "");
+        if (cep.length() != 8) {
+            inputCep.setError("CEP inválido");
+            return;
+        }
+        inputCep.setError(null);
+        String url = "https://viacep.com.br/ws/" + cep + "/json/";
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
+                response -> {
+                    try {
+                        if (response.has("erro") && response.getBoolean("erro")) {
+                            Snackbar.make(mainLayout, "CEP não encontrado.", Snackbar.LENGTH_LONG).show();
+                            return;
+                        }
+                        inputEndereco.setText(response.getString("logradouro"));
+                        inputBairro.setText(response.getString("bairro"));
+                        inputCidade.setText(response.getString("localidade"));
+                        inputEstado.setText(response.getString("uf")); // Seu código já estava correto
+                        inputNumero.requestFocus();
+                    } catch (JSONException e) {
+                        Log.e("ViaCEP", "Erro no JSON: " + e.getMessage());
+                        Snackbar.make(mainLayout, "Erro ao processar dados do CEP.", Snackbar.LENGTH_LONG).show();
+                    }
+                },
+                error -> {
+                    Log.e("ViaCEP", "Erro de requisição: " + error.toString());
+                    Snackbar.make(mainLayout, "Erro de rede ao buscar CEP. Verifique sua conexão.", Snackbar.LENGTH_LONG).show();
+                });
+        Volley.newRequestQueue(this).add(jsonObjectRequest);
     }
 
     private void ajustarLayout() {
@@ -104,99 +164,137 @@ public class CadastroActivity2 extends AppCompatActivity {
         });
     }
 
-    private void configurarSpinner() {
+    private void configurarDropdown() {
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
                 this,
                 R.array.generos_array,
-                android.R.layout.simple_spinner_item
+                android.R.layout.simple_dropdown_item_1line
         );
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerGenero.setAdapter(adapter);
     }
 
-    private void realizarCadastroCompleto() {
-        // Pega os dados da segunda tela
-        String endereco = inputEndereco.getText().toString().trim();
-        String numero = inputNumero.getText().toString().trim();
-        String complemento = inputComplemento.getText().toString().trim();
-        String cep = inputCep.getText().toString().trim();
-        String bairro = inputBairro.getText().toString().trim();
-        String cidade = inputCidade.getText().toString().trim();
-        String genero = spinnerGenero.getSelectedItem().toString();
 
-        // Validação dos campos da segunda tela
-        if (endereco.isEmpty() || numero.isEmpty() || cep.isEmpty() ||
-                bairro.isEmpty() || cidade.isEmpty() || genero.equals("Selecione seu gênero")) {
-            Toast.makeText(this, "Preencha todos os campos e selecione seu gênero", Toast.LENGTH_SHORT).show();
+    private void realizarCadastroCompleto() {
+        // CORREÇÃO: Usando "setters" para atualizar o objeto
+        dadosUsuario.setEndereco(inputEndereco.getText().toString().trim());
+        dadosUsuario.setNumero(inputNumero.getText().toString().trim());
+        dadosUsuario.setComplemento(inputComplemento.getText().toString().trim());
+        dadosUsuario.setCep(inputCep.getText().toString().trim());
+        dadosUsuario.setBairro(inputBairro.getText().toString().trim());
+        dadosUsuario.setCidade(inputCidade.getText().toString().trim());
+        dadosUsuario.setEstado(inputEstado.getText().toString().trim());
+        dadosUsuario.setGenero(spinnerGenero.getText().toString().trim());
+
+        // CORREÇÃO: Usando "getters" para validar
+        if (dadosUsuario.getEndereco().isEmpty() || dadosUsuario.getNumero().isEmpty() || dadosUsuario.getCep().isEmpty() ||
+                dadosUsuario.getBairro().isEmpty() || dadosUsuario.getCidade().isEmpty() || dadosUsuario.getEstado().isEmpty() || dadosUsuario.getGenero().isEmpty()) {
+            Snackbar.make(mainLayout, "Preencha todos os campos obrigatórios e selecione seu gênero.", Snackbar.LENGTH_LONG).show();
             return;
         }
 
-        // --- CORREÇÃO (USANDO SETTERS) ---
-        // Atualiza o objeto 'dadosUsuario' com os novos dados
-        dadosUsuario.setEndereco(endereco);
-        dadosUsuario.setNumero(numero);
-        dadosUsuario.setComplemento(complemento);
-        dadosUsuario.setCep(cep);
-        dadosUsuario.setBairro(bairro);
-        dadosUsuario.setCidade(cidade);
-        dadosUsuario.setGenero(genero);
+        if (isGoogleFlow) {
+            salvarDadosGoogleNoFirestore();
+        } else {
+            criarContaEmailESenhaECompletar();
+        }
+    }
 
-        mostrarProgressDialog("Criando sua conta...");
+    private String traduzirErroFirebase(Exception exception) {
+        // (Seu código de tradução está ótimo)
+        if (exception instanceof FirebaseAuthWeakPasswordException) {
+            return "Senha fraca. Sua senha deve seguir as políticas de segurança.";
+        } else if (exception instanceof FirebaseAuthInvalidCredentialsException) {
+            return "E-mail inválido ou credenciais incorretas.";
+        } else if (exception instanceof FirebaseAuthUserCollisionException) {
+            return "Este e-mail já está em uso por outro usuário.";
+        } else {
+            return "Erro no cadastro. Por favor, tente novamente.";
+        }
+    }
 
-        // --- CORREÇÃO (USANDO GETTER E VARIÁVEL SENHA) ---
-        // Realiza o cadastro no Firebase Auth
+    // --- CORREÇÃO: Este método agora salva um Map, não o objeto
+    private void salvarDadosGoogleNoFirestore() {
+        FirebaseUser user = auth.getCurrentUser();
+        if (user == null) {
+            // ... (seu código de erro)
+            return;
+        }
+
+        // Salva os dados no Firestore usando um Map
+        // (Isso usa a mesma lógica do 'criarContaEmailESenhaECompletar')
+        salvarDadosNoFirestore(user.getUid());
+    }
+
+
+    private void criarContaEmailESenhaECompletar() {
+        // CORREÇÃO: Usa 'getEmail()' do objeto e a variável 'senha'
         auth.createUserWithEmailAndPassword(dadosUsuario.getEmail(), senha)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         FirebaseUser user = auth.getCurrentUser();
                         if (user != null) {
-
-                            // --- ADIÇÃO IMPORTANTE ---
-                            // Adiciona o UID ao objeto antes de salvar no banco
-                            dadosUsuario.setUid(user.getUid());
-
-                            // Salva os dados completos no Firestore usando o UID do usuário
-                            db.collection("users").document(user.getUid())
-                                    .set(dadosUsuario) // Agora o objeto não contém mais a senha
-                                    .addOnSuccessListener(aVoid -> {
-                                        esconderProgressDialog();
-                                        Toast.makeText(this, "Cadastro realizado com sucesso!", Toast.LENGTH_SHORT).show();
-
-                                        // Redireciona para a tela de login (ou Home) e limpa o histórico
-                                        Intent intent = new Intent(this, MainActivity.class); // Mude para MainActivity (Login) ou HomeActivity
-                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                        startActivity(intent);
-                                        finish(); // Finaliza esta e a CadastroActivity
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        esconderProgressDialog();
-                                        // Se falhar o salvamento, exclui a conta criada para evitar inconsistência
-                                        user.delete();
-                                        Toast.makeText(this, "Erro ao salvar dados do usuário: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                                    });
+                            // Salva os dados no Firestore
+                            salvarDadosNoFirestore(user.getUid());
                         }
                     } else {
-                        esconderProgressDialog();
-                        // Se a autenticação falhar (ex: email já existe)
-                        Toast.makeText(this, "Erro no cadastro: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                        String mensagemErro = traduzirErroFirebase(task.getException());
+                        Snackbar.make(mainLayout, "Erro no cadastro: " + mensagemErro, Snackbar.LENGTH_LONG).show();
                     }
                 });
     }
 
-    // --- Métodos de ProgressDialog (opcional, mas recomendado) ---
+    // --- NOVO MÉTODO AUXILIAR ---
 
-    private void mostrarProgressDialog(String mensagem) {
-        if (mProgressDialog == null) {
-            mProgressDialog = new ProgressDialog(this);
-            mProgressDialog.setCancelable(false);
-        }
-        mProgressDialog.setMessage(mensagem);
-        mProgressDialog.show();
-    }
+    /**
+     * Pega o objeto 'dadosUsuario' e o salva no Firestore
+     * usando um Map, para garantir o schema correto.
+     */
+    private void salvarDadosNoFirestore(String uid) {
+        // Cria um Map para salvar os dados
+        Map<String, Object> userData = new HashMap<>();
 
-    private void esconderProgressDialog() {
-        if (mProgressDialog != null && mProgressDialog.isShowing()) {
-            mProgressDialog.dismiss();
-        }
+        // Dados Pessoais (Telas 1 e 2)
+        userData.put("uid", uid);
+        userData.put("nome", dadosUsuario.getNome());
+        userData.put("email", dadosUsuario.getEmail());
+        userData.put("cpf", dadosUsuario.getCpf());
+        userData.put("telefone", dadosUsuario.getTelefone());
+        userData.put("dataNascimento", dadosUsuario.getDtNasc());
+        userData.put("genero", dadosUsuario.getGenero());
+
+        // Dados de Endereço (Tela 2)
+        userData.put("endereco", dadosUsuario.getEndereco());
+        userData.put("numero", dadosUsuario.getNumero());
+        userData.put("complemento", dadosUsuario.getComplemento());
+        userData.put("cep", dadosUsuario.getCep());
+        userData.put("bairro", dadosUsuario.getBairro());
+        userData.put("cidade", dadosUsuario.getCidade());
+        userData.put("estado", dadosUsuario.getEstado());
+
+        // Campos de Controle Padrão
+        userData.put("userType", "aluno");
+        userData.put("statusVerificacao", "nenhum");
+        userData.put("comprovanteUrl", "");
+        userData.put("fotoUrl", "");
+        userData.put("dataCadastro", FieldValue.serverTimestamp());
+
+        // Salva o Map no Firestore
+        db.collection("users").document(uid)
+                .set(userData)
+                .addOnSuccessListener(aVoid -> {
+                    Snackbar.make(mainLayout, "Cadastro realizado com sucesso!", Snackbar.LENGTH_LONG).show();
+                    Intent intent = new Intent(this, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    FirebaseUser user = auth.getCurrentUser();
+                    if (user != null && !isGoogleFlow) {
+                        // Se for fluxo de email, deleta o usuário do Auth
+                        user.delete();
+                    }
+                    Snackbar.make(mainLayout, "Erro ao salvar dados. Tente novamente.", Snackbar.LENGTH_LONG).show();
+                });
     }
 }
