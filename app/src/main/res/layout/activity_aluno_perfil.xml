@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    tools:context=".AlunoPerfilActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="200dp">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="139dp"
+                android:layout_gravity="top"
+                android:scaleType="fitXY"
+                android:src="@drawable/capa" />
+
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="20dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Voltar"
+                android:padding="8dp"
+                android:src="@drawable/ic_arrow_back"
+                app:tint="@android:color/white" />
+
+            <Button
+                android:id="@+id/btnEditarPerfilAluno"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_gravity="end|top"
+                android:layout_margin="20dp"
+                android:text="Editar Perfil"
+                android:textColor="@android:color/white"
+                android:textSize="12sp"
+                android:textStyle="italic"
+                app:backgroundTint="@color/laranja"
+                app:cornerRadius="20dp" />
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivAvatarAluno"
+                android:layout_width="110dp"
+                android:layout_height="110dp"
+                android:layout_gravity="center|bottom"
+                android:layout_marginBottom="10dp"
+                android:contentDescription="Avatar"
+                android:elevation="6dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/img_avatar_circle"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Circle" />
+
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingTop="12dp">
+
+            <TextView
+                android:id="@+id/tvNomeAluno"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Carregando nome..."
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvStatusSolicitacao"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/amarelo"
+                android:textSize="14sp"
+                android:textStyle="italic"
+                android:visibility="gone"
+                tools:text="Status: Solicitação Pendente"
+                tools:visibility="visible" />
+
+        </LinearLayout>
+
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/tvNivelAluno"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableStart="@drawable/ic_star"
+                    android:drawablePadding="12dp"
+                    android:gravity="center_vertical"
+                    android:textColor="?android:attr/textColorPrimary"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:visibility="visible"
+                    app:drawableTint="?attr/colorPrimary"
+                    tools:text="Nível: Intermediário" />
+
+                <TextView
+                    android:id="@+id/tvModalidadeAluno"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:drawableStart="@drawable/ic_location"
+                    android:drawablePadding="12dp"
+                    android:gravity="center_vertical"
+                    android:textColor="?android:attr/textColorPrimary"
+                    android:textSize="16sp"
+                    android:visibility="visible"
+                    app:drawableTint="@color/laranja"
+                    tools:text="Modalidade: Presencial" />
+
+                <TextView
+                    android:id="@+id/tvObjetivosAluno"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:drawableStart="@drawable/ic_flag"
+                    android:drawablePadding="12dp"
+                    android:gravity="center_vertical"
+                    android:textColor="?android:attr/textColorPrimary"
+                    android:textSize="16sp"
+                    android:visibility="visible"
+                    app:drawableTint="@color/laranja"
+                    tools:text="Objetivos: Conversação" />
+
+            </LinearLayout>
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabLayoutAluno"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginRight="16dp"
+            android:background="@android:color/transparent"
+            app:tabIndicatorAnimationMode="elastic"
+            app:tabIndicatorColor="@color/amarelo50"
+            app:tabRippleColor="@android:color/transparent"
+            app:tabSelectedTextColor="@color/amarelo">
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sobre Mim" />
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Minhas Avaliações" />
+        </com.google.android.material.tabs.TabLayout>
+
+        <LinearLayout
+            android:id="@+id/groupBioAluno"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingVertical="16dp">
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="35dp"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="4dp">
+
+                <TextView
+                    android:id="@+id/tvBioAluno"
+                    style="@style/TextAppearance.AppCompat.Caption"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/card_background"
+                    android:padding="16dp"
+                    android:text='Pense na bio como a capa de trás de um livro 📖.
+        É o resumo que faz o aluno pensar: "Uau, é disso que eu preciso!"'
+                    android:textSize="14dp"
+                    android:textStyle="italic" />
+
+            </androidx.cardview.widget.CardView>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/groupAvaliacoesAluno"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Carregando avaliações..." />
+
+        </LinearLayout>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+    </LinearLayout>
+</ScrollView>

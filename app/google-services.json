@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "178656484388",
+    "project_id": "aulago-d2ee2",
+    "storage_bucket": "aulago-d2ee2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:178656484388:android:d0ebe8c749c4d4d35a4cb1",
+        "android_client_info": {
+          "package_name": "com.example.aulago"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "178656484388-d77krlsejjg91gc74al7uro9ner580mg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.aulago",
+            "certificate_hash": "8e27861f15f17c53e4711b97ec3732cf6449fc00"
+          }
+        },
+        {
+          "client_id": "178656484388-qr8hmdrrg8adkl3c5rnjhiti092ih68c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.aulago",
+            "certificate_hash": "1e3e393e9e907f1f3adf546f8a52d00b038ced1e"
+          }
+        },
+        {
+          "client_id": "178656484388-ti2hsvfvf7ces70t585ncsdhgurlf89p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCl3AHSpkAb_oiNCHodPbWgmwa6eLj5vkg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "178656484388-ti2hsvfvf7ces70t585ncsdhgurlf89p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
