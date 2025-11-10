@@ -19,10 +19,10 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="ScheduleActivity">
+      <SelectionState runConfigName="EditarPerfilProfessorActivity">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="EditarPerfilProfessorActivity">
+      <SelectionState runConfigName="ToolbarActivity">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

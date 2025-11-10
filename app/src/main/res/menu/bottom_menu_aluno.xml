@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidT="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@drawable/ic_home"
+        android:title="Home"
+        app:cnb_backgroundColor="#6200EE" />
+
+    <item
+        android:id="@+id/nav_classes"
+        android:icon="@drawable/ic_classes"
+        android:title="Aulas"
+        app:cnb_backgroundColor="#03DAC5" />
+
+
+    <item
+        android:id="@+id/nav_search"
+        android:icon="@drawable/ic_search" android:title="Explorar"
+        app:cnb_backgroundColor="#E91E63" />
+
+</menu>
