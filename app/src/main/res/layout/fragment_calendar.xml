@@ -5,67 +5,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context=".CalendarActivity">
-
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBarLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fitsSystemWindows="true">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:padding="16dp"
-            app:layout_scrollFlags="scroll|enterAlways|snap">
-
-            <!-- Foto de perfil do usuário -->
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/imageViewProfile"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:scaleType="centerCrop"
-                android:src="@drawable/img_avatar_circle"
-                app:shapeAppearanceOverlay="@style/Widget.AppCompat.ImageButton"
-                tools:src="@drawable/img_avatar_circle" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_weight="1"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/textViewSaudacao"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Bom dia,"
-                    android:textColor="@color/black"
-                    android:textSize="20sp"
-                    tools:text="Boa tarde," />
-
-                <TextView
-                    android:id="@+id/textViewNomeUsuario"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-
-                    android:layout_marginStart="8dp"
-
-                    android:text="Usuário"
-                    android:textColor="@color/black"
-                    android:textSize="20sp" />
-            </LinearLayout>
-        </LinearLayout>
-    </com.google.android.material.appbar.AppBarLayout>
+    tools:context=".CalendarFragment">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -73,7 +17,6 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Calendar Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -88,12 +31,10 @@
                     android:dateTextAppearance="@style/CalendarViewDateCustomText"
                     android:padding="8dp"
                     android:theme="@style/CustomCalendarViewTheme"
-
                     android:weekDayTextAppearance="@style/CalendarViewWeekCustomText" />
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Selected Date Info -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -122,7 +63,6 @@
 
             </LinearLayout>
 
-            <!-- Empty State -->
             <LinearLayout
                 android:id="@+id/emptyState"
                 android:layout_width="match_parent"
@@ -131,24 +71,8 @@
                 android:orientation="vertical"
                 android:padding="32dp"
                 android:visibility="gone">
-
-                <ImageView
-                    android:layout_width="120dp"
-                    android:layout_height="120dp"
-                    android:layout_marginBottom="16dp"
-                    android:alpha="0.3"
-                    android:src="@android:drawable/ic_menu_my_calendar" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Nenhuma aula neste dia"
-                    android:textColor="?attr/colorOnSurfaceVariant"
-                    android:textSize="16sp" />
-
             </LinearLayout>
 
-            <!-- Classes List -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewClasses"
                 android:layout_width="match_parent"
@@ -157,7 +81,6 @@
                 tools:listitem="@layout/class_card" />
 
         </LinearLayout>
-
     </androidx.core.widget.NestedScrollView>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
