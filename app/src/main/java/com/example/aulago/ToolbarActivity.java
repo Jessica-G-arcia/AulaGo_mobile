@@ -147,11 +147,19 @@ public class ToolbarActivity extends AppCompatActivity {
                 replaceFragment(new CalendarFragment());
             } else if (id == R.id.nav_search) {
                 if (ROLE_PROFESSOR.equals(userRole)) {
+                    replaceFragment(new SearchAlunosFragment());
+                } else {
+                    replaceFragment(new SearchProfessoresFragment());
+                }
+            } else if (id == R.id.nav_profile) {
+                if (ROLE_PROFESSOR.equals(userRole)) {
                     replaceFragment(new ProfessorPerfilFragment());
                 } else {
                     replaceFragment(new AlunoPerfilFragment());
                 }
             }
+
+
         });
     }
 
@@ -176,7 +184,7 @@ public class ToolbarActivity extends AppCompatActivity {
                     } else {
                         replaceFragment(new AlunoPerfilFragment());
                     }
-                    binding.bottomNavigation.setItemSelected(R.id.nav_search, true);
+                    binding.bottomNavigation.setItemSelected(R.id.nav_profile, true);
                     return true;
                 } else if (id == R.id.menu_settings) {
                     replaceFragment(new EditarDadosPessoaisFragment());

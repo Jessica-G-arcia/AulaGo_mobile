@@ -1,123 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    app:cardCornerRadius="20dp"
-    app:cardBackgroundColor="#08A1C8"
-    app:cardElevation="0dp">
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="4dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:background="@color/azul"
+        android:padding="16dp">
 
-        <ImageView
-            android:id="@+id/iv_aluno_foto"
-            android:layout_width="180dp"
-            android:layout_height="180dp"
-            android:layout_marginStart="8dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/aluna1"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <ImageView
-            android:id="@+id/iv_arrow_left_aluno"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_arrow_left"
-            android:layout_marginStart="8dp"
-            app:tint="@android:color/black"
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ivUserPhoto"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:scaleType="centerCrop"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Circle"
+            tools:src="@drawable/img_avatar_circle" />
+
+        <TextView
+            android:id="@+id/tvUserName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:fontFamily="@font/montserrat"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/ivUserPhoto"
+            app:layout_constraintTop_toTopOf="@id/ivUserPhoto"
+            tools:text="Carregando..." />
 
         <RatingBar
-            android:id="@+id/rating_bar_aluno"
+            android:id="@+id/rbUserRating"
             style="?android:attr/ratingBarStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
+            android:layout_marginTop="4dp"
+            android:isIndicator="true"
             android:numStars="5"
-            android:rating="5"
-            android:theme="@style/RatingBar"
-            app:layout_constraintBottom_toTopOf="@id/tv_aluno_nome"
-            app:layout_constraintStart_toEndOf="@id/iv_aluno_foto"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.35"
-            app:layout_constraintVertical_chainStyle="packed" />
+            android:progressTint="?attr/colorOnPrimary"
+            android:secondaryProgressTint="?attr/colorOnPrimary"
+            android:alpha="0.9"
+            app:layout_constraintStart_toStartOf="@id/tvUserName"
+            app:layout_constraintTop_toBottomOf="@id/tvUserName"
+            tools:rating="5" />
 
         <TextView
-            android:id="@+id/tv_aluno_nome"
+            android:id="@+id/tvUserSpecialty"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
             android:fontFamily="@font/montserrat"
-            android:text="Rafaela Gonçalves"
-            android:textColor="@android:color/black"
-            android:textSize="19sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@id/tv_aluno_idioma"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@id/rating_bar_aluno"
-            app:layout_constraintTop_toBottomOf="@id/rating_bar_aluno" />
-
-        <TextView
-            android:id="@+id/tv_aluno_idioma"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:fontFamily="@font/montserrat"
-            android:text="Idioma(s): Inglês"
-            android:textColor="@android:color/black"
+            android:textColor="?attr/colorOnPrimary"
             android:textSize="14sp"
-            app:layout_constraintStart_toStartOf="@id/tv_aluno_nome"
-            app:layout_constraintEnd_toEndOf="@id/tv_aluno_nome"
-            app:layout_constraintBottom_toTopOf="@id/tv_aluno_citacao"
-            app:layout_constraintTop_toBottomOf="@id/tv_aluno_nome" />
+            android:alpha="0.85"
+            app:layout_constraintEnd_toEndOf="@id/tvUserName"
+            app:layout_constraintStart_toStartOf="@id/tvUserName"
+            app:layout_constraintTop_toBottomOf="@id/rbUserRating"
+            tools:text="Idioma(s): Inglês" />
 
         <TextView
-            android:id="@+id/tv_aluno_citacao"
+            android:id="@+id/tvUserQuote"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="12dp"
             android:fontFamily="@font/montserrat"
-            android:text="&quot;Rafaela tem um aprendizado rápido, super educada. Aluna sensacional&quot;"
-            android:textColor="@android:color/black"
+            android:textColor="?attr/colorOnPrimary"
             android:textSize="14sp"
             android:textStyle="italic"
-            app:layout_constraintStart_toStartOf="@id/tv_aluno_idioma"
-            app:layout_constraintEnd_toEndOf="@id/tv_aluno_nome"
-            app:layout_constraintBottom_toTopOf="@id/tv_autor_citacao"
-            app:layout_constraintTop_toBottomOf="@id/tv_aluno_idioma" />
+            android:alpha="0.85"
+            app:layout_constraintEnd_toEndOf="@id/tvUserName"
+            app:layout_constraintStart_toStartOf="@id/tvUserName"
+            app:layout_constraintTop_toBottomOf="@id/tvUserSpecialty"
+            tools:text="&quot;Rafaela tem um aprendizado rápido, super educada. Aluna sensacional!&quot;" />
 
         <TextView
-            android:id="@+id/tv_autor_citacao"
-            android:layout_width="wrap_content"
+            android:id="@+id/tvUserQuoteAuthor"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:fontFamily="@font/montserrat"
-            android:text="Rogério Lima"
-            android:textColor="@android:color/black"
-            android:textSize="12sp"
+            android:gravity="end"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="14sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@id/tv_aluno_citacao"
-            app:layout_constraintTop_toBottomOf="@id/tv_aluno_citacao" />
-
-        <ImageView
-            android:id="@+id/iv_arrow_right_aluno"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:src="@drawable/ic_arrow_right"
-            app:tint="@android:color/black"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            android:alpha="0.85"
+            app:layout_constraintEnd_toEndOf="@id/tvUserName"
+            app:layout_constraintStart_toStartOf="@id/tvUserName"
+            app:layout_constraintTop_toBottomOf="@id/tvUserQuote"
+            tools:text="Rogério Lima" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

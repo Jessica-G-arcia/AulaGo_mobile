@@ -7,18 +7,25 @@
         android:id="@+id/nav_home"
         android:icon="@drawable/ic_home"
         android:title="Home"
-        app:cnb_backgroundColor="#6200EE" />
+        app:cnb_backgroundColor="@color/azul" />
 
     <item
         android:id="@+id/nav_classes"
         android:icon="@drawable/ic_classes"
         android:title="Aulas"
-        app:cnb_backgroundColor="#03DAC5" />
+        app:cnb_backgroundColor="@color/amarelo" />
 
 
     <item
         android:id="@+id/nav_search"
-        android:icon="@drawable/ic_search" android:title="Explorar"
-        app:cnb_backgroundColor="#E91E63" />
+        android:icon="@drawable/ic_search"
+        android:title="Buscar"
+        app:cnb_backgroundColor="@color/laranja" />
+
+    <item
+        android:id="@+id/nav_profile"
+        android:icon="@drawable/ic_person"
+        android:title="Meu Perfil"
+        app:cnb_backgroundColor="@color/marinho" />
 
 </menu>

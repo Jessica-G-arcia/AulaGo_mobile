@@ -40,7 +40,6 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
     public void onBindViewHolder(@NonNull ClassViewHolder holder, int position) {
         ClassModel classModel = classList.get(position);
 
-        // --- Seções 1, 2 e 3 (Sem alterações) ---
 
         // 1. Define os Horários
         if (classModel.getHorarioInicio() != null) {

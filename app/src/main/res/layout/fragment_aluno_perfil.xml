@@ -36,6 +36,38 @@
                 android:src="@drawable/img_avatar_circle"
                 app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Circle" />
 
+            <LinearLayout
+                android:id="@+id/groupRating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start|bottom"
+                android:layout_marginStart="16dp"
+                android:gravity="center_vertical|start"
+                android:orientation="horizontal"
+                android:padding="10dp">
+
+                <TextView
+                    android:id="@+id/tvAlunoRatingMedia"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/laranja"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    tools:text="4.8" />
+
+                <RatingBar
+                    android:id="@+id/rbAlunoRating"
+                    style="?android:attr/ratingBarStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:isIndicator="true"
+                    android:numStars="5"
+                    android:stepSize="0.1"
+                    android:progressTint="@color/amarelo"
+                    tools:rating="4.8" />
+            </LinearLayout>
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnEditar"
                 style="@style/Widget.MaterialComponents.Button.TextButton"
@@ -98,7 +130,6 @@
                 android:gravity="center_vertical"
                 android:textColor="?android:attr/textColorPrimary"
                 android:textSize="16sp"
-                android:textStyle="bold"
                 android:visibility="visible"
                 app:drawableTint="?attr/colorPrimary"
                 tools:text="Nível: Intermediário" />
@@ -107,7 +138,7 @@
                 android:id="@+id/tvModalidadeAluno"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="10dp"
                 android:drawableStart="@drawable/ic_location"
                 android:drawablePadding="12dp"
                 android:gravity="center_vertical"
@@ -121,7 +152,7 @@
                 android:id="@+id/tvObjetivosAluno"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="10dp"
                 android:drawableStart="@drawable/ic_flag"
                 android:drawablePadding="12dp"
                 android:gravity="center_vertical"
