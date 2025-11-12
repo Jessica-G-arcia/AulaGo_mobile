@@ -10,6 +10,7 @@
     android:elevation="4dp"
     app:contentInsetEnd="0dp"
     app:contentInsetStart="0dp"
+
     app:popupTheme="@style/Theme.AulaGo.AppBarOverlay">
 
     <androidx.constraintlayout.widget.ConstraintLayout

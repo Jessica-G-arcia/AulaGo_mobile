@@ -158,9 +158,37 @@ public class CadastroActivity2 extends AppCompatActivity {
     }
 
     private void ajustarLayout() {
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+        // 'main' é o seu ConstraintLayout
+        View mainView = findViewById(R.id.main);
+
+        // 1. Salva o padding original que você definiu no XML
+        // (Isso captura seus 24dp de start/end e 8dp de top/bottom)
+        int originalPaddingLeft = mainView.getPaddingLeft();
+        int originalPaddingTop = mainView.getPaddingTop();
+        int originalPaddingRight = mainView.getPaddingRight();
+        int originalPaddingBottom = mainView.getPaddingBottom();
+
+        ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
+            // 2. Pega os insets da barra de status (topo)
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+
+            // 3. Pega os insets do TECLADO (IME)
+            Insets imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime());
+
+            // 4. Pega os insets da barra de navegação (gestos/botões)
+            Insets navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
+
+            // 5. Calcula o padding
+            int paddingLeft = originalPaddingLeft + systemBars.left;
+            int paddingTop = originalPaddingTop + systemBars.top;
+            int paddingRight = originalPaddingRight + systemBars.right;
+
+            // O padding de baixo é o original + o MAIOR valor entre o teclado e a barra de navegação
+            int paddingBottom = originalPaddingBottom + Math.max(imeInsets.bottom, navBars.bottom);
+
+            // 6. Aplica o padding
+            v.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
+
             return insets;
         });
     }
@@ -284,12 +312,27 @@ public class CadastroActivity2 extends AppCompatActivity {
                 .set(userData)
                 .addOnSuccessListener(aVoid -> {
 
-                    // --- CORREÇÃO APLICADA AQUI ---
+                    // --- INÍCIO DA CORREÇÃO ---
+
+                    // 1. O LOG QUE VOCÊ PEDIU:
+                    // Verifique a aba "Logcat" no Android Studio filtrando por "CADASTRO_DEBUG"
+                    Log.d("CADASTRO_DEBUG", "SUCESSO: .addOnSuccessListener foi chamado.");
+
+                    // 2. VERIFICAÇÃO DE SEGURANÇA:
+                    // Checa se a Activity ainda está ativa antes de mostrar o diálogo.
+                    // Se 'isFinishing()' for true, a Activity está morrendo e não pode mostrar um diálogo.
+                    if (isFinishing() || isDestroyed()) {
+                        Log.w("CADASTRO_DEBUG", "Activity está finalizando. Diálogo de sucesso pulado.");
+                        return; // Não faz mais nada
+                    }
+
+                    // 3. SEU CÓDIGO ORIGINAL (agora seguro):
                     // Exibe um pop-up de sucesso antes de navegar
                     new AlertDialog.Builder(this)
-                            .setTitle("Sucesso!")
+                            .setTitle("")
                             .setMessage("Cadastro realizado com sucesso!")
                             .setPositiveButton("OK", (dialog, which) -> {
+                                Log.d("CADASTRO_DEBUG", "Usuário clicou em OK. Navegando...");
                                 // A navegação agora acontece DENTRO do clique do botão
                                 Intent intent = new Intent(this, MainActivity.class);
                                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -302,6 +345,7 @@ public class CadastroActivity2 extends AppCompatActivity {
 
                 })
                 .addOnFailureListener(e -> {
+                    Log.e("CADASTRO_DEBUG", "FALHA ao salvar no Firestore: ", e);
                     FirebaseUser user = auth.getCurrentUser();
                     if (user != null && !isGoogleFlow) {
                         // Se for fluxo de email, deleta o usuário do Auth
