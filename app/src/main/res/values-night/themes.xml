@@ -1,7 +1,60 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.AulaGo" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+    <style name="Base.Theme.AulaGo" parent="Theme.Material3.Light.NoActionBar">
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="colorPrimary">@color/laranja</item>
+        <item name="android:fontFamily">@font/montserrat</item>
+        <item name="android:textSize">12sp</item>
+        <item name="fontFamily">@font/montserrat</item>
     </style>
+
+    <style name="Theme.AulaGo.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@android:color/white</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_aulago_round</item>
+        <item name="postSplashScreenTheme">@style/Theme.AulaGo</item>
+    </style>
+
+    <style name="Theme.AulaGo" parent="Base.Theme.AulaGo" />
+
+
+    <style name="CustomCalendarViewTheme" parent="Theme.Material3.DayNight">
+        <item name="colorPrimary">@color/azul</item>
+        <item name="android:colorControlActivated">@color/azul50</item>
+        <item name="android:colorControlHighlight">@color/azul</item>
+    </style>
+
+    <style name="Theme.AulaGo.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="Theme.AulaGo.AppBarOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="RatingBar" parent="Widget.AppCompat.RatingBar.Small">
+        <item name="colorControlNormal">@android:color/white</item>
+        <item name="colorControlActivated">#FFC107</item>
+    </style>
+
+    <style name="CalendarViewWeekCustomText" parent="TextAppearance.AppCompat.Caption">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="ShapeAppearance.Material3.Circle" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="CalendarViewDateCustomText" parent="TextAppearance.AppCompat.Body1">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="MyCustomTabStyle" parent="TextAppearance.MaterialComponents.Button">
+        <item name="android:fontFamily">@font/montserrat</item>
+        <item name="textAllCaps">false</item>
+    </style>
+
+    <style name="MyPopupMenuStyle" parent="ThemeOverlay.AppCompat.Light">
+        <item name="android:textColorPrimary">@android:color/black</item>
+    </style>
+
 </resources>
