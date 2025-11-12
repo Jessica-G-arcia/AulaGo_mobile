@@ -4,13 +4,23 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.splashscreen.SplashScreen;
+
+// Imports de Biometria e Criptografia
+import androidx.biometric.BiometricManager;
+import androidx.biometric.BiometricPrompt;
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKeys;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -26,8 +36,11 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -43,21 +56,153 @@ public class MainActivity extends AppCompatActivity {
     private static final String PREFS_NAME = "AuthPrefs";
     private static final String KEY_REMEMBER_ME = "rememberMe";
 
+    // --- Variáveis de Biometria e Criptografia ---
+    private Executor executor;
+    private BiometricPrompt biometricPrompt;
+    private BiometricPrompt.PromptInfo promptInfo;
+
+    private SharedPreferences securePreferences;
+    private static final String SECURE_PREFS_NAME = "SecureAuthPrefs";
+    private static final String KEY_USER_EMAIL = "userEmail";
+    private static final String KEY_USER_PASS = "userPass";
+
+    // Chave para salvar o e-mail (não criptografado) para lookup
+    private static final String KEY_BIOMETRIC_EMAIL_ALIAS = "biometricEmailAlias";
+
+    // Flags de controle
+    private boolean isParaSalvarBiometria = false;
+    private String tempEmail;
+    private String tempSenha;
+    private boolean isBiometricPromptShowing = false;
+    // --- Fim Variáveis Biometria ---
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         SplashScreen.installSplashScreen(this);
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
+        inicializarSecurePreferences();
         inicializarViews();
-        verificarSessaoSalva();
         configurarGoogleSignIn();
-        configurarListeners();
+        configurarBiometria();
+        configurarListeners(); // <-- Agora inclui o OnFocusChangeListener
+
+        // Tenta logar o usuário automaticamente (Sessão Firebase ou Biometria)
+        boolean justLoggedOut = getIntent().getBooleanExtra("JUST_LOGGED_OUT", false);
+        tentarLoginAutomatico(justLoggedOut);
+    }
+
+    /**
+     * Inicializa as SharedPreferences Criptografadas.
+     */
+    private void inicializarSecurePreferences() {
+        try {
+            String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
+            securePreferences = EncryptedSharedPreferences.create(
+                    SECURE_PREFS_NAME,
+                    masterKeyAlias,
+                    this,
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            );
+        } catch (GeneralSecurityException | IOException e) {
+            Log.e("SecurePrefs", "Erro ao inicializar EncryptedSharedPreferences", e);
+        }
+    }
+
+    /**
+     * Configura o Executor, o Callback e o Pop-up de Biometria.
+     */
+    private void configurarBiometria() {
+        executor = ContextCompat.getMainExecutor(this);
+
+        biometricPrompt = new BiometricPrompt(MainActivity.this, executor, new BiometricPrompt.AuthenticationCallback() {
+            @Override
+            public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
+                super.onAuthenticationError(errorCode, errString);
+                isBiometricPromptShowing = false; // Permite um novo prompt
+
+                if (isParaSalvarBiometria) {
+                    isParaSalvarBiometria = false;
+                    Toast.makeText(getApplicationContext(), "Ativação da biometria cancelada.", Toast.LENGTH_SHORT).show();
+                    abrirTela(ToolbarActivity.class);
+                } else {
+                    Toast.makeText(getApplicationContext(), "Autenticação cancelada.", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
+                super.onAuthenticationSucceeded(result);
+                isBiometricPromptShowing = false; // Permite um novo prompt
+
+                if (isParaSalvarBiometria) {
+                    // --- FLUXO DE SALVAR ---
+                    isParaSalvarBiometria = false;
+                    salvarCredenciaisSeguras(tempEmail, tempSenha); // Agora salva (incluindo o alias)
+                    tempEmail = null;
+                    tempSenha = null;
+
+                    Toast.makeText(getApplicationContext(), "Biometria ativada com sucesso!", Toast.LENGTH_SHORT).show();
+                    abrirTela(ToolbarActivity.class);
+
+                } else {
+                    // --- FLUXO DE LOGAR ---
+                    if (securePreferences == null) {
+                        Toast.makeText(getApplicationContext(), "Erro de segurança. Faça login manualmente.", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    String email = securePreferences.getString(KEY_USER_EMAIL, null);
+                    String senha = securePreferences.getString(KEY_USER_PASS, null);
+
+                    if (email != null && senha != null) {
+                        Toast.makeText(getApplicationContext(), "Autenticado! Entrando...", Toast.LENGTH_SHORT).show();
+                        verificarExistenciaUsuarioELogar(email, senha);
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Credenciais não encontradas. Faça login manualmente.", Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onAuthenticationFailed() {
+                super.onAuthenticationFailed();
+                isBiometricPromptShowing = false; // Permite um novo prompt
+                Toast.makeText(getApplicationContext(), "Autenticação falhou.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        promptInfo = new BiometricPrompt.PromptInfo.Builder()
+                .setTitle("Login Biométrico")
+                .setSubtitle("Use sua digital ou rosto para fazer login")
+                .setNegativeButtonText("Cancelar")
+                .build();
+    }
+
+    /**
+     * Tenta logar o usuário automaticamente.
+     */
+    private void tentarLoginAutomatico(boolean justLoggedOut) {
+        SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        boolean rememberMe = preferences.getBoolean(KEY_REMEMBER_ME, false);
+        FirebaseUser user = auth.getCurrentUser();
+
+        if (rememberMe && user != null) {
+            Log.d("Login", "Login automático via sessão Firebase.");
+            abrirTela(ToolbarActivity.class);
+
+        } else if (podeAutenticarComBiometria() && temCredenciaisSalvas() && !justLoggedOut) {
+            Log.d("Login", "Login automático via Biometria.");
+            isBiometricPromptShowing = true;
+            biometricPrompt.authenticate(promptInfo);
+
+        } else {
+            Log.d("Login", "Nenhum login automático. Aguardando entrada manual.");
+        }
     }
 
     private void inicializarViews() {
@@ -74,26 +219,37 @@ public class MainActivity extends AppCompatActivity {
         switchLembrarSenha.setChecked(rememberMe);
     }
 
-    private void verificarSessaoSalva() {
-        SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        boolean rememberMe = preferences.getBoolean(KEY_REMEMBER_ME, false);
-
-        if (rememberMe) {
-            FirebaseUser user = auth.getCurrentUser();
-            if (user != null) {
-                // Sessão ativa: redireciona imediatamente para o app
-                Toast.makeText(this, "Bem-vindo de volta!", Toast.LENGTH_SHORT).show();
-
-                // MUDANÇA AQUI: Abre a ToolbarActivity
-                abrirTela(ToolbarActivity.class);
-            }
-        }
-    }
-
+    // --- MÉTODO ATUALIZADO ---
     private void configurarListeners() {
         btnEntrar.setOnClickListener(v -> loginComEmailESenha());
         btnCriarConta.setOnClickListener(v -> redirecionarParaCadastro());
         btnGoogleLogin.setOnClickListener(v -> loginComGoogle());
+
+        // --- LÓGICA DE FOCO RESTAURADA ---
+        // Aciona a biometria assim que o usuário para de digitar o e-mail
+        inputEmail.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus && !isBiometricPromptShowing) {
+                // Usuário terminou de digitar o e-mail
+                String emailDigitado = inputEmail.getText().toString().trim();
+                if (emailCorrespondeAoSalvo(emailDigitado)) {
+                    // E-mail bate com o alias salvo! Dispara a biometria.
+                    Log.d("Login", "E-mail com biometria detectado (via Foco). Acionando prompt.");
+                    isBiometricPromptShowing = true;
+                    biometricPrompt.authenticate(promptInfo);
+                }
+            }
+        });
+    }
+
+    // Método helper para checar o "alias" do e-mail
+    private boolean emailCorrespondeAoSalvo(String emailDigitado) {
+        if (emailDigitado.isEmpty() || !podeAutenticarComBiometria() || !temCredenciaisSalvas()) {
+            return false;
+        }
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        String emailSalvo = prefs.getString(KEY_BIOMETRIC_EMAIL_ALIAS, null);
+
+        return emailDigitado.equalsIgnoreCase(emailSalvo);
     }
 
     private void configurarGoogleSignIn() {
@@ -106,18 +262,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void verificarExistenciaUsuarioELogar(String email, String senha) {
-
         auth.signInWithEmailAndPassword(email, senha)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        // SUCESSO NO LOGIN
-                        salvarEstadoDoSwitch();
-
-                        // MUDANÇA AQUI: Não precisamos verificar o tipo de usuário,
-                        // apenas abrir a tela principal.
-                        Log.d("Login", "Login com e-mail bem-sucedido. Abrindo app.");
-                        abrirTela(ToolbarActivity.class);
-
+                        Log.d("Login", "Login manual bem-sucedido.");
+                        processarPosLoginManual(email, senha);
                     } else {
                         // FALHA NO LOGIN
                         String mensagemErro = "Erro ao fazer login. Verifique as credenciais.";
@@ -129,35 +278,97 @@ public class MainActivity extends AppCompatActivity {
                             mensagemErro = "A senha está incorreta ou o usuário não está cadastrado.";
                         } catch (Exception e) {
                             mensagemErro = "Erro desconhecido: " + e.getLocalizedMessage();
-                            Log.e("LoginError", "Erro de login: " + e.getMessage());
                         }
                         Toast.makeText(this, mensagemErro, Toast.LENGTH_LONG).show();
                     }
                 });
     }
 
+    /**
+     * Decide o que fazer após um login manual bem-sucedido.
+     */
+    private void processarPosLoginManual(String email, String senha) {
+        // 1. Salva o estado do switch "Lembrar Senha"
+        SharedPreferences.Editor editor = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
+        boolean querLembrar = switchLembrarSenha.isChecked();
+        editor.putBoolean(KEY_REMEMBER_ME, querLembrar);
+        editor.apply();
+
+        // 2. Verifica se pode OFERECER a biometria
+        boolean podeHabilitarBiometria = podeAutenticarComBiometria() && !temCredenciaisSalvas();
+
+        if (podeHabilitarBiometria) {
+            // Mostra o pop-up de oferta
+            new AlertDialog.Builder(this)
+                    .setTitle("Login Rápido")
+                    .setMessage("Deseja habilitar o login com biometria para esta conta?")
+                    .setPositiveButton("Sim, habilitar", (dialog, which) -> {
+                        // Prepara as variáveis para o callback
+                        isParaSalvarBiometria = true;
+                        tempEmail = email;
+                        tempSenha = senha;
+
+                        // Chama o pop-up do SISTEMA para confirmar
+                        isBiometricPromptShowing = true;
+                        biometricPrompt.authenticate(promptInfo);
+                    })
+                    .setNegativeButton("Agora não", (dialog, which) -> {
+                        abrirTela(ToolbarActivity.class);
+                    })
+                    .setCancelable(false)
+                    .show();
+        } else {
+            abrirTela(ToolbarActivity.class);
+        }
+    }
+
+
+    /**
+     * Limpa a biometria após o login do Google.
+     */
+    private void processarPosLoginGoogle() {
+        SharedPreferences.Editor editor = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
+        editor.putBoolean(KEY_REMEMBER_ME, switchLembrarSenha.isChecked());
+        editor.apply();
+        apagarCredenciaisSeguras(); // Login Google não usa senha, então limpa biometria local
+    }
+
+    // --- MÉTODO ATUALIZADO ---
+    /**
+     * Lógica de login com E-mail/Senha.
+     * Checa a biometria se a senha estiver vazia (lógica de fallback).
+     */
     private void loginComEmailESenha() {
         String email = inputEmail.getText().toString().trim();
         String senha = inputSenha.getText().toString().trim();
 
-        boolean camposPreenchidos = true;
-
         if (email.isEmpty()) {
             inputEmail.setError("O e-mail é obrigatório.");
-            camposPreenchidos = false;
-        } else {
-            inputEmail.setError(null);
+            inputEmail.requestFocus();
+            return;
         }
 
+        // Se o prompt já estiver aparecendo (pelo listener de foco), não faz nada.
+        if (isBiometricPromptShowing) {
+            return;
+        }
+
+        // LÓGICA DE FALLBACK (Botão "Entrar")
+        if (senha.isEmpty() && emailCorrespondeAoSalvo(email)) {
+            // Se a senha está VAZIA e o E-MAIL BATE,
+            // aciona o prompt (caso o listener de foco tenha falhado).
+            Log.d("Login", "E-mail com biometria detectado (via Botão). Acionando prompt.");
+            isBiometricPromptShowing = true;
+            biometricPrompt.authenticate(promptInfo);
+            return; // Para a execução aqui e espera a biometria
+        }
+
+        // Se a senha NÃO está vazia, ou o e-mail não bate, continua o login normal
         if (senha.isEmpty()) {
+            // Se chegou aqui, a senha está vazia MAS a biometria não se aplica.
+            // Portanto, a senha é obrigatória.
             inputSenha.setError("A senha é obrigatória.");
-            camposPreenchidos = false;
-        } else {
-            inputSenha.setError(null);
-        }
-
-        if (!camposPreenchidos) {
-            Toast.makeText(this, "Preencha os campos obrigatórios.", Toast.LENGTH_SHORT).show();
+            inputSenha.requestFocus();
             return;
         }
 
@@ -185,19 +396,16 @@ public class MainActivity extends AppCompatActivity {
                 firebaseAuthWithGoogle(account);
             } catch (ApiException e) {
                 Log.w("GoogleAuth", "Google sign in falhou", e);
-                Toast.makeText(this, "Erro no login com Google: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
     }
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
-        Log.d("FirebaseAuth", "Autenticando com credenciais Google: " + acct.getIdToken());
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
-
         auth.signInWithCredential(credential)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        salvarEstadoDoSwitch();
+                        processarPosLoginGoogle();
                         FirebaseUser user = auth.getCurrentUser();
                         tratarLoginGoogle(user, acct);
                     } else {
@@ -214,73 +422,42 @@ public class MainActivity extends AppCompatActivity {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         if (!task.getResult().exists()) {
-                            // USUÁRIO NOVO: Redireciona para o cadastro (primeira tela) com dados preenchidos
-
+                            // USUÁRIO NOVO
                             Toast.makeText(this, "Bem-vindo! Complete seu cadastro.", Toast.LENGTH_LONG).show();
-
-                            // Cria o objeto de dados parciais
                             DadosUsuario dadosParciais = new DadosUsuario();
                             dadosParciais.setNome(acct.getDisplayName());
                             dadosParciais.setEmail(acct.getEmail());
-
-                            // Redireciona para a primeira tela de cadastro
                             Intent intent = new Intent(MainActivity.this, CadastroActivity.class);
-
-                            // Adiciona um FLAG especial para o CadastroActivity saber que é um fluxo Google
                             intent.putExtra(CadastroActivity.KEY_FLUXO_GOOGLE, true);
-
-                            // Envia os dados parciais
                             intent.putExtra(CadastroActivity.KEY_DADOS_GOOGLE, dadosParciais);
-
                             startActivity(intent);
-                            finish(); // Fecha a MainActivity
-
+                            finish();
                         } else {
-                            // USUÁRIO EXISTENTE: Salva dados básicos (se necessário) e redireciona para a principal
-                            salvarUsuarioFirestoreSeNovo(user, acct);
-
+                            // USUÁRIO EXISTENTE
+                            salvarUsuarioFirestoreSeNovo(user, acct); // Apenas por garantia
                             Toast.makeText(this, "Login com Google realizado com sucesso!", Toast.LENGTH_SHORT).show();
                             abrirTela(ToolbarActivity.class);
                         }
                     } else {
-                        Log.e("Firestore", "Erro ao verificar existência do usuário: " + task.getException());
-                        // Em caso de erro, por segurança, trata como login normal (pode dar erro na próxima tela)
-                        Toast.makeText(this, "Erro ao verificar dados. Tentando login normal...", Toast.LENGTH_SHORT).show();
+                        Log.e("Firestore", "Erro ao verificar existência do usuário.", task.getException());
                         abrirTela(ToolbarActivity.class);
                     }
                 });
     }
 
-    private void salvarEstadoDoSwitch() {
-        SharedPreferences.Editor editor = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
-        editor.putBoolean(KEY_REMEMBER_ME, switchLembrarSenha.isChecked());
-        editor.apply();
-    }
-
-    /**
-     * Verifica se o usuário é novo (primeiro login com Google) e salva dados no Firestore.
-     */
     private void salvarUsuarioFirestoreSeNovo(FirebaseUser user, GoogleSignInAccount acct) {
         if (user == null) return;
-
         db.collection("users").document(user.getUid())
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         if (!task.getResult().exists()) {
-                            // Usuário novo! Salvar dados básicos no Firestore.
                             Map<String, Object> userData = new HashMap<>();
                             userData.put("nome", acct.getDisplayName());
                             userData.put("email", acct.getEmail());
                             userData.put("genero", "Não informado (Google)");
-
-                            db.collection("users").document(user.getUid())
-                                    .set(userData)
-                                    .addOnSuccessListener(aVoid -> Log.d("Firestore", "Dados do Google salvos com sucesso."))
-                                    .addOnFailureListener(e -> Log.e("Firestore", "Erro ao salvar dados do Google: " + e.getMessage()));
+                            db.collection("users").document(user.getUid()).set(userData);
                         }
-                    } else {
-                        Log.e("Firestore", "Erro ao verificar existência do usuário: " + task.getException());
                     }
                 });
     }
@@ -292,4 +469,65 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 
+    // --- (Início) Métodos Auxiliares de Biometria e Criptografia ---
+
+    private boolean podeAutenticarComBiometria() {
+        if (securePreferences == null) return false;
+        BiometricManager biometricManager = BiometricManager.from(this);
+        int canAuth = biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG | BiometricManager.Authenticators.BIOMETRIC_WEAK);
+        return canAuth == BiometricManager.BIOMETRIC_SUCCESS;
+    }
+
+    private boolean temCredenciaisSalvas() {
+        if (securePreferences == null) return false;
+        return securePreferences.contains(KEY_USER_EMAIL) && securePreferences.contains(KEY_USER_PASS);
+    }
+
+    /**
+     * Salva e-mail e senha no EncryptedSharedPreferences.
+     * ATUALIZADO: Agora também salva o "alias" do e-mail.
+     */
+    private void salvarCredenciaisSeguras(String email, String senha) {
+        if (securePreferences == null) return;
+        try {
+            // Salva criptografado
+            securePreferences.edit()
+                    .putString(KEY_USER_EMAIL, email)
+                    .putString(KEY_USER_PASS, senha)
+                    .apply();
+
+            // Salva o "alias" (não criptografado)
+            SharedPreferences.Editor editor = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
+            editor.putString(KEY_BIOMETRIC_EMAIL_ALIAS, email);
+            editor.apply();
+
+            Log.d("SecurePrefs", "Credenciais de biometria e alias salvos.");
+        } catch (Exception e) {
+            Log.e("SecurePrefs", "Erro ao salvar credenciais seguras", e);
+        }
+    }
+
+    /**
+     * Apaga e-mail e senha do EncryptedSharedPreferences.
+     * ATUALIZADO: Agora também apaga o "alias" do e-mail.
+     */
+    private void apagarCredenciaisSeguras() {
+        if (securePreferences == null) return;
+        try {
+            // Apaga criptografado
+            securePreferences.edit()
+                    .remove(KEY_USER_EMAIL)
+                    .remove(KEY_USER_PASS)
+                    .apply();
+
+            // Apaga o "alias" (não criptografado)
+            SharedPreferences.Editor editor = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
+            editor.remove(KEY_BIOMETRIC_EMAIL_ALIAS);
+            editor.apply();
+
+            Log.d("SecurePrefs", "Credenciais de biometria e alias apagados.");
+        } catch (Exception e) {
+            Log.e("SecurePrefs", "Erro ao apagar credenciais seguras", e);
+        }
+    }
 }

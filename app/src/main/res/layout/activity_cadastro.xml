@@ -5,21 +5,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:paddingStart="24dp"
-    android:paddingEnd="24dp"
-    android:background="#FFFFFF"
     tools:context=".CadastroActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/white">
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:background="@android:color/white"
+        android:padding="8dp"
+        >
 
         <ImageView
             android:id="@+id/imageView"
-            android:layout_width="414dp"
-            android:layout_height="138dp"
+            android:layout_width="405dp"
+            android:layout_height="105dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -29,6 +30,7 @@
             android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:text="Crie sua conta"
             android:textColor="@android:color/black"
             android:textSize="24sp"
@@ -44,7 +46,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:textColorHint="@color/black"
-            app:cursorColor="#FF9800"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/title">
@@ -54,8 +55,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Nome completo"
-                android:inputType="textPersonName"
-                android:textColor="@android:color/black" />
+                android:textColorHint="@color/black"
+                android:inputType="textPersonName" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -65,7 +66,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:textColorHint="@color/black"
-            app:cursorColor="#FF9800"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textInputLayoutNome">
@@ -75,7 +75,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="CPF"
-                android:textColor="@android:color/black"
                 android:inputType="number" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -86,7 +85,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:textColorHint="@color/black"
-            app:cursorColor="#FF9800"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textInputLayoutCpf">
@@ -96,7 +94,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="E-mail"
-                android:textColor="@android:color/black"
                 android:inputType="textEmailAddress" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -107,7 +104,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:textColorHint="@color/black"
-            app:cursorColor="#FF9800"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textInputLayoutEmail">
@@ -117,7 +113,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Telefone"
-                android:textColor="@android:color/black"
                 android:inputType="phone" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -128,7 +123,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:textColorHint="@color/black"
-            app:cursorColor="#FF9800"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textInputLayoutTelefone">
@@ -138,7 +132,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Data de Nascimento (DD/MM/AAAA)"
-                android:textColor="@android:color/black"
                 android:inputType="date" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -149,21 +142,16 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:textColorHint="@color/black"
-            app:cursorColor="#FF9800"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textInputLayoutDtNasc"
-            app:passwordToggleEnabled="true"
-            app:errorEnabled="true"
-            app:helperText="Mínimo de 6 caracteres"
-            app:helperTextTextColor="@color/black">
+            app:passwordToggleEnabled="true">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/inputSenha"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Senha"
-                android:textColor="@android:color/black"
                 android:inputType="textPassword" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -171,7 +159,7 @@
             android:id="@+id/btnContinuar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="24dp"
             android:backgroundTint="#DD6D2F"
             android:text="Continuar"
             android:textColor="#FFFFFF"

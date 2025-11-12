@@ -94,10 +94,37 @@ public class CadastroActivity extends AppCompatActivity {
     }
 
     private void ajustarLayout() {
-        // (Seu código de ajuste de layout - está ótimo)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+        // 'main' é o seu ConstraintLayout
+        View mainView = findViewById(R.id.main);
+
+        // 1. Salva o padding original que você definiu no XML
+        // (Isso captura seus 24dp de start/end e 8dp de top/bottom)
+        int originalPaddingLeft = mainView.getPaddingLeft();
+        int originalPaddingTop = mainView.getPaddingTop();
+        int originalPaddingRight = mainView.getPaddingRight();
+        int originalPaddingBottom = mainView.getPaddingBottom();
+
+        ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
+            // 2. Pega os insets da barra de status (topo)
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+
+            // 3. Pega os insets do TECLADO (IME)
+            Insets imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime());
+
+            // 4. Pega os insets da barra de navegação (gestos/botões)
+            Insets navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
+
+            // 5. Calcula o padding
+            int paddingLeft = originalPaddingLeft + systemBars.left;
+            int paddingTop = originalPaddingTop + systemBars.top;
+            int paddingRight = originalPaddingRight + systemBars.right;
+
+            // O padding de baixo é o original + o MAIOR valor entre o teclado e a barra de navegação
+            int paddingBottom = originalPaddingBottom + Math.max(imeInsets.bottom, navBars.bottom);
+
+            // 6. Aplica o padding
+            v.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
+
             return insets;
         });
     }

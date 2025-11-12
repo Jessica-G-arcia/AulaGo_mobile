@@ -1,13 +1,10 @@
 package com.example.aulago;
 
-import android.content.Intent;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.view.Menu;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.util.Log;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -20,6 +17,15 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.fragment.app.Fragment;
 
+import android.content.Context;
+
+import androidx.appcompat.view.ContextThemeWrapper;
+
+// IMPORTS ADICIONADOS PARA A CORREÇÃO DE COR
+import android.content.Context;
+
+import androidx.appcompat.view.ContextThemeWrapper; // <-- 1. NOVO IMPORT
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
@@ -27,11 +33,27 @@ import com.example.aulago.databinding.AppBarMainBinding;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.ismaeldivita.chipnavigation.ChipNavigationBar;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ToolbarActivity extends AppCompatActivity {
 
     private AppBarMainBinding binding;
+    public static final String ROLE_PROFESSOR = "Professor";
+    public static final String ROLE_ALUNO = "Aluno";
+
+    // --- CONSTANTES ---
+    private static final String PREFS_NAME = "AuthPrefs";
+    private static final String KEY_REMEMBER_ME = "rememberMe";
+    private static final String SECURE_PREFS_NAME = "SecureAuthPrefs";
+    private static final String KEY_USER_EMAIL = "userEmail";
+    private static final String KEY_USER_PASS = "userPass";
+    private static final String KEY_BIOMETRIC_EMAIL_ALIAS = "biometricEmailAlias";
+    // --- FIM DAS CONSTANTES ---
+
     private FirebaseAuth auth;
     private FirebaseFirestore db;
 
@@ -49,29 +71,46 @@ public class ToolbarActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        // Inicia o processo de carregamento de dados e configuração da UI
+        // --- CHAMADA DO MÉTODO ADICIONADA AQUI ---
+        ajustarLayout();
+
+        setSupportActionBar(binding.toolbarLayout.toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+            getSupportActionBar().setTitle("");
+        }
+
+        ImageView notificationIcon = binding.toolbarLayout.ivNotifications;
+        notificationIcon.setOnClickListener(view -> {
+            replaceFragment(new NotificationsFragment());
+        });
+
         loadUserDataAndSetupUI();
     }
 
     /**
-     * Ponto de entrada principal: busca os dados do usuário no Firestore
-     * e, em caso de sucesso, configura toda a UI.
+     * Função principal que busca os dados do usuário no Firestore
+     * e configura toda a UI baseada nesses dados.
      */
     private void loadUserDataAndSetupUI() {
         FirebaseUser user = auth.getCurrentUser();
         if (user == null) {
-            redirectToLogin();
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
             return;
         }
 
-        db.collection("users").document(user.getUid()).get()
+        String uid = user.getUid();
+        db.collection("users").document(uid).get()
                 .addOnSuccessListener(document -> {
                     String userRole = ROLE_ALUNO; // Assume "Aluno" por padrão
                     String userPhotoUrl = null;
 
                     if (document.exists()) {
-                        // Lógica para determinar a role (ex: Professor se a solicitação foi aprovada)
-                        if ("aprovado".equals(document.getString("statusSolicitacao"))) {
+                        String status = document.getString("statusSolicitacao");
+                        if ("aprovado".equals(status)) {
                             userRole = ROLE_PROFESSOR;
                         }
                         userPhotoUrl = document.getString("urlFotoPerfil");
@@ -115,7 +154,6 @@ public class ToolbarActivity extends AppCompatActivity {
 
     private void setupClickListeners(String userRole) {
         BottomNavigationView bottomNav = binding.bottomNavigation;
-        Drawable transparentBackground = new ColorDrawable(Color.TRANSPARENT);
 
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
@@ -193,7 +231,7 @@ public class ToolbarActivity extends AppCompatActivity {
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.fragment_container, fragment)
-                .addToBackStack(null) // Permite voltar ao fragmento anterior com o botão "Voltar"
+                .addToBackStack(null)
                 .commit();
     }
 
@@ -201,20 +239,82 @@ public class ToolbarActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle("Sair")
                 .setMessage("Tem certeza que deseja sair da sua conta?")
-                .setPositiveButton("Sair", (dialog, which) -> performLogout())
+                .setPositiveButton("Sair", (dialog, which) -> {
+                    performLogout();
+                })
                 .setNegativeButton("Cancelar", null)
                 .show();
     }
 
     private void performLogout() {
         auth.signOut();
-        redirectToLogin();
-    }
-
-    private void redirectToLogin() {
         Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("JUST_LOGGED_OUT", true); // Envia a flag
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
+    }
+
+    /**
+     * Este método não é chamado no logout normal,
+     * mas é mantido aqui caso seja necessário em outro fluxo (ex: login google)
+     */
+    private void apagarCredenciaisSeguras() {
+        try {
+            String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
+            SharedPreferences securePreferences = EncryptedSharedPreferences.create(
+                    SECURE_PREFS_NAME,
+                    masterKeyAlias,
+                    this,
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            );
+
+            // Apaga as chaves criptografadas
+            securePreferences.edit()
+                    .remove(KEY_USER_EMAIL)
+                    .remove(KEY_USER_PASS)
+                    .apply();
+            Log.d("SecurePrefs", "Credenciais de biometria apagadas.");
+
+        } catch (GeneralSecurityException | IOException e) {
+            Log.e("SecurePrefs", "Erro ao apagar credenciais seguras", e);
+        }
+    }
+
+    // --- MÉTODO ADICIONADO DA OPÇÃO 1 ---
+    private void ajustarLayout() {
+        // 'getRoot()' é a sua view principal (provavelmente um ConstraintLayout)
+        View mainView = binding.getRoot();
+
+        // Salva o padding original do seu XML (se houver)
+        int originalPaddingLeft = mainView.getPaddingLeft();
+        int originalPaddingTop = mainView.getPaddingTop();
+        int originalPaddingRight = mainView.getPaddingRight();
+        int originalPaddingBottom = mainView.getPaddingBottom();
+
+        ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
+            // Pega os insets da barra de status (topo)
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+
+            // Pega os insets do TECLADO (IME)
+            Insets imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime());
+
+            // Pega os insets da barra de navegação (gestos/botões)
+            Insets navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
+
+            // Calcula o padding
+            int paddingLeft = originalPaddingLeft + systemBars.left;
+            int paddingTop = originalPaddingTop + systemBars.top; // <-- Adiciona padding no topo
+            int paddingRight = originalPaddingRight + systemBars.right;
+
+            // O padding de baixo é o original + o MAIOR valor entre o teclado e a barra de navegação
+            int paddingBottom = originalPaddingBottom + Math.max(imeInsets.bottom, navBars.bottom); // <-- Adiciona padding embaixo
+
+            // Aplica o padding
+            v.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
+
+            return insets;
+        });
     }
 }
