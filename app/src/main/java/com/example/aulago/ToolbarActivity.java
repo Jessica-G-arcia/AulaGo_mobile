@@ -7,18 +7,16 @@ import android.util.Log;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.ImageView;
-import android.view.View; // Import genérico, necessário
+import android.view.View; // <-- ADICIONADO PARA OPÇÃO 1
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 
-// --- IMPORTS ADICIONADOS PARA O NOVO LAYOUT ---
+// --- IMPORTS ADICIONADOS PARA OPÇÃO 1 ---
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowCompat;
-import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.core.view.WindowInsetsCompat;
 // --- FIM DOS IMPORTS ---
 
@@ -72,8 +70,8 @@ public class ToolbarActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        // --- CHAMADA DO NOVO MÉTODO DE LAYOUT ---
-        configurarLayoutImersivoHibrido(); // <-- SUBSTITUI OS MÉTODOS ANTERIORES
+        // --- CHAMADA DO MÉTODO ADICIONADA AQUI ---
+        ajustarLayout();
 
         setSupportActionBar(binding.toolbarLayout.toolbar);
         if (getSupportActionBar() != null) {
@@ -89,55 +87,10 @@ public class ToolbarActivity extends AppCompatActivity {
         loadUserDataAndSetupUI();
     }
 
-    // --- MÉTODO DE LAYOUT HÍBRIDO (OPÇÃO 1 + OPÇÃO 2) ---
-    private void configurarLayoutImersivoHibrido() {
-        // 1. Diz ao sistema que vamos cuidar do layout
-        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
-
-        View mainView = binding.getRoot();
-        int originalPaddingLeft = mainView.getPaddingLeft();
-        int originalPaddingTop = mainView.getPaddingTop();
-        int originalPaddingRight = mainView.getPaddingRight();
-        int originalPaddingBottom = mainView.getPaddingBottom();
-
-        // 2. Ouve as mudanças de insets (barras e teclado)
-        ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
-
-            // --- LÓGICA DA OPÇÃO 1 (APENAS PARA O TOPO) ---
-            // Pega o tamanho da barra de status (topo)
-            Insets statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars());
-            // Pega o tamanho do teclado (para o rodapé)
-            Insets imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime());
-
-            // Calcula o padding
-            int paddingLeft = originalPaddingLeft + statusBars.left;
-            int paddingTop = originalPaddingTop + statusBars.top; // <-- Respeita a barra de status
-            int paddingRight = originalPaddingRight + statusBars.right;
-
-            // O padding de baixo só reage ao teclado, ignorando a barra de navegação
-            int paddingBottom = originalPaddingBottom + imeInsets.bottom; // <-- Ignora a barra de navegação
-
-            v.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
-
-            return insets;
-        });
-
-        // --- LÓGICA DA OPÇÃO 2 (APENAS PARA O RODAPÉ) ---
-        WindowInsetsControllerCompat controller = new WindowInsetsControllerCompat(getWindow(), mainView);
-
-        // Esconde APENAS a barra de navegação (embaixo)
-        controller.hide(WindowInsetsCompat.Type.navigationBars());
-
-        // Define o comportamento: a barra reaparece com um gesto de swipe
-        controller.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-    }
-
-
-    // --- Restante do seu código (sem alterações) ---
-
     private void loadUserDataAndSetupUI() {
         FirebaseUser user = auth.getCurrentUser();
         if (user == null) {
+            // Se o usuário for nulo, volta para o login
             Intent intent = new Intent(this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
@@ -161,6 +114,7 @@ public class ToolbarActivity extends AppCompatActivity {
                     setupUIWithRole(userRole, userPhotoUrl);
                 })
                 .addOnFailureListener(e -> {
+                    // Em caso de falha, carrega como aluno
                     setupUIWithRole(ROLE_ALUNO, null);
                 });
     }
@@ -178,6 +132,7 @@ public class ToolbarActivity extends AppCompatActivity {
         setupNavigationListener(bottomNav, userRole);
         setupAvatarClickListener(userRole);
 
+        // Carrega o fragmento inicial se não houver um
         if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) == null) {
             replaceFragment(new HomeFragment());
             bottomNav.setItemSelected(R.id.nav_home, true);
@@ -291,18 +246,27 @@ public class ToolbarActivity extends AppCompatActivity {
     }
 
     private void performLogout() {
+        // 1. Encerrar a sessão do Firebase
         auth.signOut();
+
+        // 2. Limpar APENAS a flag da sessão "Lembrar Senha"
         SharedPreferences.Editor editor = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
         editor.putBoolean(KEY_REMEMBER_ME, false);
         editor.apply();
 
+        // 3. NÃO APAGAR AS CREDENCIAIS DE BIOMETRIA.
+        // 4. Voltar para a tela de login com a flag
         Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra("JUST_LOGGED_OUT", true);
+        intent.putExtra("JUST_LOGGED_OUT", true); // Envia a flag
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
     }
 
+    /**
+     * Este método não é chamado no logout normal,
+     * mas é mantido aqui caso seja necessário em outro fluxo (ex: login google)
+     */
     private void apagarCredenciaisSeguras() {
         try {
             String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
@@ -313,13 +277,52 @@ public class ToolbarActivity extends AppCompatActivity {
                     EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                     EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
             );
+
+            // Apaga as chaves criptografadas
             securePreferences.edit()
                     .remove(KEY_USER_EMAIL)
                     .remove(KEY_USER_PASS)
                     .apply();
             Log.d("SecurePrefs", "Credenciais de biometria apagadas.");
+
         } catch (GeneralSecurityException | IOException e) {
             Log.e("SecurePrefs", "Erro ao apagar credenciais seguras", e);
         }
+    }
+
+    // --- MÉTODO ADICIONADO DA OPÇÃO 1 ---
+    private void ajustarLayout() {
+        // 'getRoot()' é a sua view principal (provavelmente um ConstraintLayout)
+        View mainView = binding.getRoot();
+
+        // Salva o padding original do seu XML (se houver)
+        int originalPaddingLeft = mainView.getPaddingLeft();
+        int originalPaddingTop = mainView.getPaddingTop();
+        int originalPaddingRight = mainView.getPaddingRight();
+        int originalPaddingBottom = mainView.getPaddingBottom();
+
+        ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
+            // Pega os insets da barra de status (topo)
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+
+            // Pega os insets do TECLADO (IME)
+            Insets imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime());
+
+            // Pega os insets da barra de navegação (gestos/botões)
+            Insets navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
+
+            // Calcula o padding
+            int paddingLeft = originalPaddingLeft + systemBars.left;
+            int paddingTop = originalPaddingTop + systemBars.top; // <-- Adiciona padding no topo
+            int paddingRight = originalPaddingRight + systemBars.right;
+
+            // O padding de baixo é o original + o MAIOR valor entre o teclado e a barra de navegação
+            int paddingBottom = originalPaddingBottom + Math.max(imeInsets.bottom, navBars.bottom); // <-- Adiciona padding embaixo
+
+            // Aplica o padding
+            v.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
+
+            return insets;
+        });
     }
 }

@@ -20,8 +20,10 @@
 
     <style name="CustomCalendarViewTheme" parent="Theme.Material3.DayNight">
         <item name="colorPrimary">@color/azul</item>
-        <item name="android:colorControlActivated">@color/azul50</item>
-        <item name="android:colorControlHighlight">@color/azul</item>
+        <item name="android:colorControlActivated">@color/azul</item>
+        <item name="android:colorControlHighlight">@color/azul50</item>
+        <item name="android:textColorPrimary">@color/azul</item>
+        <item name="android:colorControlNormal">@color/azul</item>
     </style>
 
     <style name="Theme.AulaGo.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
