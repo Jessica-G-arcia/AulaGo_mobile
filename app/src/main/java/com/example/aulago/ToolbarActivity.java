@@ -57,17 +57,12 @@ public class ToolbarActivity extends AppCompatActivity {
     private FirebaseAuth auth;
     private FirebaseFirestore db;
 
-    public static final String ROLE_PROFESSOR = "Professor";
-    public static final String ROLE_ALUNO = "Aluno";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Infla o layout usando ViewBinding
         binding = AppBarMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Inicializa Firebase
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
@@ -114,22 +109,17 @@ public class ToolbarActivity extends AppCompatActivity {
                             userRole = ROLE_PROFESSOR;
                         }
                         userPhotoUrl = document.getString("urlFotoPerfil");
-
-
-                        android.util.Log.d("ToolbarActivity", "URL da foto recebida do Firestore: " + userPhotoUrl);
                     }
-                    // Com os dados em mãos, configura toda a interface
+
                     setupUIWithRole(userRole, userPhotoUrl);
                 })
                 .addOnFailureListener(e -> {
-                    // Em caso de falha, carrega a UI com o papel padrão de Aluno
                     setupUIWithRole(ROLE_ALUNO, null);
                 });
     }
 
     /**
-     * Configura toda a UI da Activity (barras de navegação e listeners)
-     * depois que os dados do usuário foram buscados.
+     * Configura toda a UI da Activity depois que os dados do usuário foram buscados.
      */
     private void setupUIWithRole(String userRole, String userPhotoUrl) {
         BottomNavigationView bottomNav = binding.bottomNavigation;
