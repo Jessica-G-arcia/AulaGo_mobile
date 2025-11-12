@@ -125,31 +125,25 @@ public class HomeFragment extends Fragment {
                 });
     }
 
-    // --- Carrossel "Top Users" (CORRIGIDO) ---
     private void setupTopUsersCarousel(String userTypeToFetch) {
-
-        // 1. Corrige o erro de compilação: Usa o NOVO adapter
+        // 1. Inicializa o adapter
         topUserAdapter = new TopUserAdapter(new ArrayList<>());
+        binding.viewpagerAlunos.setAdapter(topUserAdapter); // Use o ID do seu ViewPager2
 
-        // 2. Assumindo que o ID no XML é 'viewpager_alunos'
-        ViewPager2 viewPager = binding.viewpagerAlunos;
-        viewPager.setAdapter(topUserAdapter);
-
-        // 3. Busca na coleção "users"
+        // 2. Busca os dados no Firebase
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("users")
-                .whereEqualTo("userType", userTypeToFetch) // "aluno" ou "professor"
-                .orderBy("ratingMedia", Query.Direction.DESCENDING) // Ordena pela nota
-                .limit(10) // Top 10
+                .whereEqualTo("userType", userTypeToFetch)
+                .orderBy("ratingMedia", Query.Direction.DESCENDING)
+                .limit(10) // Pega até 10 usuários que correspondem ao filtro
                 .get()
                 .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        List<UserModel> users = new ArrayList<>();
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            users.add(document.toObject(UserModel.class));
-                        }
-                        topUserAdapter.updateList(users); // Atualiza o novo adapter
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        // O método toObjects é uma forma limpa de converter a lista
+                        List<UserModel> users = task.getResult().toObjects(UserModel.class);
+                        topUserAdapter.updateList(users);
                     } else {
-                        Log.e("FirebaseError", "Erro ao buscar top users: ", task.getException());
+                        Log.e("FirebaseError", "Erro ao buscar users: ", task.getException());
                     }
                 });
     }

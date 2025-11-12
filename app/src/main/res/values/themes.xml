@@ -1,10 +1,11 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="Base.Theme.AulaGo" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Base.Theme.AulaGo" parent="Theme.Material3.Light.NoActionBar">
         <item name="colorPrimary">@color/laranja</item>
         <item name="android:fontFamily">@font/montserrat</item>
         <item name="android:textSize">12sp</item>
         <item name="fontFamily">@font/montserrat</item>
+
 
     </style>
 
@@ -16,6 +17,9 @@
 
     <style name="Theme.AulaGo" parent="Base.Theme.AulaGo" />
 
+    <style name="BottomNavigationStyle" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="itemRippleColor">@android:color/transparent</item>
+    </style>
 
     <style name="CustomCalendarViewTheme" parent="Theme.Material3.DayNight">
         <item name="colorPrimary">@color/azul</item>

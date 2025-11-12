@@ -18,79 +18,97 @@
             android:textSize="22sp"
             android:textStyle="bold" />
 
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ivFotoPerfil"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_gravity="center"
+            android:scaleType="centerCrop"
+            android:src="@drawable/img_avatar_circle"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Circle" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnEscolherFoto"
+            style="?attr/borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Alterar Foto"
+            android:textColor="@color/laranja" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Estas informações ajudam os professores a entenderem seus objetivos."
-            android:layout_marginTop="8dp"/>
+            android:layout_marginTop="8dp"
+            android:text="Estas informações ajudam os professores a entenderem seus objetivos." />
 
         <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            android:layout_marginTop="16dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etBioAluno"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="top"
                 android:hint="Sua Bio (Ex: Olá, sou analista de dados...)"
                 android:inputType="textMultiLine"
-                android:minLines="5"
-                android:gravity="top"/>
+                android:minLines="5" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            android:layout_marginTop="16dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etNivelAluno"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Seu nível (Ex: Iniciante, Intermediário)"
-                android:inputType="text"/>
+                android:inputType="text" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            android:layout_marginTop="16dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etModalidadePreferida"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Modalidade de preferência (Ex: Online, Presencial)"
-                android:inputType="text"/>
+                android:inputType="text" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            android:layout_marginTop="16dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etObjetivosAluno"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="top"
                 android:hint="Seus objetivos (Ex: Foco em conversação, inglês para viagens...)"
                 android:inputType="textMultiLine"
-                android:minLines="3"
-                android:gravity="top"/>
+                android:minLines="3" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <Button
-            android:id="@+id/btnSalvarPerfilAluno"
+            android:id="@+id/btnSalvarPerfil"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Salvar Perfil"
+            android:layout_marginTop="32dp"
             android:backgroundTint="@color/laranja"
-            android:layout_marginTop="32dp"/>
+            android:text="Salvar Perfil" />
 
         <TextView
             android:layout_width="wrap_content"

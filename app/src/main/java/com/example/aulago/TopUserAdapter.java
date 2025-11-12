@@ -9,13 +9,11 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
-// (Opcional) Importe o Glide ou Picasso se for carregar fotos da internet
 import com.bumptech.glide.Glide;
 
 import java.util.List;
+import java.util.StringJoiner;
 
-// Este adapter aceita um List<UserModel>
 public class TopUserAdapter extends RecyclerView.Adapter<TopUserAdapter.UserViewHolder> {
 
     private List<UserModel> userList;
@@ -29,8 +27,8 @@ public class TopUserAdapter extends RecyclerView.Adapter<TopUserAdapter.UserView
     @Override
     public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         this.context = parent.getContext();
-        // Usa o layout 'item_aluno.xml' que você criou
-        View view = LayoutInflater.from(context).inflate(R.layout.item_aluno, parent, false);
+        // PASSO MAIS IMPORTANTE: Inflando o NOVO layout do card azul
+        View view = LayoutInflater.from(context).inflate(R.layout.item_top_user_card, parent, false);
         return new UserViewHolder(view);
     }
 
@@ -38,43 +36,62 @@ public class TopUserAdapter extends RecyclerView.Adapter<TopUserAdapter.UserView
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
         UserModel user = userList.get(position);
 
-        holder.tvName.setText(user.getNome());
-        holder.rbRating.setRating((float) user.getRatingMedia());
-        holder.tvSpecialty.setText(user.getEspecialidade());
-        holder.tvQuote.setText("\"" + user.getQuote() + "\"");
-        holder.tvQuoteAuthor.setText(user.getQuoteAuthor());
+        // Preenchendo os dados no card
+        holder.tvUserName.setText(user.getNome());
+        holder.rbUserRating.setVisibility(View.VISIBLE);
+        holder.rbUserRating.setRating((float) user.getRatingMedia());
 
-        // Para carregar a foto do Firebase Storage
+        // Carregando a foto com Glide
         if (user.getFotoUrl() != null && !user.getFotoUrl().isEmpty()) {
-            Glide.with(context).load(user.getFotoUrl()).into(holder.ivPhoto);
+            Glide.with(context)
+                    .load(user.getFotoUrl())
+                    .circleCrop()
+                    .placeholder(R.drawable.img_avatar_circle) // Imagem padrão
+                    .into(holder.ivUserPhoto);
+        } else {
+            holder.ivUserPhoto.setImageResource(R.drawable.img_avatar_circle); // Imagem padrão
         }
+
+        // Juntando a lista de idiomas em um texto
+        if (user.getIdiomas() != null && !user.getIdiomas().isEmpty()) {
+            StringJoiner joiner = new StringJoiner(", ");
+            for (String idioma : user.getIdiomas()) {
+                joiner.add(idioma);
+            }
+            holder.tvUserSpecialty.setText("Idiomas: " + joiner.toString());
+        } else {
+            holder.tvUserSpecialty.setText("Idiomas: Não informado");
+        }
+
+        // Mostrando a citação e o autor
+        holder.tvUserQuote.setText(user.getQuote() != null ? "\"" + user.getQuote() + "\"" : "");
+        holder.tvUserQuoteAuthor.setText(user.getQuoteAuthor() != null ? "— " + user.getQuoteAuthor() : "");
     }
 
     @Override
     public int getItemCount() {
-        return userList.size();
+        return userList != null ? userList.size() : 0;
     }
 
-    // Método para o Fragment atualizar a lista
     public void updateList(List<UserModel> newList) {
         this.userList = newList;
         notifyDataSetChanged();
     }
 
-    // ViewHolder com os IDs do 'item_aluno.xml'
+    // ViewHolder com os IDs do novo layout 'item_top_user_card.xml'
     public static class UserViewHolder extends RecyclerView.ViewHolder {
-        ImageView ivPhoto;
-        TextView tvName, tvSpecialty, tvQuote, tvQuoteAuthor;
-        RatingBar rbRating;
+        ImageView ivUserPhoto;
+        TextView tvUserName, tvUserSpecialty, tvUserQuote, tvUserQuoteAuthor;
+        RatingBar rbUserRating;
 
         public UserViewHolder(@NonNull View itemView) {
             super(itemView);
-            ivPhoto = itemView.findViewById(R.id.ivUserPhoto);
-            tvName = itemView.findViewById(R.id.tvUserName);
-            rbRating = itemView.findViewById(R.id.rbUserRating);
-            tvSpecialty = itemView.findViewById(R.id.tvUserSpecialty);
-            tvQuote = itemView.findViewById(R.id.tvUserQuote);
-            tvQuoteAuthor = itemView.findViewById(R.id.tvUserQuoteAuthor);
+            ivUserPhoto = itemView.findViewById(R.id.ivUserPhoto);
+            tvUserName = itemView.findViewById(R.id.tvUserName);
+            rbUserRating = itemView.findViewById(R.id.rbUserRating);
+            tvUserSpecialty = itemView.findViewById(R.id.tvUserSpecialty);
+            tvUserQuote = itemView.findViewById(R.id.tvUserQuote);
+            tvUserQuoteAuthor = itemView.findViewById(R.id.tvUserQuoteAuthor);
         }
     }
 }

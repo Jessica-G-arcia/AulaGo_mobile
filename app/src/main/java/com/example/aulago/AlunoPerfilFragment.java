@@ -93,31 +93,33 @@ public class AlunoPerfilFragment extends Fragment {
      * em vez de tentar iniciar uma Activity (o que causava o crash).
      */
     private void configurarListeners() {
-        // Botão para editar dados
+        // Proteção: se a view do botão não foi encontrada, avisa e não tenta usar.
+        if (btnEditarPerfilAluno == null) {
+            Toast.makeText(requireContext(), "Botão de editar não encontrado no layout (id inválido).", Toast.LENGTH_LONG).show();
+            android.util.Log.e("AlunoPerfilFragment", "btnEditarPerfilAluno == null - verifique R.id.btnEditar no XML fragment_aluno_perfil.xml");
+            return;
+        }
+
         btnEditarPerfilAluno.setOnClickListener(v -> {
-
-            // CORREÇÃO: Pede para a Activity "pai" (ToolbarActivity) trocar o fragmento
-            if (getActivity() instanceof ToolbarActivity) {
-                ((ToolbarActivity) getActivity()).replaceFragment(new EditarPerfilAlunoFragment());
-            }
-        });
-
-        // Listener para o TabLayout (sem mudanças)
-        tabLayoutAluno.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                if (tab.getPosition() == 0) { // "Sobre Mim"
-                    groupBioAluno.setVisibility(View.VISIBLE);
-                    groupAvaliacoesAluno.setVisibility(View.GONE);
-                } else { // "Minhas Avaliações"
-                    groupBioAluno.setVisibility(View.GONE);
-                    groupAvaliacoesAluno.setVisibility(View.VISIBLE);
+            try {
+                // Preferência: usar método da ToolbarActivity se disponível
+                if (getActivity() instanceof ToolbarActivity) {
+                    ((ToolbarActivity) getActivity()).replaceFragment(new EditarPerfilAlunoFragment());
+                    return;
                 }
+
+                // Fallback: faz a transação diretamente no FragmentManager.
+                // Usa android.R.id.content como container padrão (root view da Activity).
+                getParentFragmentManager()
+                        .beginTransaction()
+                        .replace(android.R.id.content, new EditarPerfilAlunoFragment())
+                        .addToBackStack(null)
+                        .commit();
+            } catch (Exception e) {
+                // Se acontecer qualquer erro, loga e mostra um Toast para o usuário
+                android.util.Log.e("AlunoPerfilFragment", "Erro ao abrir EditarPerfilAlunoFragment", e);
+                Toast.makeText(requireContext(), "Não foi possível abrir a tela de edição: " + e.getMessage(), Toast.LENGTH_LONG).show();
             }
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {}
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {}
         });
     }
 

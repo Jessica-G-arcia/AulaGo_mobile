@@ -2,146 +2,136 @@
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/nestedScroll"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
+    android:background="?android:attr/colorBackground"
     tools:context=".HomeFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="10dp">
+        android:paddingTop="16dp"
+        android:paddingBottom="24dp">
 
+        <!-- Título de Boas Vindas -->
         <TextView
+            android:id="@+id/tvWelcome"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginBottom="24dp"
-            android:fontFamily="@font/montserrat"
-            android:text="Seja bem vindo!"
-            android:textColor="@android:color/black"
-            android:textSize="18sp" />
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:fontFamily="@font/montserrat_bold"
+            android:text="Seja bem-vindo!"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="24sp" />
 
+        <!-- ============================================= -->
+        <!-- SEÇÃO DE IDIOMAS (FLAGS) - MANTIDA E AJUSTADA -->
+        <!-- ============================================= -->
         <TextView
+            android:id="@+id/tvLanguagesTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/montserrat"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
             android:text="Idiomas"
-            android:textColor="@android:color/black"
+            android:textColor="?android:attr/textColorPrimary"
             android:textSize="20sp" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="25dp">
+            android:layout_marginTop="8dp">
 
             <ImageButton
                 android:id="@+id/btn_scroll_left"
-                android:layout_width="25dp"
-                android:layout_height="30dp"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="48dp"
+                android:layout_height="0dp"
                 android:src="@drawable/ic_arrow_left"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                app:layout_constraintTop_toTopOf="parent"
+                android:contentDescription="Rolar para esquerda"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"/>
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_languages"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:clipToPadding="false"
-                android:nestedScrollingEnabled="false"
                 android:orientation="horizontal"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/btn_scroll_right"
                 app:layout_constraintStart_toEndOf="@id/btn_scroll_left"
                 app:layout_constraintTop_toTopOf="parent"
+                tools:itemCount="4"
                 tools:listitem="@layout/item_language" />
 
             <ImageButton
                 android:id="@+id/btn_scroll_right"
-                android:layout_width="25dp"
-                android:layout_height="30dp"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="48dp"
+                android:layout_height="0dp"
                 android:src="@drawable/ic_arrow_right"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                app:layout_constraintTop_toTopOf="parent"
+                android:contentDescription="Rolar para direita"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <!-- ============================================= -->
+        <!-- SEÇÃO TOP 10 - NOVO DESIGN                   -->
+        <!-- ============================================= -->
         <TextView
+            android:id="@+id/tvTopUsersTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
             android:layout_marginTop="24dp"
-            android:fontFamily="@font/montserrat"
-            android:text="TOP 10 - Alunos"
-            android:textColor="@android:color/black"
-            android:textSize="20sp" />
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="20sp"
+            tools:text="Top Professores" />
 
-        <!-- ViewPager2 com preview -->
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/viewpager_alunos"
             android:layout_width="match_parent"
-            android:layout_height="235dp"
-            android:layout_marginTop="25dp"
-            android:nestedScrollingEnabled="false"
-            tools:itemCount="3"
-            tools:layout="@layout/item_aluno"
-            tools:orientation="horizontal" />
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:orientation="horizontal"
+            android:paddingHorizontal="30dp"
+            tools:itemCount="1"
+            tools:layout="@layout/item_top_user_card" /> <!-- Use o novo card aqui -->
+
 
         <TextView
+            android:id="@+id/tvTodayClassesTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
             android:layout_marginTop="24dp"
-            android:text="Aulas de hoje"
-            android:textSize="20sp"
-            android:fontFamily="@font/montserrat"
-            android:textColor="@android:color/black"/>
+            android:text="Suas próximas aulas"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="20sp" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_aulas"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="25dp">
-
-            <ImageButton
-                android:id="@+id/btnAulasLeft"
-                android:layout_width="25dp"
-                android:layout_height="30dp"
-                android:src="@drawable/ic_arrow_left"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"/>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycler_aulas"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:clipToPadding="false"
-                android:nestedScrollingEnabled="false"
-                android:orientation="horizontal"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@id/btnAulasLeft"
-                app:layout_constraintEnd_toStartOf="@id/btnAulasRight"
-                tools:listitem="@layout/item_aula"/>
-
-            <ImageButton
-                android:id="@+id/btnAulasRight"
-                android:layout_width="25dp"
-                android:layout_height="30dp"
-                android:src="@drawable/ic_arrow_right"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            android:layout_marginTop="8dp"
+            android:clipToPadding="false"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="8dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:itemCount="3"
+            tools:listitem="@layout/item_aula" />
 
     </LinearLayout>
 
