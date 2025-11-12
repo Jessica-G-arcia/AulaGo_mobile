@@ -2,26 +2,33 @@ package com.example.aulago;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
+// IMPORT ADICIONADO
+import com.bumptech.glide.Glide;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-public class AlunoPerfilActivity extends AppCompatActivity {
+public class AlunoPerfilFragment extends Fragment {
 
     // Views do XML
     private TextView tvNomeAluno, tvStatusSolicitacao;
-    private TextView tvNivelAluno, tvModalidadeAluno, tvObjetivosAluno; // Campos de info
-    private Button btnEditarPerfilAluno; // Botão de editar
-    private ImageView ivAvatarAluno;
+    private TextView tvNivelAluno, tvModalidadeAluno, tvObjetivosAluno;
+    private Button btnEditarPerfilAluno;
+    private ImageView ivAvatarAluno; // <-- Estava no seu XML
     private TabLayout tabLayoutAluno;
     private LinearLayout groupBioAluno, groupAvaliacoesAluno;
     private TextView tvBioAluno;
@@ -32,68 +39,70 @@ public class AlunoPerfilActivity extends AppCompatActivity {
     private FirebaseUser currentUser;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Define o seu XML
-        setContentView(R.layout.activity_aluno_perfil);
-
-        // Inicializar Firebase
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         currentUser = auth.getCurrentUser();
+    }
 
-        // Checagem de segurança
-        if (currentUser == null) {
-            startActivity(new Intent(this, MainActivity.class));
-            finish();
-            return;
-        }
-
-        // Encontrar as Views
-        initViews();
-
-        // Configurar os cliques
-        configurarListeners();
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_aluno_perfil, container, false);
     }
 
     @Override
-    protected void onResume() {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        if (currentUser == null) {
+            startActivity(new Intent(requireActivity(), MainActivity.class));
+            requireActivity().finish();
+            return;
+        }
+
+        initViews(view);
+        configurarListeners(); // <-- Este método foi corrigido
+    }
+
+    @Override
+    public void onResume() {
         super.onResume();
-        // Carrega os dados toda vez que a tela volta ao foco
-        carregarDadosAluno();
+        carregarDadosAluno(); // <-- Este método foi atualizado
     }
 
-    private void initViews() {
-        tvNomeAluno = findViewById(R.id.tvNomeAluno);
-        tvStatusSolicitacao = findViewById(R.id.tvStatusSolicitacao);
-        btnEditarPerfilAluno = findViewById(R.id.btnEditarPerfilAluno);
-        ivAvatarAluno = findViewById(R.id.ivAvatarAluno);
+    private void initViews(View view) {
+        tvNomeAluno = view.findViewById(R.id.tvNomeAluno);
+        tvStatusSolicitacao = view.findViewById(R.id.tvStatusSolicitacao);
+        btnEditarPerfilAluno = view.findViewById(R.id.btnEditar);
+        ivAvatarAluno = view.findViewById(R.id.ivAvatarAluno); // <-- Encontrando o avatar
 
-        tabLayoutAluno = findViewById(R.id.tabLayoutAluno);
-        groupBioAluno = findViewById(R.id.groupBioAluno);
-        groupAvaliacoesAluno = findViewById(R.id.groupAvaliacoesAluno);
-        tvBioAluno = findViewById(R.id.tvBioAluno);
+        tabLayoutAluno = view.findViewById(R.id.tabLayoutAluno);
+        groupBioAluno = view.findViewById(R.id.groupBioAluno);
+        groupAvaliacoesAluno = view.findViewById(R.id.groupAvaliacoesAluno);
+        tvBioAluno = view.findViewById(R.id.tvBioAluno);
 
-        tvNivelAluno = findViewById(R.id.tvNivelAluno);
-        tvModalidadeAluno = findViewById(R.id.tvModalidadeAluno);
-        tvObjetivosAluno = findViewById(R.id.tvObjetivosAluno);
-
-        // O ID "btnSolicitarProfessor" não existe neste XML,
-        // então NÃO tentamos encontrá-lo (isso conserta o crash).
+        tvNivelAluno = view.findViewById(R.id.tvNivelAluno);
+        tvModalidadeAluno = view.findViewById(R.id.tvModalidadeAluno);
+        tvObjetivosAluno = view.findViewById(R.id.tvObjetivosAluno);
     }
 
+    /**
+     * CORRIGIDO: Este método agora pede à ToolbarActivity para trocar o fragmento,
+     * em vez de tentar iniciar uma Activity (o que causava o crash).
+     */
     private void configurarListeners() {
         // Botão para editar dados
         btnEditarPerfilAluno.setOnClickListener(v -> {
-            // Abre a tela de edição de perfil PÚBLICO
-            Intent intent = new Intent(AlunoPerfilActivity.this, EditarPerfilAlunoActivity.class);
-            startActivity(intent);
+
+            // CORREÇÃO: Pede para a Activity "pai" (ToolbarActivity) trocar o fragmento
+            if (getActivity() instanceof ToolbarActivity) {
+                ((ToolbarActivity) getActivity()).replaceFragment(new EditarPerfilAlunoFragment());
+            }
         });
 
-        // O listener para "btnSolicitarProfessor" foi removido
-        // porque o botão não está nesta tela.
-
-        // Listener para o TabLayout (Bio / Avaliações)
+        // Listener para o TabLayout (sem mudanças)
         tabLayoutAluno.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -113,16 +122,31 @@ public class AlunoPerfilActivity extends AppCompatActivity {
     }
 
     /**
-     * Busca os dados do aluno no Firestore e atualiza a UI.
+     * ATUALIZADO: Agora também carrega a foto do avatar.
      */
     private void carregarDadosAluno() {
         String uid = currentUser.getUid();
 
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(documentSnapshot -> {
+                    // Checagem de segurança
+                    if (!isAdded()) return;
+
                     if (documentSnapshot.exists()) {
                         // Preenche o nome
                         tvNomeAluno.setText(documentSnapshot.getString("nome"));
+
+                        // ATUALIZAÇÃO: Carrega a foto do perfil
+                        String fotoUrl = documentSnapshot.getString("urlFotoPerfil");
+                        if (fotoUrl != null && !fotoUrl.isEmpty()) {
+                            Glide.with(requireContext())
+                                    .load(fotoUrl)
+                                    .placeholder(R.drawable.img_avatar_circle)
+                                    .error(R.drawable.img_avatar_circle)
+                                    .into(ivAvatarAluno);
+                        } else {
+                            ivAvatarAluno.setImageResource(R.drawable.img_avatar_circle);
+                        }
 
                         // Carrega a Bio
                         String bio = documentSnapshot.getString("bio");
@@ -159,22 +183,20 @@ public class AlunoPerfilActivity extends AppCompatActivity {
                             tvObjetivosAluno.setVisibility(View.GONE);
                         }
 
-                        // Lógica do status (para o texto "Solicitação Pendente")
+                        // Lógica do status
                         String status = documentSnapshot.getString("statusSolicitacao");
                         controlarStatusSolicitacao(status);
 
                     } else {
-                        Toast.makeText(this, "Erro: Documento do usuário não encontrado.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), "Erro: Documento do usuário não encontrado.", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Erro ao carregar dados: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    if (!isAdded()) return;
+                    Toast.makeText(requireContext(), "Erro ao carregar dados: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
-    /**
-     * Controla o texto do status da solicitação
-     */
     private void controlarStatusSolicitacao(String status) {
         if (status == null) status = "nenhum";
 
@@ -188,13 +210,11 @@ public class AlunoPerfilActivity extends AppCompatActivity {
                 tvStatusSolicitacao.setVisibility(View.VISIBLE);
                 break;
             case "aprovado":
-                // (Não deveria estar aqui, mas é uma segurança)
                 tvStatusSolicitacao.setText("Status: Professor Aprovado");
                 tvStatusSolicitacao.setVisibility(View.VISIBLE);
                 break;
             case "nenhum":
             default:
-                // Se não tem solicitação, esconde o texto
                 tvStatusSolicitacao.setVisibility(View.GONE);
                 break;
         }

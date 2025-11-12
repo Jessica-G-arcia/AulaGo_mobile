@@ -10,10 +10,9 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="200dp">
+            android:layout_height="184dp">
 
             <ImageView
                 android:layout_width="match_parent"
@@ -21,33 +20,6 @@
                 android:layout_gravity="top"
                 android:scaleType="fitXY"
                 android:src="@drawable/capa" />
-
-            <ImageButton
-                android:id="@+id/btnBack"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="20dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Voltar"
-                android:padding="8dp"
-                android:src="@drawable/ic_arrow_back"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:tint="@android:color/white" />
-
-            <Button
-                android:id="@+id/btnEditar"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:layout_gravity="end|top"
-                android:layout_margin="20dp"
-                android:text="Editar perfil"
-                android:textColor="@android:color/white"
-                android:textSize="12sp"
-                android:textStyle="italic"
-                app:backgroundTint="@color/laranja"
-                app:cornerRadius="20dp" />
 
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/ivAvatar"
@@ -61,6 +33,54 @@
                 android:src="@drawable/img_avatar_circle"
                 app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Circle" />
 
+            <LinearLayout
+                android:id="@+id/groupRating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start|bottom"
+                android:gravity="center_vertical|start"
+                android:orientation="horizontal"
+                android:padding="10dp"
+                android:layout_marginStart="16dp">
+
+                <TextView
+                    android:id="@+id/tvProfessorRatingMedia"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/laranja"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    tools:text="4.8" />
+
+                <RatingBar
+                    android:id="@+id/rbProfessorRating"
+                    style="?android:attr/ratingBarStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:isIndicator="true"
+                    android:numStars="5"
+                    android:stepSize="0.1"
+                    android:progressTint="@color/amarelo"
+                    tools:rating="4.8" />
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnEditar"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end|bottom"
+                android:layout_marginEnd="16dp"
+                android:fontFamily="@font/montserrat"
+                android:text="Editar perfil"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="9sp"
+                android:textStyle="bold"
+                app:cornerRadius="20dp"
+                app:icon="@drawable/ic_edit"
+                app:iconTint="?attr/colorPrimary" />
+
         </FrameLayout>
 
         <LinearLayout
@@ -70,7 +90,6 @@
             android:orientation="horizontal"
             android:paddingLeft="16dp"
             android:paddingRight="16dp">
-
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -88,6 +107,7 @@
                         android:id="@+id/inputNome"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/montserrat"
                         android:text="Carregando nome..."
                         android:textSize="18sp"
                         android:textStyle="bold" />
@@ -142,108 +162,103 @@
                         tools:visibility="visible" />
 
                 </LinearLayout>
-                <!--                <TextView-->
-                <!--                    android:id="@+id/tvEntrouEm"-->
-                <!--                    android:layout_width="wrap_content"-->
-                <!--                    android:layout_height="wrap_content"-->
-                <!--                    android:paddingVertical="5dp"-->
-                <!--                    android:text="Entrou em..." />-->
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/inputEspecialidade"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_trophy"
+                android:drawablePadding="12dp"
+                android:fontFamily="@font/montserrat"
+                android:gravity="center_vertical"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:visibility="visible"
+                app:drawableTint="?attr/colorPrimary"
+                tools:text="Especialidade: Carregando" />
+
+            <TextView
+                android:id="@+id/inputModalidade"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:drawableStart="@drawable/ic_location"
+                android:drawablePadding="12dp"
+                android:fontFamily="@font/montserrat"
+                android:gravity="center_vertical"
+                android:textColor="?android:attr/textColorPrimary"
+                android:visibility="visible"
+                app:drawableTint="?attr/colorPrimary"
+                tools:text="Modalidade: Presencial e Online" />
+
+            <LinearLayout
+                android:id="@+id/groupValorPresencial"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                tools:visibility="visible">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableStart="@drawable/ic_presencial"
+                    android:drawablePadding="12dp"
+                    android:fontFamily="@font/montserrat"
+                    android:gravity="center_vertical"
+                    android:text="Presencial: "
+                    app:drawableTint="?attr/colorPrimary" />
+
+                <TextView
+                    android:id="@+id/inputValorPresencial"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/montserrat"
+                    android:textStyle="bold"
+                    tools:text="R$ 150,00" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/groupValorOnline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                tools:visibility="visible">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableStart="@drawable/ic_online"
+                    android:drawablePadding="12dp"
+                    android:fontFamily="@font/montserrat"
+                    android:gravity="center_vertical"
+                    android:text="Online: "
+                    app:drawableTint="?attr/colorPrimary" />
+
+                <TextView
+                    android:id="@+id/inputValorOnline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/montserrat"
+                    android:textStyle="bold"
+                    tools:text="R$ 100,00" />
 
             </LinearLayout>
         </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:id="@+id/inputEspecialidade"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:drawableStart="@drawable/ic_trophy"
-                    android:drawablePadding="12dp"
-                    android:gravity="center_vertical"
-                    android:textColor="?android:attr/textColorPrimary"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:visibility="visible"
-                    app:drawableTint="?attr/colorPrimary"
-                    tools:text="Especialidade: Beach Tennis" />
-
-                <TextView
-                    android:id="@+id/inputModalidade"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:drawableStart="@drawable/ic_location"
-                    android:drawablePadding="12dp"
-                    android:gravity="center_vertical"
-                    android:textColor="?android:attr/textColorPrimary"
-                    android:textSize="16sp"
-                    android:visibility="visible"
-                    app:drawableTint="?attr/colorPrimary"
-                    tools:text="Modalidade: Presencial e Online" />
-
-                <LinearLayout
-                    android:id="@+id/groupValorPresencial"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    tools:visibility="visible">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:drawableStart="@drawable/ic_attach_money"
-                        android:drawablePadding="12dp"
-                        android:gravity="center_vertical"
-                        android:text="Presencial: "
-                        android:textSize="14sp"
-                        app:drawableTint="?attr/colorPrimary" />
-
-                    <TextView
-                        android:id="@+id/inputValorPresencial"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textStyle="bold"
-                        android:textSize="14sp"
-                        tools:text="R$ 150,00" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/groupValorOnline"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    tools:visibility="visible">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:drawableStart="@drawable/ic_laptop"
-                        android:drawablePadding="12dp"
-                        android:gravity="center_vertical"
-                        android:text="Online: "
-                        android:textSize="14sp"
-                        app:drawableTint="?attr/colorPrimary" />
-
-                    <TextView
-                        android:id="@+id/inputValorOnline"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textStyle="bold"
-                        android:textSize="14sp"
-                        tools:text="R$ 100,00" />
-
-                </LinearLayout>
-            </LinearLayout>
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabLayout"
             android:layout_width="match_parent"
@@ -255,7 +270,8 @@
             app:tabIndicatorAnimationMode="elastic"
             app:tabIndicatorColor="@color/amarelo50"
             app:tabRippleColor="@android:color/transparent"
-            app:tabSelectedTextColor="@color/amarelo">
+            app:tabSelectedTextColor="@color/amarelo"
+            app:tabTextAppearance="@style/MyCustomTabStyle">
 
             <com.google.android.material.tabs.TabItem
                 android:layout_width="wrap_content"
@@ -271,15 +287,15 @@
         <LinearLayout
             android:id="@+id/groupBio"
             android:layout_width="match_parent"
-            android:layout_height="237dp"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingVertical="16dp">
+            android:paddingVertical="20dp">
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="35dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginHorizontal="10dp"
+                android:padding="20dp"
                 app:cardCornerRadius="10dp"
                 app:cardElevation="4dp">
 
@@ -287,8 +303,9 @@
                     android:id="@+id/tvBio"
                     style="@style/TextAppearance.AppCompat.Caption"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:background="@drawable/card_background"
+                    android:fontFamily="@font/montserrat"
                     android:padding="16dp"
                     android:text='Pense na bio como a capa de trás de um livro 📖.
         É o resumo que faz o aluno pensar: "Uau, é disso que eu preciso!"'
@@ -316,7 +333,7 @@
                 android:padding="32dp"
                 android:text="Ainda não há avaliações."
                 android:textColor="?attr/colorOnSurfaceVariant"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 android:visibility="gone"
                 tools:visibility="visible" />
 

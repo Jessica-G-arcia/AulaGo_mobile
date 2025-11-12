@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    tools:context=".AlunoPerfilActivity">
+    tools:context=".AlunoPerfilFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -23,30 +23,6 @@
                 android:scaleType="fitXY"
                 android:src="@drawable/capa" />
 
-            <ImageButton
-                android:id="@+id/btnBack"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="20dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Voltar"
-                android:padding="8dp"
-                android:src="@drawable/ic_arrow_back"
-                app:tint="@android:color/white" />
-
-            <Button
-                android:id="@+id/btnEditarPerfilAluno"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:layout_gravity="end|top"
-                android:layout_margin="20dp"
-                android:text="Editar Perfil"
-                android:textColor="@android:color/white"
-                android:textSize="12sp"
-                android:textStyle="italic"
-                app:backgroundTint="@color/laranja"
-                app:cornerRadius="20dp" />
 
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/ivAvatarAluno"
@@ -60,6 +36,53 @@
                 android:src="@drawable/img_avatar_circle"
                 app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Circle" />
 
+            <LinearLayout
+                android:id="@+id/groupRating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start|bottom"
+                android:layout_marginStart="16dp"
+                android:gravity="center_vertical|start"
+                android:orientation="horizontal"
+                android:padding="10dp">
+
+                <TextView
+                    android:id="@+id/tvAlunoRatingMedia"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/laranja"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    tools:text="4.8" />
+
+                <RatingBar
+                    android:id="@+id/rbAlunoRating"
+                    style="?android:attr/ratingBarStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:isIndicator="true"
+                    android:numStars="5"
+                    android:stepSize="0.1"
+                    android:progressTint="@color/amarelo"
+                    tools:rating="4.8" />
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnEditar"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end|bottom"
+                android:layout_marginEnd="16dp"
+                android:fontFamily="@font/montserrat"
+                android:text="Editar perfil"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="9sp"
+                android:textStyle="bold"
+                app:cornerRadius="20dp"
+                app:icon="@drawable/ic_edit"
+                app:iconTint="?attr/colorPrimary" />
         </FrameLayout>
 
         <LinearLayout
@@ -92,56 +115,54 @@
         </LinearLayout>
 
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/tvNivelAluno"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:drawableStart="@drawable/ic_star"
+                android:drawablePadding="12dp"
+                android:gravity="center_vertical"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="16sp"
+                android:visibility="visible"
+                app:drawableTint="?attr/colorPrimary"
+                tools:text="Nível: Intermediário" />
 
-                <TextView
-                    android:id="@+id/tvNivelAluno"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:drawableStart="@drawable/ic_star"
-                    android:drawablePadding="12dp"
-                    android:gravity="center_vertical"
-                    android:textColor="?android:attr/textColorPrimary"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:visibility="visible"
-                    app:drawableTint="?attr/colorPrimary"
-                    tools:text="Nível: Intermediário" />
+            <TextView
+                android:id="@+id/tvModalidadeAluno"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:drawableStart="@drawable/ic_location"
+                android:drawablePadding="12dp"
+                android:gravity="center_vertical"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="16sp"
+                android:visibility="visible"
+                app:drawableTint="@color/laranja"
+                tools:text="Modalidade: Presencial" />
 
-                <TextView
-                    android:id="@+id/tvModalidadeAluno"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:drawableStart="@drawable/ic_location"
-                    android:drawablePadding="12dp"
-                    android:gravity="center_vertical"
-                    android:textColor="?android:attr/textColorPrimary"
-                    android:textSize="16sp"
-                    android:visibility="visible"
-                    app:drawableTint="@color/laranja"
-                    tools:text="Modalidade: Presencial" />
+            <TextView
+                android:id="@+id/tvObjetivosAluno"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:drawableStart="@drawable/ic_flag"
+                android:drawablePadding="12dp"
+                android:gravity="center_vertical"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="16sp"
+                android:visibility="visible"
+                app:drawableTint="@color/laranja"
+                tools:text="Objetivos: Conversação" />
 
-                <TextView
-                    android:id="@+id/tvObjetivosAluno"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:drawableStart="@drawable/ic_flag"
-                    android:drawablePadding="12dp"
-                    android:gravity="center_vertical"
-                    android:textColor="?android:attr/textColorPrimary"
-                    android:textSize="16sp"
-                    android:visibility="visible"
-                    app:drawableTint="@color/laranja"
-                    tools:text="Objetivos: Conversação" />
-
-            </LinearLayout>
+        </LinearLayout>
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabLayoutAluno"
@@ -188,8 +209,7 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/card_background"
                     android:padding="16dp"
-                    android:text='Pense na bio como a capa de trás de um livro 📖.
-        É o resumo que faz o aluno pensar: "Uau, é disso que eu preciso!"'
+                    android:text='Pense na bio como a capa de trás de um livro 📖.'
                     android:textSize="14dp"
                     android:textStyle="italic" />
 

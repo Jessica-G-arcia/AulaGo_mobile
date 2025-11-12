@@ -1,10 +1,10 @@
 package com.example.aulago;
 
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -13,7 +13,9 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment; // <-- MUDOU
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
@@ -24,20 +26,17 @@ import com.google.firebase.storage.StorageReference;
 import java.util.HashMap;
 import java.util.Map;
 
-public class EditarPerfilProfessorActivity extends AppCompatActivity {
+public class EditarPerfilProfessorFragment extends Fragment { // <-- MUDOU
 
     private FirebaseFirestore db;
     private FirebaseAuth auth;
     private FirebaseStorage storage;
     private String uid;
 
-    // Views de Texto
+    // Views
     private EditText etEspecialidade, etModalidade, etValorPresencial, etValorOnline, etBio;
-
-    // Views de Foto
     private ImageView ivFotoPerfil;
     private Button btnEscolherFoto;
-
     private Button btnSalvarPerfil;
     private ProgressBar progressBar;
 
@@ -46,10 +45,10 @@ public class EditarPerfilProfessorActivity extends AppCompatActivity {
     private Uri imageUri;
     private String currentFotoUrl;
 
+    // 'onCreate' do Fragmento: para inicializar dados não-visuais
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_editar_perfil_professor);
 
         // Inicialize o Firebase
         db = FirebaseFirestore.getInstance();
@@ -57,18 +56,7 @@ public class EditarPerfilProfessorActivity extends AppCompatActivity {
         storage = FirebaseStorage.getInstance();
         uid = auth.getCurrentUser().getUid();
 
-        // Encontre os Views do seu XML
-        etEspecialidade = findViewById(R.id.etEspecialidade);
-        etModalidade = findViewById(R.id.etModalidade);
-        etValorPresencial = findViewById(R.id.etValorPresencial);
-        etValorOnline = findViewById(R.id.etValorOnline);
-        etBio = findViewById(R.id.etBio);
-        btnSalvarPerfil = findViewById(R.id.btnSalvarPerfil);
-        progressBar = findViewById(R.id.progressBar);
-
-        ivFotoPerfil = findViewById(R.id.ivFotoPerfil);
-        btnEscolherFoto = findViewById(R.id.btnEscolherFoto);
-
+        // MUDOU: O 'registerForActivityResult' deve ser chamado no 'onCreate' do Fragmento
         mGetContent = registerForActivityResult(
                 new ActivityResultContracts.GetContent(),
                 uri -> {
@@ -78,6 +66,23 @@ public class EditarPerfilProfessorActivity extends AppCompatActivity {
                     }
                 }
         );
+    }
+
+    // 'onCreateView': para carregar o XML
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        // Carrega o seu ficheiro XML renomeado
+        return inflater.inflate(R.layout.fragment_editar_perfil_professor, container, false);
+    }
+
+    // 'onViewCreated': Onde toda a lógica do 'onCreate' da Activity vai
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // Encontre os Views (agora precisa de 'view.')
+        initViews(view);
 
         // Configure o clique do botão
         btnSalvarPerfil.setOnClickListener(v -> salvarPerfil());
@@ -90,6 +95,19 @@ public class EditarPerfilProfessorActivity extends AppCompatActivity {
         carregarDadosAtuais();
     }
 
+    // MUDOU: Este método agora precisa de 'view'
+    private void initViews(View view) {
+        etEspecialidade = view.findViewById(R.id.etEspecialidade);
+        etModalidade = view.findViewById(R.id.etModalidade);
+        etValorPresencial = view.findViewById(R.id.etValorPresencial);
+        etValorOnline = view.findViewById(R.id.etValorOnline);
+        etBio = view.findViewById(R.id.etBio);
+        btnSalvarPerfil = view.findViewById(R.id.btnSalvarPerfil);
+        progressBar = view.findViewById(R.id.progressBar);
+        ivFotoPerfil = view.findViewById(R.id.ivFotoPerfil);
+        btnEscolherFoto = view.findViewById(R.id.btnEscolherFoto);
+    }
+
     private void carregarDadosAtuais() {
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(document -> {
@@ -98,7 +116,6 @@ public class EditarPerfilProfessorActivity extends AppCompatActivity {
                         etBio.setText(document.getString("bio"));
                         etEspecialidade.setText(document.getString("especialidade"));
 
-                        // CORREÇÃO: Lendo do campo "preferenciaAula"
                         etModalidade.setText(document.getString("preferenciaAula"));
 
                         if (document.getDouble("valorPresencial") != null) {
@@ -110,7 +127,8 @@ public class EditarPerfilProfessorActivity extends AppCompatActivity {
 
                         currentFotoUrl = document.getString("urlFotoPerfil");
                         if (currentFotoUrl != null && !currentFotoUrl.isEmpty()) {
-                            Glide.with(this)
+                            // MUDOU: 'this' para 'requireContext()'
+                            Glide.with(requireContext())
                                     .load(currentFotoUrl)
                                     .placeholder(R.drawable.img_avatar_circle)
                                     .into(ivFotoPerfil);
@@ -118,7 +136,8 @@ public class EditarPerfilProfessorActivity extends AppCompatActivity {
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Erro ao carregar dados", Toast.LENGTH_SHORT).show();
+                    // MUDOU: 'this' para 'requireContext()'
+                    Toast.makeText(requireContext(), "Erro ao carregar dados", Toast.LENGTH_SHORT).show();
                 });
     }
 
@@ -127,7 +146,6 @@ public class EditarPerfilProfessorActivity extends AppCompatActivity {
      */
     private void salvarPerfil() {
         setLoading(true);
-
         if (imageUri != null) {
             fazerUploadDaImagem();
         } else {
@@ -149,7 +167,8 @@ public class EditarPerfilProfessorActivity extends AppCompatActivity {
                     });
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Erro no upload da foto: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    // MUDOU: 'this' para 'requireContext()'
+                    Toast.makeText(requireContext(), "Erro no upload da foto: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     setLoading(false);
                 });
     }
@@ -170,7 +189,8 @@ public class EditarPerfilProfessorActivity extends AppCompatActivity {
             if (!strValorP.isEmpty()) valorP = Double.parseDouble(strValorP);
             if (!strValorO.isEmpty()) valorO = Double.parseDouble(strValorO);
         } catch (NumberFormatException e) {
-            Toast.makeText(this, "Por favor, insira valores válidos (ex: 100.50)", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Por favor, insira valores válidos (ex: 100.50)", Toast.LENGTH_SHORT).show();
+
             setLoading(false);
             return;
         }
@@ -193,12 +213,19 @@ public class EditarPerfilProfessorActivity extends AppCompatActivity {
                 .update(professorData)
                 .addOnSuccessListener(aVoid -> {
                     setLoading(false);
-                    Toast.makeText(EditarPerfilProfessorActivity.this, "Perfil atualizado com sucesso!", Toast.LENGTH_SHORT).show();
-                    finish();
+                    // MUDOU: 'this' para 'requireContext()'
+                    Toast.makeText(requireContext(), "Perfil atualizado com sucesso!", Toast.LENGTH_SHORT).show();
+
+                    // MUDOU: 'finish()' para 'popBackStack()'
+                    // Isto "aperta o botão voltar" e regressa ao ProfessorPerfilFragment
+                    if (isAdded()) { // Garante que o fragmento ainda está "vivo"
+                        getParentFragmentManager().popBackStack();
+                    }
                 })
                 .addOnFailureListener(e -> {
                     setLoading(false);
-                    Toast.makeText(EditarPerfilProfessorActivity.this, "Erro ao atualizar: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    // MUDOU: 'this' para 'requireContext()'
+                    Toast.makeText(requireContext(), "Erro ao atualizar: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 

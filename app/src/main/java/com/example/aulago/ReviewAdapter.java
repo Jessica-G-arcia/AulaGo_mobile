@@ -10,9 +10,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-//import com.bumptech.glide.Glide; // Import do Glide
+// --- Imports Limpos ---
+import com.bumptech.glide.Glide; // Import do Glide
 import com.google.android.material.imageview.ShapeableImageView;
-
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
@@ -37,6 +37,7 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewView
     @NonNull
     @Override
     public ReviewViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        // Você precisará criar este layout 'review_card.xml'
         View view = LayoutInflater.from(context).inflate(R.layout.review_card, parent, false);
         return new ReviewViewHolder(view);
     }
@@ -75,13 +76,13 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewView
 
         // 4. Define o nome
         holder.tvReviewerName.setText(nomeParaExibir);
-//
-//        // 5. Carrega a imagem (com Glide)
-//        Glide.with(context)
-//                .load(avatarParaExibir)
-//                .placeholder(R.drawable.img_avatar_circle) // Imagem padrão
-//                .error(R.drawable.img_avatar_circle)       // Imagem de erro
-//                .into(holder.ivReviewerAvatar);
+
+        // 5. Carrega a imagem (com Glide)
+        Glide.with(context)
+                .load(avatarParaExibir)
+                .placeholder(R.drawable.img_avatar_circle) // Imagem padrão
+                .error(R.drawable.img_avatar_circle)       // Imagem de erro
+                .into(holder.ivReviewerAvatar);
     }
 
     @Override

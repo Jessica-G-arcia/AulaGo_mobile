@@ -10,6 +10,7 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.splashscreen.SplashScreen;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -44,15 +45,17 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        SplashScreen.installSplashScreen(this);
+
         super.onCreate(savedInstanceState);
-        // Supondo que você tem R.layout.activity_main
         setContentView(R.layout.activity_main);
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
         inicializarViews();
-        verificarSessaoSalva(); // Verifica se há sessão ativa ao iniciar
+        verificarSessaoSalva();
         configurarGoogleSignIn();
         configurarListeners();
     }
@@ -66,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
 
         switchLembrarSenha = findViewById(R.id.switchLembrarSenha);
 
-        // Recupera o estado anterior do Switch
         SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         boolean rememberMe = preferences.getBoolean(KEY_REMEMBER_ME, false);
         switchLembrarSenha.setChecked(rememberMe);
@@ -79,9 +81,11 @@ public class MainActivity extends AppCompatActivity {
         if (rememberMe) {
             FirebaseUser user = auth.getCurrentUser();
             if (user != null) {
-                // Sessão ativa e marcada para ser lembrada: redireciona imediatamente
-                Toast.makeText(this, "Bem-vindo de volta, " + user.getEmail(), Toast.LENGTH_SHORT).show();
-                redirecionarParaTelaPrincipal();
+                // Sessão ativa: redireciona imediatamente para o app
+                Toast.makeText(this, "Bem-vindo de volta!", Toast.LENGTH_SHORT).show();
+
+                // MUDANÇA AQUI: Abre a ToolbarActivity
+                abrirTela(ToolbarActivity.class);
             }
         }
     }
@@ -94,7 +98,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void configurarGoogleSignIn() {
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                // O default_web_client_id DEVE estar no seu strings.xml
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
@@ -107,24 +110,22 @@ public class MainActivity extends AppCompatActivity {
         auth.signInWithEmailAndPassword(email, senha)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
+                        // SUCESSO NO LOGIN
                         salvarEstadoDoSwitch();
-                        FirebaseUser user = auth.getCurrentUser();
-                        if (user != null) {
-                            verificarTipoDeUsuario(user.getUid());
-                        } else {
-                            Toast.makeText(this, "Erro ao obter usuário", Toast.LENGTH_SHORT).show();
-                        }
+
+                        // MUDANÇA AQUI: Não precisamos verificar o tipo de usuário,
+                        // apenas abrir a tela principal.
+                        Log.d("Login", "Login com e-mail bem-sucedido. Abrindo app.");
+                        abrirTela(ToolbarActivity.class);
+
                     } else {
+                        // FALHA NO LOGIN
                         String mensagemErro = "Erro ao fazer login. Verifique as credenciais.";
                         try {
-                            // Lança a exceção para ser capturada
                             throw task.getException();
                         } catch (FirebaseAuthInvalidUserException e) {
-                            // **ESTA É A EXCEÇÃO CORRETA:** Usuário não encontrado no Firebase Auth.
                             mensagemErro = "O e-mail digitado não está cadastrado no sistema.";
                         } catch (FirebaseAuthInvalidCredentialsException e) {
-                            // Usuário existe, mas credenciais inválidas (geralmente, senha incorreta).
-                            // Ocasionalmente, o Firebase emite essa exceção para *usuário não existente* também.
                             mensagemErro = "A senha está incorreta ou o usuário não está cadastrado.";
                         } catch (Exception e) {
                             mensagemErro = "Erro desconhecido: " + e.getLocalizedMessage();
@@ -168,14 +169,6 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void redirecionarParaTelaPrincipal() {
-        // Redirecione para a tela principal real do seu app (ex: HomeActivity.class)
-        // Intent intent = new Intent(MainActivity.this, HomeActivity.class);
-        // startActivity(intent);
-        // finish();
-        Toast.makeText(this, "Redirecionando para a tela principal...", Toast.LENGTH_SHORT).show();
-    }
-
     private void loginComGoogle() {
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
         startActivityForResult(signInIntent, RC_SIGN_IN);
@@ -205,14 +198,9 @@ public class MainActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         salvarEstadoDoSwitch();
-                        // Sucesso no Firebase Auth
                         FirebaseUser user = auth.getCurrentUser();
-
-                        // CHAMA O NOVO FLUXO DE REDIRECIONAMENTO
                         tratarLoginGoogle(user, acct);
-
                     } else {
-                        // Falha no Firebase Auth
                         Toast.makeText(this, "Erro ao autenticar com Google no Firebase.", Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -252,13 +240,13 @@ public class MainActivity extends AppCompatActivity {
                             salvarUsuarioFirestoreSeNovo(user, acct);
 
                             Toast.makeText(this, "Login com Google realizado com sucesso!", Toast.LENGTH_SHORT).show();
-                            redirecionarParaTelaPrincipal();
+                            abrirTela(ToolbarActivity.class);
                         }
                     } else {
                         Log.e("Firestore", "Erro ao verificar existência do usuário: " + task.getException());
                         // Em caso de erro, por segurança, trata como login normal (pode dar erro na próxima tela)
                         Toast.makeText(this, "Erro ao verificar dados. Tentando login normal...", Toast.LENGTH_SHORT).show();
-                        redirecionarParaTelaPrincipal();
+                        abrirTela(ToolbarActivity.class);
                     }
                 });
     }
@@ -299,39 +287,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void abrirTela(Class<?> telaDestino) {
         Intent intent = new Intent(this, telaDestino);
-        // Limpa todas as telas anteriores (Login, Cadastro)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
-        finish(); // Fecha a LoginActivity
+        finish();
     }
 
-    /**
-     * Busca o documento do usuário no Firestore para decidir para qual tela ir.
-     */
-    private void verificarTipoDeUsuario(String uid) {
-        db.collection("users").document(uid)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-
-                    if (documentSnapshot.exists()) {
-                        String userType = documentSnapshot.getString("userType");
-
-                        // --- ESTA É A LÓGICA DE ROTEAMENTO ---
-                        if ("professor".equals(userType)) {
-                            // É um professor! Vá para o Perfil de Professor.
-                            Log.d("Login", "Tipo de usuário: Professor.");
-                            abrirTela(ProfessorPerfilActivity.class);
-
-                        } else {
-                            // É um aluno (ou o campo é nulo, ou "aluno")
-                            Log.d("Login", "Tipo de usuário: Aluno.");
-                            abrirTela(AlunoPerfilActivity.class);
-                        }
-                    } else {
-                        // Documento não existe (raro, mas pode acontecer)
-                        Log.w("Login", "Documento do usuário não encontrado!");
-                        abrirTela(AlunoPerfilActivity.class); // Padrão: Aluno
-                    }
-                });
-    }
 }

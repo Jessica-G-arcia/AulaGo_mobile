@@ -21,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog; // <-- IMPORTAÇÃO ADICIONADA
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -216,7 +217,7 @@ public class CadastroActivity2 extends AppCompatActivity {
     private void salvarDadosGoogleNoFirestore() {
         FirebaseUser user = auth.getCurrentUser();
         if (user == null) {
-            // ... (seu código de erro)
+            Snackbar.make(mainLayout, "Erro: Usuário Google não autenticado.", Snackbar.LENGTH_LONG).show();
             return;
         }
 
@@ -243,7 +244,7 @@ public class CadastroActivity2 extends AppCompatActivity {
                 });
     }
 
-    // --- NOVO MÉTODO AUXILIAR ---
+    // --- MÉTODO AUXILIAR ATUALIZADO ---
 
     /**
      * Pega o objeto 'dadosUsuario' e o salva no Firestore
@@ -282,11 +283,23 @@ public class CadastroActivity2 extends AppCompatActivity {
         db.collection("users").document(uid)
                 .set(userData)
                 .addOnSuccessListener(aVoid -> {
-                    Snackbar.make(mainLayout, "Cadastro realizado com sucesso!", Snackbar.LENGTH_LONG).show();
-                    Intent intent = new Intent(this, MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                    finish();
+
+                    // --- CORREÇÃO APLICADA AQUI ---
+                    // Exibe um pop-up de sucesso antes de navegar
+                    new AlertDialog.Builder(this)
+                            .setTitle("Sucesso!")
+                            .setMessage("Cadastro realizado com sucesso!")
+                            .setPositiveButton("OK", (dialog, which) -> {
+                                // A navegação agora acontece DENTRO do clique do botão
+                                Intent intent = new Intent(this, MainActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                startActivity(intent);
+                                finish();
+                            })
+                            .setCancelable(false) // Impede o usuário de fechar
+                            .show();
+                    // --- FIM DA CORREÇÃO ---
+
                 })
                 .addOnFailureListener(e -> {
                     FirebaseUser user = auth.getCurrentUser();

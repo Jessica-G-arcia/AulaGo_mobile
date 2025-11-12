@@ -2,38 +2,31 @@ package com.example.aulago;
 
 import java.util.Date;
 
-// 1. REMOVEMOS os imports desnecessários.
-// 2. ADICIONAMOS todos os novos campos da nossa tabela.
-// 3. ADICIONAMOS um construtor vazio (obrigatório para o Firestore).
-// 4. ADICIONAMOS Getters e Setters para todos os campos.
-
+// Esta classe substitui a antiga classe "Aula"
 public class ClassModel {
 
     // Atores
     private String alunoId;
     private String professorId;
-    private String alunoNome;     // Substitui o antigo campo 'aluno'
-    private String professorNome; // Novo
+    private String alunoNome;
+    private String professorNome;
 
     // Detalhes da Aula
     private String idioma;
     private String local;
-    // Adicione outros que desejar (nivel, modalidade, etc.)
 
     // Agendamento
-    private Date data;             // Mantemos como Date
-    private String horarioInicio;  // Substitui 'horario'
-    private String horarioFim;     // Substitui 'horario'
+    private Date data;
+    private String horarioInicio;
+    private String horarioFim;
 
-    // Status
-    private String status;         // Substitui 'concluida' (boolean)
+    // Status e Avaliação
+    private String status;         // Substitui 'concluida' (Ex: "Pendente", "Concluída")
+    private float avaliacao;     // Campo trazido da classe "Aula"
 
     // Construtor vazio - ESSENCIAL para o Firestore
     public ClassModel() {
     }
-
-    // (Opcional) Você pode manter um construtor completo para testes,
-    // mas não é mais usado pelo CalendarActivity.
 
     // --- Getters e Setters para TODOS os campos ---
 
@@ -115,5 +108,14 @@ public class ClassModel {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    // Getter e Setter para o novo campo
+    public float getAvaliacao() {
+        return avaliacao;
+    }
+
+    public void setAvaliacao(float avaliacao) {
+        this.avaliacao = avaliacao;
     }
 }

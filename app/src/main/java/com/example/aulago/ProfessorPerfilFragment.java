@@ -3,21 +3,22 @@ package com.example.aulago;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment; // <-- MUDOU
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-// --- ADICIONADO: Import do Glide para carregar imagens ---
 import com.bumptech.glide.Glide;
-
 import com.google.android.material.chip.Chip;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
@@ -29,121 +30,127 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class ProfessorPerfilActivity extends AppCompatActivity {
+public class ProfessorPerfilFragment extends Fragment {
 
     // Views da UI
     private TextView inputNome, inputEspecialidade, inputModalidade, inputValorPresencial, inputValorOnline, tvBio;
     private ImageView ivAvatar;
     private Button btnEditar;
-    private Chip statusProfessor; // Selo "Verificado"
+    private Chip statusProfessor, chipPlanoPro, chipPlanoPremium;
     private TabLayout tabLayout;
     private LinearLayout groupBio, groupAvaliacoes;
     private LinearLayout groupValorPresencial, groupValorOnline;
-
-    // --- NOVO: Chips para os Planos ---
-    private Chip chipPlanoPro;
-    private Chip chipPlanoPremium;
 
     // Firebase
     private FirebaseAuth auth;
     private FirebaseFirestore db;
     private FirebaseUser currentUser;
 
-    // --- Variáveis para a Lista de Avaliações ---
+    // Lista de Avaliações
     private RecyclerView rvAvaliacoes;
     private ReviewAdapter reviewAdapter;
     private List<ReviewModel> listaDeAvaliacoes;
-    private TextView tvEmptyReviews; // TextView para "Nenhuma avaliação"
+    private TextView tvEmptyReviews;
 
+    // O 'onCreate' de um Fragmento é para dados, não para Views
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_professor_perfil);
 
         // Inicializar Firebase
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         currentUser = auth.getCurrentUser();
+    }
+
+    // O 'onCreateView' é para carregar o XML
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        // Carrega o seu ficheiro XML renomeado
+        return inflater.inflate(R.layout.fragment_professor_perfil, container, false);
+    }
+
+    // O 'onViewCreated' é para configurar as Views (o seu 'onCreate' antigo)
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         if (currentUser == null) {
-            startActivity(new Intent(this, MainActivity.class));
-            finish();
+            // MUDOU: Usa requireActivity() para o contexto
+            startActivity(new Intent(requireActivity(), MainActivity.class));
+            requireActivity().finish();
             return;
         }
 
-        // Encontrar todas as Views do seu XML
-        initViews();
+        // Encontrar todas as Views (agora precisa do 'view.')
+        initViews(view);
 
         // Configurar os cliques
         configurarListeners();
 
         // Configurar o RecyclerView de avaliações
         setupReviewRecyclerView();
-
-        ImageButton backButton = findViewById(R.id.btnBack);
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed(); // Simula o botão "voltar" do sistema
-            }
-        });
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         // Carrega (ou recarrega) os dados do perfil e as avaliações
         carregarDadosProfessor();
         carregarAvaliacoes();
     }
 
-    private void initViews() {
+    // MUDOU: Este método agora precisa da 'view'
+    private void initViews(View view) {
         // Banner
-        btnEditar = findViewById(R.id.btnEditar);
-        ivAvatar = findViewById(R.id.ivAvatar);
+        btnEditar = view.findViewById(R.id.btnEditar);
+        ivAvatar = view.findViewById(R.id.ivAvatar);
 
         // Info Principal
-        inputNome = findViewById(R.id.inputNome);
-        statusProfessor = findViewById(R.id.statusProfessor); // Selo "Verificado"
-
-        // --- NOVO: Inicializa os chips dos Planos ---
-        chipPlanoPro = findViewById(R.id.chipPlanoPro);
-        chipPlanoPremium = findViewById(R.id.chipPlanoPremium);
+        inputNome = view.findViewById(R.id.inputNome);
+        statusProfessor = view.findViewById(R.id.statusProfessor);
+        chipPlanoPro = view.findViewById(R.id.chipPlanoPro);
+        chipPlanoPremium = view.findViewById(R.id.chipPlanoPremium);
 
         // Bloco de Detalhes
-        inputEspecialidade = findViewById(R.id.inputEspecialidade);
-        inputModalidade = findViewById(R.id.inputModalidade);
-        inputValorPresencial = findViewById(R.id.inputValorPresencial);
-        inputValorOnline = findViewById(R.id.inputValorOnline);
-        groupValorPresencial = findViewById(R.id.groupValorPresencial);
-        groupValorOnline = findViewById(R.id.groupValorOnline);
+        inputEspecialidade = view.findViewById(R.id.inputEspecialidade);
+        inputModalidade = view.findViewById(R.id.inputModalidade);
+        inputValorPresencial = view.findViewById(R.id.inputValorPresencial);
+        inputValorOnline = view.findViewById(R.id.inputValorOnline);
+        groupValorPresencial = view.findViewById(R.id.groupValorPresencial);
+        groupValorOnline = view.findViewById(R.id.groupValorOnline);
 
         // TabLayout
-        tabLayout = findViewById(R.id.tabLayout);
-        groupBio = findViewById(R.id.groupBio);
-        groupAvaliacoes = findViewById(R.id.groupAvaliacoes);
-        tvBio = findViewById(R.id.tvBio);
+        tabLayout = view.findViewById(R.id.tabLayout);
+        groupBio = view.findViewById(R.id.groupBio);
+        groupAvaliacoes = view.findViewById(R.id.groupAvaliacoes);
+        tvBio = view.findViewById(R.id.tvBio);
 
         // Views da aba Avaliações
-        rvAvaliacoes = findViewById(R.id.rvAvaliacoes);
-        tvEmptyReviews = findViewById(R.id.tvEmptyReviews);
+        rvAvaliacoes = view.findViewById(R.id.rvAvaliacoes);
+        tvEmptyReviews = view.findViewById(R.id.tvEmptyReviews);
     }
 
     private void configurarListeners() {
-        // Botão para abrir a tela de Edição
+
+        // Botão para abrir a tela de Edição de Perfil PÚBLICO
         btnEditar.setOnClickListener(v -> {
-            Intent intent = new Intent(ProfessorPerfilActivity.this, EditarPerfilProfessorActivity.class);
-            startActivity(intent);
+
+            // Pede para a Activity "pai" (ToolbarActivity) fazer a troca.
+            if (getActivity() instanceof ToolbarActivity) {
+                ((ToolbarActivity) getActivity()).replaceFragment(new EditarPerfilProfessorFragment());
+            }
         });
 
-        // Listener para o TabLayout (Bio / Avaliações)
+        // Listener para o TabLayout
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                if (tab.getPosition() == 0) { // Posição 0 = "Bio"
+                if (tab.getPosition() == 0) {
                     groupBio.setVisibility(View.VISIBLE);
                     groupAvaliacoes.setVisibility(View.GONE);
-                } else { // Posição 1 = "Avaliações"
+                } else {
                     groupBio.setVisibility(View.GONE);
                     groupAvaliacoes.setVisibility(View.VISIBLE);
                 }
@@ -159,12 +166,8 @@ public class ProfessorPerfilActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Busca os dados do professor no Firestore e atualiza a UI
-     */
     private void carregarDadosProfessor() {
         String uid = currentUser.getUid();
-
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(document -> {
                     if (document.exists()) {
@@ -252,36 +255,36 @@ public class ProfessorPerfilActivity extends AppCompatActivity {
                             groupValorOnline.setVisibility(View.GONE);
                         }
 
-                        // --- CÓDIGO DA FOTO DESCOMENTADO ---
-                        //Carregar foto do avatar (usei o campo "urlFotoPerfil" da sua imagem)
+                        // Carregar foto do avatar
                         String fotoUrl = document.getString("urlFotoPerfil");
                         if (fotoUrl != null && !fotoUrl.isEmpty()) {
-                            Glide.with(this)
+                            // MUDOU: 'this' para 'requireContext()'
+                            Glide.with(requireContext())
                                     .load(fotoUrl)
-                                    .placeholder(R.drawable.img_avatar_circle) // Imagem padrão
-                                    .error(R.drawable.img_avatar_circle)       // Imagem de erro
+                                    .placeholder(R.drawable.img_avatar_circle)
+                                    .error(R.drawable.img_avatar_circle)
                                     .into(ivAvatar);
                         }
 
                     } else {
-                        Toast.makeText(this, "Erro: Documento do usuário não encontrado.", Toast.LENGTH_SHORT).show();
+                        // MUDOU: 'this' para 'requireContext()'
+                        Toast.makeText(requireContext(), "Erro: Documento do usuário não encontrado.", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Erro ao carregar dados: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-
+                    // MUDOU: 'this' para 'requireContext()'
+                    Toast.makeText(requireContext(), "Erro ao carregar dados: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
-    // --- Método para configurar a lista de reviews ---
     private void setupReviewRecyclerView() {
         listaDeAvaliacoes = new ArrayList<>();
-        reviewAdapter = new ReviewAdapter(this, listaDeAvaliacoes, ReviewAdapter.MODO_EXIBIR_ALUNO);
-        rvAvaliacoes.setLayoutManager(new LinearLayoutManager(this));
+        // MUDOU: 'this' para 'requireContext()'
+        reviewAdapter = new ReviewAdapter(requireContext(), listaDeAvaliacoes, ReviewAdapter.MODO_EXIBIR_ALUNO);
+        rvAvaliacoes.setLayoutManager(new LinearLayoutManager(requireContext())); // <-- MUDOU
         rvAvaliacoes.setAdapter(reviewAdapter);
     }
 
-    // --- Método para carregar as avaliações do Firebase ---
     private void carregarAvaliacoes() {
         String uid = currentUser.getUid();
 
