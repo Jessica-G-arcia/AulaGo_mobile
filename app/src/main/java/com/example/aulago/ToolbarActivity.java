@@ -1,11 +1,15 @@
 package com.example.aulago;
 
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -14,7 +18,12 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
 import androidx.core.graphics.drawable.DrawableCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 
 import android.content.Context;
@@ -25,6 +34,8 @@ import androidx.appcompat.view.ContextThemeWrapper;
 import android.content.Context;
 
 import androidx.appcompat.view.ContextThemeWrapper; // <-- 1. NOVO IMPORT
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKeys;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
@@ -36,6 +47,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.ismaeldivita.chipnavigation.ChipNavigationBar;
+
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -81,6 +95,7 @@ public class ToolbarActivity extends AppCompatActivity {
         });
 
         loadUserDataAndSetupUI();
+        configurarLayoutImersivoHibrido();
     }
 
     /**
@@ -148,13 +163,6 @@ public class ToolbarActivity extends AppCompatActivity {
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
 
-            // **LÓGICA PRINCIPAL DA CORREÇÃO**
-            // Muda a regra de fundo ANTES de fazer a navegação.
-            if (id == R.id.nav_profile) {
-                bottomNav.setItemBackground(transparentBackground);
-            } else {
-                bottomNav.setItemBackground(null);
-            }
 
             // Lógica de navegação que você já tinha
             if (id == R.id.nav_home) {
@@ -213,7 +221,6 @@ public class ToolbarActivity extends AppCompatActivity {
 
         // **IMPORTANTE**: Garante que se o app iniciar na tela de perfil, o fundo já esteja transparente.
         if (binding.bottomNavigation.getSelectedItemId() == R.id.nav_profile) {
-            binding.bottomNavigation.setItemBackground(new ColorDrawable(Color.TRANSPARENT));
         }
     }
 
@@ -307,4 +314,48 @@ public class ToolbarActivity extends AppCompatActivity {
             return insets;
         });
     }
+
+    // --- MÉTODO DE LAYOUT CORRIGIDO ---
+    private void configurarLayoutImersivoHibrido() {
+        // 1. Diz ao sistema que vamos cuidar do layout
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+
+        View mainView = binding.getRoot();
+        int originalPaddingLeft = mainView.getPaddingLeft();
+        int originalPaddingTop = mainView.getPaddingTop();
+        int originalPaddingRight = mainView.getPaddingRight();
+        int originalPaddingBottom = mainView.getPaddingBottom();
+
+        // (A linha 'extraPaddingBottom' foi REMOVIDA)
+
+        // 2. Ouve as mudanças de insets (barras e teclado)
+        ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
+
+            // Pega o tamanho da barra de status (topo)
+            Insets statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars());
+            // Pega o tamanho do teclado (para o rodapé)
+            Insets imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime());
+
+            // Calcula o padding
+            int paddingLeft = originalPaddingLeft + statusBars.left;
+            int paddingTop = originalPaddingTop + statusBars.top; // Respeita a barra de status
+            int paddingRight = originalPaddingRight + statusBars.right;
+
+            // O padding de baixo agora é SÓ o original + o teclado
+            int paddingBottom = originalPaddingBottom + imeInsets.bottom;
+
+            v.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
+
+            return insets;
+        });
+
+        // 3. Esconde a barra de navegação (embaixo)
+        WindowInsetsControllerCompat controller = new WindowInsetsControllerCompat(getWindow(), mainView);
+        //controller.hide(WindowInsetsCompat.Type.navigationBars());
+        controller.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+    }
+
+    // --- MÉTODO dpToPx REMOVIDO ---
+    // (Você pode apagar o método dpToPx, pois não o usamos mais)
+    // private int dpToPx(int dp) { ... }
 }
