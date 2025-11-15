@@ -1,5 +1,9 @@
 package com.example.aulago;
 
+
+
+import static android.os.Build.VERSION_CODES.N;
+
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,17 +15,18 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.example.aulago.databinding.FragmentEditarDadosPessoaisBinding; // <-- Certifique-se que o nome do XML está correto aqui
+import com.example.aulago.databinding.FragmentEditarDadosPessoaisBinding;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
+import java.util.List; // <-- IMPORT NECESSÁRIO
 import java.util.Map;
 
 public class EditarDadosPessoaisFragment extends Fragment {
 
-    private FragmentEditarDadosPessoaisBinding binding; // <-- View Binding
+    private FragmentEditarDadosPessoaisBinding binding;
     private ProgressDialog progressDialog;
     private FirebaseFirestore db;
     private FirebaseAuth auth;
@@ -37,7 +42,6 @@ public class EditarDadosPessoaisFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // Usa o View Binding para inflar o layout
         binding = FragmentEditarDadosPessoaisBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -56,21 +60,19 @@ public class EditarDadosPessoaisFragment extends Fragment {
         progressDialog = new ProgressDialog(requireContext());
         progressDialog.setCancelable(false);
 
-        // Configurar o clique do botão Salvar
         binding.btnSalvar.setOnClickListener(v -> salvarAlteracoes());
-
-        // Buscar dados do Firestore e preencher o formulário
         carregarDadosDoUsuario();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        binding = null; // Limpa o binding
+        binding = null;
     }
 
     /**
      * Busca os dados no Firestore e preenche os campos EditText.
+     * ATUALIZADO: Agora checa se é professor e carrega os dados bancários.
      */
     private void carregarDadosDoUsuario() {
         progressDialog.setMessage("Carregando dados...");
@@ -95,7 +97,25 @@ public class EditarDadosPessoaisFragment extends Fragment {
                         binding.inputComplemento.setText(document.getString("complemento"));
                         binding.inputBairro.setText(document.getString("bairro"));
                         binding.inputCidade.setText(document.getString("cidade"));
-                        binding.inputEstado.setText(document.getString("estado")); // <-- CAMPO NOVO ADICIONADO
+                        binding.inputEstado.setText(document.getString("estado"));
+
+                        // --- LÓGICA DE DADOS BANCÁRIOS (NOVA) ---
+                        // Verifica se o usuário é professor
+                        List<String> roles = (List<String>) document.get("roles");
+                        if (roles != null && roles.contains("professor")) {
+                            // É professor, mostra a seção
+                            binding.layoutDadosBancarios.setVisibility(View.VISIBLE);
+
+                            // Carrega os dados bancários (se existirem)
+                            binding.inputBanco.setText(document.getString("banco"));
+                            binding.inputAgencia.setText(document.getString("agencia"));
+                            binding.inputConta.setText(document.getString("conta"));
+                            binding.inputPix.setText(document.getString("pix"));
+                        } else {
+                            // Não é professor, esconde a seção
+                            binding.layoutDadosBancarios.setVisibility(View.GONE);
+                        }
+                        // --- FIM DA LÓGICA ---
 
                     } else {
                         Toast.makeText(requireContext(), "Erro: Documento do usuário não encontrado.", Toast.LENGTH_SHORT).show();
@@ -111,6 +131,7 @@ public class EditarDadosPessoaisFragment extends Fragment {
 
     /**
      * Pega todos os dados dos campos e salva no Firestore usando .update()
+     * ATUALIZADO: Agora salva os dados bancários se a seção estiver visível.
      */
     private void salvarAlteracoes() {
         progressDialog.setMessage("Salvando alterações...");
@@ -131,7 +152,17 @@ public class EditarDadosPessoaisFragment extends Fragment {
         dadosPessoais.put("complemento", binding.inputComplemento.getText().toString().trim());
         dadosPessoais.put("bairro", binding.inputBairro.getText().toString().trim());
         dadosPessoais.put("cidade", binding.inputCidade.getText().toString().trim());
-        dadosPessoais.put("estado", binding.inputEstado.getText().toString().trim()); // <-- CAMPO NOVO ADICIONADO
+        dadosPessoais.put("estado", binding.inputEstado.getText().toString().trim());
+
+        // --- LÓGICA DE DADOS BANCÁRIOS (NOVA) ---
+        // Só salva os dados bancários se a seção estiver visível
+        if (binding.layoutDadosBancarios.getVisibility() == View.VISIBLE) {
+            dadosPessoais.put("banco", binding.inputBanco.getText().toString().trim());
+            dadosPessoais.put("agencia", binding.inputAgencia.getText().toString().trim());
+            dadosPessoais.put("conta", binding.inputConta.getText().toString().trim());
+            dadosPessoais.put("pix", binding.inputPix.getText().toString().trim());
+        }
+        // --- FIM DA LÓGICA ---
 
         db.collection("users").document(uid)
                 .update(dadosPessoais)
@@ -141,11 +172,16 @@ public class EditarDadosPessoaisFragment extends Fragment {
                     Toast.makeText(requireContext(), "Dados atualizados com sucesso!", Toast.LENGTH_SHORT).show();
 
                     // Simula o "voltar"
-                    requireActivity().onBackPressed();
+                    if (getActivity() != null) {
+                        getActivity().getSupportFragmentManager().popBackStack();
+                    }
                 })
                 .addOnFailureListener(e -> {
                     if (!isAdded()) return;
                     progressDialog.dismiss();
+
+                    // --- CORREÇÃO AQUI ---
+                    // O 'N' estava fora das aspas
                     Toast.makeText(requireContext(), "Erro ao salvar: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }

@@ -7,14 +7,15 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.text.SimpleDateFormat; // Import
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale; // Import
 
 public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.NotificationViewHolder> {
 
     private List<Notification> notificationList;
-   //Para saber qual filtro está ativo
-    private String currentFilter = "";
 
     public NotificationAdapter(List<Notification> notificationList) {
         this.notificationList = notificationList;
@@ -25,12 +26,6 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         notificationList = new ArrayList<>(newList);
         notifyDataSetChanged();
     }
-
-    //Fragment usará este método para nos dizer qual filtro está ativo
-    public void setCurrentFilter(String filter) {
-        this.currentFilter = filter;
-    }
-
 
     @NonNull
     @Override
@@ -44,14 +39,26 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         Notification notification = notificationList.get(position);
         holder.title.setText(notification.getTitle());
         holder.message.setText(notification.getMessage());
-        holder.date.setText(notification.getDate());
-        holder.timeAgo.setText(notification.getTimeAgo());
 
-        //A bolinha só aparece se a notificação NÃO for lida E o filtro ativo for "Não lidas"
-        boolean isUnread = !notification.getIsRead();
-        boolean isUnreadFilterActive = "unread".equals(currentFilter);
+        // --- LÓGICA DE DATA/HORA CORRIGIDA ---
+        if (notification.getDataCriacao() != null) {
+            // Formato da Data (ex: 25/03/2025)
+            SimpleDateFormat sdfDate = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            holder.date.setText(sdfDate.format(notification.getDataCriacao()));
 
-        if (isUnread && isUnreadFilterActive) {
+            // Formato da Hora (ex: 10:30)
+            SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm", Locale.getDefault());
+            holder.timeAgo.setText(sdfTime.format(notification.getDataCriacao()));
+        } else {
+            // Se a data for nula, esconde os campos
+            holder.date.setText("");
+            holder.timeAgo.setText("");
+        }
+
+        // --- LÓGICA DO PONTO DE "NÃO LIDO" CORRIGIDA ---
+        // A bolinha deve aparecer se a notificação NÃO for lida.
+        // O filtro (no Fragment) decide se o item aparece na lista ou não.
+        if (!notification.getIsRead()) {
             holder.unreadDot.setVisibility(View.VISIBLE);
         } else {
             holder.unreadDot.setVisibility(View.GONE);

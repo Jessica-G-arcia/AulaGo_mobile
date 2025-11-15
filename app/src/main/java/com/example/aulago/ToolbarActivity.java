@@ -34,7 +34,8 @@ import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKeys;
 
 import com.bumptech.glide.Glide;
-import com.example.aulago.databinding.AppBarMainBinding;
+// MUDANÇA 1: Import corrigido
+import com.example.aulago.databinding.ActivityToolbarBinding;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -45,7 +46,8 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ToolbarActivity extends AppCompatActivity {
 
-    private AppBarMainBinding binding;
+    // MUDANÇA 2: Declaração da variável corrigida
+    private ActivityToolbarBinding binding;
     public static final String ROLE_PROFESSOR = "Professor";
     public static final String ROLE_ALUNO = "Aluno";
 
@@ -64,7 +66,9 @@ public class ToolbarActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = AppBarMainBinding.inflate(getLayoutInflater());
+
+        // MUDANÇA 3: Inflação do layout corrigida
+        binding = ActivityToolbarBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         auth = FirebaseAuth.getInstance();

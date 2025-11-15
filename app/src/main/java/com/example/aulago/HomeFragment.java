@@ -84,7 +84,7 @@ public class HomeFragment extends Fragment {
         // binding.tvTituloTopUsers.setText("Top 10 Professores");
 
         setupLanguagesCarousel();
-        setupTopUsersCarousel("professor"); // <-- Puxa PROFESSORES
+//        setupTopUsersCarousel("professor"); // <-- Puxa PROFESSORES
         setupAulasCarousel("alunoId"); // <-- Puxa aulas do ALUNO
     }
 
@@ -94,7 +94,7 @@ public class HomeFragment extends Fragment {
         // binding.tvTituloTopUsers.setText("Top 10 Alunos");
 
         setupLanguagesCarousel();
-        setupTopUsersCarousel("aluno"); // <-- Puxa ALUNOS
+//        setupTopUsersCarousel("aluno"); // <-- Puxa ALUNOS
         setupAulasCarousel("professorId"); // <-- Puxa aulas do PROFESSOR
     }
 
@@ -126,33 +126,33 @@ public class HomeFragment extends Fragment {
     }
 
     // --- Carrossel "Top Users" (CORRIGIDO) ---
-    private void setupTopUsersCarousel(String userTypeToFetch) {
-
-        // 1. Corrige o erro de compilação: Usa o NOVO adapter
-        topUserAdapter = new TopUserAdapter(new ArrayList<>());
-
-        // 2. Assumindo que o ID no XML é 'viewpager_alunos'
-        ViewPager2 viewPager = binding.viewpagerAlunos;
-        viewPager.setAdapter(topUserAdapter);
-
-        // 3. Busca na coleção "users"
-        db.collection("users")
-                .whereEqualTo("userType", userTypeToFetch) // "aluno" ou "professor"
-                .orderBy("ratingMedia", Query.Direction.DESCENDING) // Ordena pela nota
-                .limit(10) // Top 10
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        List<UserModel> users = new ArrayList<>();
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            users.add(document.toObject(UserModel.class));
-                        }
-                        topUserAdapter.updateList(users); // Atualiza o novo adapter
-                    } else {
-                        Log.e("FirebaseError", "Erro ao buscar top users: ", task.getException());
-                    }
-                });
-    }
+//    private void setupTopUsersCarousel(String userTypeToFetch) {
+//
+//        // 1. Corrige o erro de compilação: Usa o NOVO adapter
+//        topUserAdapter = new TopUserAdapter(new ArrayList<>());
+//
+//        // 2. Assumindo que o ID no XML é 'viewpager_alunos'
+//        ViewPager2 viewPager = binding.viewpagerAlunos;
+//        viewPager.setAdapter(topUserAdapter);
+//
+//        // 3. Busca na coleção "users"
+//        db.collection("users")
+//                .whereEqualTo("userType", userTypeToFetch) // "aluno" ou "professor"
+//                .orderBy("ratingMedia", Query.Direction.DESCENDING) // Ordena pela nota
+//                .limit(10) // Top 10
+//                .get()
+//                .addOnCompleteListener(task -> {
+//                    if (task.isSuccessful()) {
+//                        List<UserModel> users = new ArrayList<>();
+//                        for (QueryDocumentSnapshot document : task.getResult()) {
+//                            users.add(document.toObject(UserModel.class));
+//                        }
+//                        topUserAdapter.updateList(users); // Atualiza o novo adapter
+//                    } else {
+//                        Log.e("FirebaseError", "Erro ao buscar top users: ", task.getException());
+//                    }
+//                });
+//    }
 
     // --- Carrossel Aulas de Hoje (Agenda) ---
     private void setupAulasCarousel(String idField) {

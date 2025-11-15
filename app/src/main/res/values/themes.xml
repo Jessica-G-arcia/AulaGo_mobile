@@ -60,4 +60,8 @@
         <item name="android:textColorPrimary">@android:color/black</item>
     </style>
 
+    <style name="BottomNavigationStyle" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="itemRippleColor">@android:color/transparent</item>
+    </style>
+
 </resources>

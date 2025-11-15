@@ -138,18 +138,52 @@ public class SolicitarSerProfessorFragment extends Fragment { // MUDOU
     // Não precisamos mais dele, pois o 'documentPickerLauncher' faz todo o trabalho.
 
     private void validarEEnviar() {
-        // MUDOU: Usa 'binding'
-        String nome = binding.etNomeCompleto.getText().toString();
+        // 1. Pega todos os dados
+        String nome = binding.etNomeCompleto.getText().toString().trim();
+        String tipoCert = binding.spinnerCertificacao.getText().toString().trim();
+        String numCert = binding.etNumeroCertificado.getText().toString().trim();
+        String instituicao = binding.etInstituicao.getText().toString().trim();
+        String pontuacao = binding.etPontuacao.getText().toString().trim();
+
+        // 2. Valida os campos obrigatórios
         if (nome.isEmpty()) {
             Toast.makeText(requireContext(), "Preencha seu nome completo.", Toast.LENGTH_SHORT).show();
+            binding.etNomeCompleto.requestFocus(); // Pede foco no campo
             return;
         }
 
+        if (tipoCert.isEmpty() || tipoCert.equals("Selecione")) {
+            Toast.makeText(requireContext(), "Selecione o tipo de certificação.", Toast.LENGTH_SHORT).show();
+            binding.spinnerCertificacao.requestFocus();
+            return;
+        }
+
+        if (numCert.isEmpty()) {
+            Toast.makeText(requireContext(), "Preencha o número do certificado.", Toast.LENGTH_SHORT).show();
+            binding.etNumeroCertificado.requestFocus();
+            return;
+        }
+
+        if (instituicao.isEmpty()) {
+            Toast.makeText(requireContext(), "Preencha a instituição emissora.", Toast.LENGTH_SHORT).show();
+            binding.etInstituicao.requestFocus();
+            return;
+        }
+
+        // 3. Valida a pontuação (se visível)
+        if (binding.layoutPontuacao.getVisibility() == View.VISIBLE && pontuacao.isEmpty()) {
+            Toast.makeText(requireContext(), "Preencha a pontuação (TOEFL/IELTS).", Toast.LENGTH_SHORT).show();
+            binding.etPontuacao.requestFocus();
+            return;
+        }
+
+        // 4. Valida o documento
         if (documentoUri == null) {
             Toast.makeText(requireContext(), "Selecione o documento do certificado", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        // 5. Se tudo estiver OK, envia
         enviarDocumentoEAtualizarFirestore();
     }
 
