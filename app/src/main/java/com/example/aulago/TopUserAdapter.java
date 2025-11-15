@@ -28,7 +28,7 @@ public class TopUserAdapter extends RecyclerView.Adapter<TopUserAdapter.UserView
     public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         this.context = parent.getContext();
         // PASSO MAIS IMPORTANTE: Inflando o NOVO layout do card azul
-        View view = LayoutInflater.from(context).inflate(R.layout.item_top_user_card, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_aluno, parent, false);
         return new UserViewHolder(view);
     }
 

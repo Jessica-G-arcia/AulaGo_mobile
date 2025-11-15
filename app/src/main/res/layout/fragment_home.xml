@@ -4,27 +4,28 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
     android:background="?android:attr/colorBackground"
+    android:fillViewport="true"
     tools:context=".HomeFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/white"
         android:orientation="vertical"
         android:paddingTop="16dp"
         android:paddingBottom="24dp">
 
         <!-- Título de Boas Vindas -->
         <TextView
-            android:id="@+id/tvWelcome"
+            android:id="@+id/tvBoasVindas"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="16dp"
             android:fontFamily="@font/montserrat_bold"
-            android:text="Seja bem-vindo!"
+            android:text="Olá, "
             android:textColor="?android:attr/textColorPrimary"
             android:textSize="24sp" />
 
@@ -46,16 +47,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp">
 
-            <ImageButton
-                android:id="@+id/btn_scroll_left"
-                style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_width="48dp"
-                android:layout_height="0dp"
-                android:src="@drawable/ic_arrow_left"
-                android:contentDescription="Rolar para esquerda"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_languages"
@@ -63,21 +54,32 @@
                 android:layout_height="wrap_content"
                 android:clipToPadding="false"
                 android:orientation="horizontal"
+                android:paddingHorizontal="30dp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/btn_scroll_right"
-                app:layout_constraintStart_toEndOf="@id/btn_scroll_left"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:itemCount="4"
                 tools:listitem="@layout/item_language" />
+
+            <ImageButton
+                android:id="@+id/btn_scroll_left"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="48dp"
+                android:layout_height="0dp"
+                android:src="@drawable/ic_arrow_left"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageButton
                 android:id="@+id/btn_scroll_right"
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="48dp"
                 android:layout_height="0dp"
-                android:src="@drawable/ic_arrow_right"
                 android:contentDescription="Rolar para direita"
+                android:src="@drawable/ic_arrow_right"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -107,7 +109,7 @@
             android:orientation="horizontal"
             android:paddingHorizontal="30dp"
             tools:itemCount="1"
-            tools:layout="@layout/item_top_user_card" /> <!-- Use o novo card aqui -->
+            tools:layout="@layout/item_aluno" /> <!-- Use o novo card aqui -->
 
 
         <TextView

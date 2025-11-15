@@ -40,7 +40,7 @@ import androidx.security.crypto.MasterKeys;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
-import com.example.aulago.databinding.AppBarMainBinding;
+import com.example.aulago.databinding.ActivityToolbarBinding;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -55,7 +55,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ToolbarActivity extends AppCompatActivity {
 
-    private AppBarMainBinding binding;
+    private ActivityToolbarBinding binding;
     public static final String ROLE_PROFESSOR = "Professor";
     public static final String ROLE_ALUNO = "Aluno";
 
@@ -74,7 +74,7 @@ public class ToolbarActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = AppBarMainBinding.inflate(getLayoutInflater());
+        binding = ActivityToolbarBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         auth = FirebaseAuth.getInstance();
@@ -146,8 +146,6 @@ public class ToolbarActivity extends AppCompatActivity {
             bottomNav.inflateMenu(R.menu.bottom_menu_aluno);
         }
 
-        // Carrega a foto do perfil, que vai SOBRESCREVER as regras acima para o item de perfil
-        loadProfileImageIntoNav(userPhotoUrl);
 
         setupClickListeners(userRole);
 
@@ -190,39 +188,6 @@ public class ToolbarActivity extends AppCompatActivity {
         logoutIcon.setOnClickListener(v -> showLogoutConfirmationDialog());
     }
 
-    /**
-     * Carrega a imagem do perfil e DESATIVA a pintura (tint) sobre ela.
-     * A lógica de fundo foi movida para o setupClickListeners.
-     */
-    private void loadProfileImageIntoNav(@Nullable String userPhotoUrl) {
-        MenuItem profileMenuItem = binding.bottomNavigation.getMenu().findItem(R.id.nav_profile);
-        if (profileMenuItem == null) return;
-
-        // Desativa a pintura laranja/roxa sobre a foto de perfil.
-        profileMenuItem.setIconTintList(null);
-
-        if (userPhotoUrl != null && !userPhotoUrl.isEmpty()) {
-            Glide.with(this)
-                    .asBitmap()
-                    .load(userPhotoUrl)
-                    .circleCrop()
-                    .into(new CustomTarget<android.graphics.Bitmap>() {
-                        @Override
-                        public void onResourceReady(@NonNull android.graphics.Bitmap resource, @Nullable Transition<? super android.graphics.Bitmap> transition) {
-                            Drawable profileIcon = new BitmapDrawable(getResources(), resource);
-                            profileMenuItem.setIcon(profileIcon);
-                        }
-
-                        @Override
-                        public void onLoadCleared(@Nullable Drawable placeholder) {
-                        }
-                    });
-        }
-
-        // **IMPORTANTE**: Garante que se o app iniciar na tela de perfil, o fundo já esteja transparente.
-        if (binding.bottomNavigation.getSelectedItemId() == R.id.nav_profile) {
-        }
-    }
 
     public void replaceFragment(Fragment fragment) {
         getSupportFragmentManager()

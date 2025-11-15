@@ -9,8 +9,8 @@
     android:background="#F5F5F5"
     tools:context=".NotificationsFragment"> <TextView
     android:id="@+id/textView"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:layout_height="60dp"
     android:text="Notificações"
     android:textColor="@android:color/black"
     android:textSize="24sp"

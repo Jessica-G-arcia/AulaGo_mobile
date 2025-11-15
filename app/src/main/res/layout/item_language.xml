@@ -23,14 +23,14 @@
             android:layout_width="85dp"
             android:layout_height="55dp"
             android:scaleType="centerCrop"
-            android:src="@drawable/us_flag"/>
+            android:src="@drawable/ic_flag"/>
 
         <TextView
             android:id="@+id/tv_language_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="Inglês"
+            android:text="Idioma"
             android:fontFamily="@font/montserrat"
             android:textColor="#333333"/>
 
