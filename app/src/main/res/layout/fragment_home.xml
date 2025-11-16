@@ -30,7 +30,7 @@
             android:textSize="24sp" />
 
         <!-- ============================================= -->
-        <!-- SEÇÃO DE IDIOMAS (FLAGS) - MANTIDA E AJUSTADA -->
+        <!-- SEÇÃO DE IDIOMAS (FLAGS) -->
         <!-- ============================================= -->
         <TextView
             android:id="@+id/tvLanguagesTitle"
@@ -46,7 +46,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp">
-
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_languages"
@@ -83,11 +82,10 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <!-- ============================================= -->
-        <!-- SEÇÃO TOP 10 - NOVO DESIGN                   -->
+        <!-- SEÇÃO TOP 10 - COM SETAS ADICIONADAS         -->
         <!-- ============================================= -->
         <TextView
             android:id="@+id/tvTopUsersTitle"
@@ -99,19 +97,57 @@
             android:textSize="20sp"
             tools:text="Top Professores" />
 
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/viewpager_alunos"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:orientation="horizontal"
-            android:paddingHorizontal="30dp"
-            tools:itemCount="1"
-            tools:layout="@layout/item_aluno" /> <!-- Use o novo card aqui -->
+            android:layout_marginTop="8dp">
+
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/viewpager_alunos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:orientation="horizontal"
+                android:paddingHorizontal="40dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:itemCount="1"
+                tools:layout="@layout/item_aluno" />
+
+            <!-- BOTÃO ESQUERDA PARA O TOP 10 -->
+            <ImageButton
+                android:id="@+id/btnTopUsersLeft"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="48dp"
+                android:layout_height="0dp"
+                android:src="@drawable/ic_arrow_left"
+                android:elevation="2dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- BOTÃO DIREITA PARA O TOP 10 -->
+            <ImageButton
+                android:id="@+id/btnTopUsersRight"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="48dp"
+                android:layout_height="0dp"
+                android:src="@drawable/ic_arrow_right"
+                android:elevation="2dp"
+                android:contentDescription="Rolar para direita"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
 
+        <!-- ============================================= -->
+        <!-- SEÇÃO PRÓXIMAS AULAS -->
+        <!-- ============================================= -->
         <TextView
             android:id="@+id/tvTodayClassesTitle"
             android:layout_width="wrap_content"
@@ -125,15 +161,16 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp">
+            android:layout_marginTop="8dp"
+            android:clipChildren="false">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_aulas"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:clipToPadding="false"
                 android:orientation="horizontal"
-                android:paddingStart="16dp"
+                android:paddingStart="40dp"
                 android:paddingEnd="8dp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -166,7 +203,6 @@
                 app:layout_constraintBottom_toBottomOf="@id/recycler_aulas"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="@id/recycler_aulas" />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <TextView

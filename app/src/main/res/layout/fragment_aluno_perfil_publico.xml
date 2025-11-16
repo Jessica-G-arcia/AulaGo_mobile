@@ -244,32 +244,9 @@
             android:id="@+id/groupBio"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingVertical="20dp">
+            android:orientation="vertical">
 
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="10dp"
-                android:padding="20dp"
-                app:cardCornerRadius="10dp"
-                app:cardElevation="4dp">
-
-                <TextView
-                    android:id="@+id/tvBio"
-                    style="@style/TextAppearance.AppCompat.Caption"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/card_background"
-                    android:fontFamily="@font/montserrat"
-                    android:padding="16dp"
-                    android:text='Pense na bio como a capa de trás de um livro 📖.
-        É o resumo que faz o aluno pensar: "Uau, é disso que eu preciso!"'
-                    android:textSize="14dp"
-                    android:textStyle="italic" />
-
-            </androidx.cardview.widget.CardView>
-
+            <include layout="@layout/bio_card" />
 
         </LinearLayout>
 

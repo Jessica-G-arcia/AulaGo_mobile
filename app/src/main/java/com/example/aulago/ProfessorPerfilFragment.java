@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,6 +52,9 @@ public class ProfessorPerfilFragment extends Fragment {
     private ReviewAdapter reviewAdapter;
     private List<ReviewModel> listaDeAvaliacoes;
     private TextView tvEmptyReviews;
+    private LinearLayout groupRating;
+    private TextView tvProfessorRatingMedia;
+    private RatingBar rbProfessorRating;
 
     // O 'onCreate' de um Fragmento é para dados, não para Views
     @Override
@@ -130,6 +134,9 @@ public class ProfessorPerfilFragment extends Fragment {
         // Views da aba Avaliações
         rvAvaliacoes = view.findViewById(R.id.rvAvaliacoes);
         tvEmptyReviews = view.findViewById(R.id.tvEmptyReviews);
+        groupRating = view.findViewById(R.id.groupRating);
+        tvProfessorRatingMedia = view.findViewById(R.id.tvProfessorRatingMedia);
+        rbProfessorRating = view.findViewById(R.id.rbProfessorRating);
     }
 
     private void configurarListeners() {
@@ -265,7 +272,25 @@ public class ProfessorPerfilFragment extends Fragment {
                                     .error(R.drawable.img_avatar_circle)
                                     .into(ivAvatar);
                         }
+                        if (document.contains("ratingMedia") && document.contains("ratingCount")) {
+                            double media = document.getDouble("ratingMedia");
+                            long contagem = document.getLong("ratingCount");
 
+                            if (contagem > 0) {
+                                // Exibe a nota (ex: "4.8")
+                                tvProfessorRatingMedia.setText(String.format(Locale.US, "%.1f", media));
+                                // Preenche as estrelas
+                                rbProfessorRating.setRating((float) media);
+                                // Mostra o grupo
+                                groupRating.setVisibility(View.VISIBLE);
+                            } else {
+                                // Se não tem avaliações, esconde o grupo
+                                groupRating.setVisibility(View.GONE);
+                            }
+                        } else {
+                            // Se os campos não existem, esconde o grupo
+                            groupRating.setVisibility(View.GONE);
+                        }
                     } else {
                         // MUDOU: 'this' para 'requireContext()'
                         Toast.makeText(requireContext(), "Erro: Documento do usuário não encontrado.", Toast.LENGTH_SHORT).show();

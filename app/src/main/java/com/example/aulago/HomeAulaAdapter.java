@@ -23,15 +23,16 @@ public class HomeAulaAdapter extends RecyclerView.Adapter<HomeAulaAdapter.AulaVi
     private List<ClassModel> aulasList;
     private Context context;
     private SimpleDateFormat dateFormatter;
+    private String currentUserType;
     private SimpleDateFormat dateComparator; // Para comparar "yyyyMMdd"
     private String todayDateString; // String de "hoje"
 
-    public HomeAulaAdapter(List<ClassModel> aulasList) {
+    public HomeAulaAdapter(List<ClassModel> aulasList, String currentUserType) { // <-- MUDANÇA AQUI
         this.aulasList = aulasList;
+        this.currentUserType = currentUserType; // <-- ADICIONE ESTA LINHA
         // Formato de exibição para datas futuras
         this.dateFormatter = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
     }
-
     @NonNull
     @Override
     public AulaViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -44,8 +45,13 @@ public class HomeAulaAdapter extends RecyclerView.Adapter<HomeAulaAdapter.AulaVi
     public void onBindViewHolder(@NonNull AulaViewHolder holder, int position) {
         ClassModel aula = aulasList.get(position);
 
-        // 1. Define o nome do Aluno
-        holder.tvAluno.setText("Aluno: " + aula.getAlunoNome());
+        if ("aluno".equals(currentUserType)) {
+            // Se o usuário logado é ALUNO, mostre o nome do PROFESSOR
+            holder.tvAluno.setText("Prof: " + aula.getProfessorNome());
+        } else {
+            // Se o usuário logado é PROFESSOR, mostre o nome do ALUNO
+            holder.tvAluno.setText("Aluno: " + aula.getAlunoNome());
+        }
 
         // 2. LÓGICA DE DATA (ÚNICA)
         if (aula.getDataTimestamp() != null) {

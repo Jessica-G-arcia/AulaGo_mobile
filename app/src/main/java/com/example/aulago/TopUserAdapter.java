@@ -4,19 +4,21 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.Glide;
+import com.google.android.material.imageview.ShapeableImageView;
 
 import java.util.List;
-import java.util.StringJoiner;
+import java.util.Locale;
 
-public class TopUserAdapter extends RecyclerView.Adapter<TopUserAdapter.UserViewHolder> {
+public class TopUserAdapter extends RecyclerView.Adapter<TopUserAdapter.TopUserViewHolder> {
 
-    private List<UserModel> userList;
+    private List<UserModel> userList; // Use seu modelo (UserModel, Aluno ou Professor)
     private Context context;
 
     public TopUserAdapter(List<UserModel> userList) {
@@ -25,52 +27,69 @@ public class TopUserAdapter extends RecyclerView.Adapter<TopUserAdapter.UserView
 
     @NonNull
     @Override
-    public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public TopUserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         this.context = parent.getContext();
-        // PASSO MAIS IMPORTANTE: Inflando o NOVO layout do card azul
+        // Infla o SEU layout de card
         View view = LayoutInflater.from(context).inflate(R.layout.item_aluno, parent, false);
-        return new UserViewHolder(view);
+        return new TopUserViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull TopUserViewHolder holder, int position) {
         UserModel user = userList.get(position);
+        if (user == null) return;
 
-        // Preenchendo os dados no card
+        // 1. Carrega a Foto
+        Glide.with(context)
+                .load(user.getUrlFotoPerfil())
+                .placeholder(R.drawable.img_avatar_circle)
+                .error(R.drawable.img_avatar_circle)
+                .into(holder.ivUserPhoto);
+
+        // 2. Carrega o Nome
         holder.tvUserName.setText(user.getNome());
-        holder.rbUserRating.setVisibility(View.VISIBLE);
-        holder.rbUserRating.setRating((float) user.getRatingMedia());
 
-        // Carregando a foto com Glide
-        if (user.getFotoUrl() != null && !user.getFotoUrl().isEmpty()) {
-            Glide.with(context)
-                    .load(user.getFotoUrl())
-                    .circleCrop()
-                    .placeholder(R.drawable.img_avatar_circle) // Imagem padrão
-                    .into(holder.ivUserPhoto);
+        // 3. LÓGICA DA AVALIAÇÃO
+        if (user.getRatingCount() > 0) {
+            holder.tvProfessorRating.setVisibility(View.VISIBLE);
+            holder.tvProfessorReviews.setVisibility(View.VISIBLE);
+            holder.tvProfessorRating.setText(String.format(Locale.getDefault(), "⭐ %.1f", user.getRatingMedia()));
+            holder.tvProfessorReviews.setText(String.format(Locale.getDefault(), "(%d avaliações)", user.getRatingCount()));
         } else {
-            holder.ivUserPhoto.setImageResource(R.drawable.img_avatar_circle); // Imagem padrão
+            // Esconde os campos de avaliação se não houver nenhuma
+            holder.tvProfessorRating.setVisibility(View.GONE);
+            holder.tvProfessorReviews.setVisibility(View.GONE);
         }
 
-        // Juntando a lista de idiomas em um texto
-        if (user.getIdiomas() != null && !user.getIdiomas().isEmpty()) {
-            StringJoiner joiner = new StringJoiner(", ");
-            for (String idioma : user.getIdiomas()) {
-                joiner.add(idioma);
-            }
-            holder.tvUserSpecialty.setText("Idiomas: " + joiner.toString());
+        // 4. Lógica da "Especialidade" (Dinâmico)
+        if ("aluno".equals(user.getUserType())) {
+            // Se for aluno, mostra o Nível (ex: "Nível: Básico")
+            holder.tvUserSpecialty.setText("Nível: " + user.getNivel());
         } else {
-            holder.tvUserSpecialty.setText("Idiomas: Não informado");
+            // Se for professor, mostra a Especialidade (ex: "Especialidade: Inglês")
+            holder.tvUserSpecialty.setText("Especialidade: " + user.getEspecialidade());
         }
 
-        // Mostrando a citação e o autor
-        holder.tvUserQuote.setText(user.getQuote() != null ? "\"" + user.getQuote() + "\"" : "");
-        holder.tvUserQuoteAuthor.setText(user.getQuoteAuthor() != null ? "— " + user.getQuoteAuthor() : "");
+        // 5. LÓGICA DO "COMENTÁRIO"
+        // Verifica se há um comentário para exibir
+        String melhorComentario = user.getComentarioMelhorAvaliado();
+        String autorComentario = user.getAutorComentarioMelhorAvaliado();
+
+        if (melhorComentario != null && !melhorComentario.trim().isEmpty() && autorComentario != null) {
+            holder.tvUserQuote.setVisibility(View.VISIBLE);
+            holder.tvUserQuoteAuthor.setVisibility(View.VISIBLE);
+            holder.tvUserQuote.setText("\"" + melhorComentario + "\"");
+            holder.tvUserQuoteAuthor.setText(autorComentario);
+        } else {
+            // Esconde os campos de citação se não houver comentário
+            holder.tvUserQuote.setVisibility(View.GONE);
+            holder.tvUserQuoteAuthor.setVisibility(View.GONE);
+        }
     }
 
     @Override
     public int getItemCount() {
-        return userList != null ? userList.size() : 0;
+        return userList.size();
     }
 
     public void updateList(List<UserModel> newList) {
@@ -78,20 +97,27 @@ public class TopUserAdapter extends RecyclerView.Adapter<TopUserAdapter.UserView
         notifyDataSetChanged();
     }
 
-    // ViewHolder com os IDs do novo layout 'item_top_user_card.xml'
-    public static class UserViewHolder extends RecyclerView.ViewHolder {
-        ImageView ivUserPhoto;
-        TextView tvUserName, tvUserSpecialty, tvUserQuote, tvUserQuoteAuthor;
-        RatingBar rbUserRating;
+    // --- ViewHolder ---
+    // Mapeia os IDs do seu "item_aluno.xml"
+    public static class TopUserViewHolder extends RecyclerView.ViewHolder {
 
-        public UserViewHolder(@NonNull View itemView) {
+        ShapeableImageView ivUserPhoto;
+        TextView tvUserName, tvUserSpecialty, tvUserQuote, tvUserQuoteAuthor;
+        TextView tvProfessorRating, tvProfessorReviews;
+
+        public TopUserViewHolder(@NonNull View itemView) {
             super(itemView);
+
             ivUserPhoto = itemView.findViewById(R.id.ivUserPhoto);
             tvUserName = itemView.findViewById(R.id.tvUserName);
-            rbUserRating = itemView.findViewById(R.id.rbUserRating);
+
+            tvProfessorRating = itemView.findViewById(R.id.tvProfessorRating);   // ← ADICIONADO
+            tvProfessorReviews = itemView.findViewById(R.id.tvProfessorReviews); // ← ADICIONADO
+
             tvUserSpecialty = itemView.findViewById(R.id.tvUserSpecialty);
             tvUserQuote = itemView.findViewById(R.id.tvUserQuote);
             tvUserQuoteAuthor = itemView.findViewById(R.id.tvUserQuoteAuthor);
         }
     }
+
 }

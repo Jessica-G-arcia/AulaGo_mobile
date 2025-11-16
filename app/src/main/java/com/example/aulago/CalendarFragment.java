@@ -108,31 +108,27 @@ public class CalendarFragment extends Fragment { // MUDOU
 
 
     private void setupRecyclerView() {
-        // MUDOU: Usa binding e requireContext()
         binding.recyclerViewClasses.setLayoutManager(new LinearLayoutManager(requireContext()));
         adapter = new ClassAdapter(requireContext(), new ArrayList<>());
         binding.recyclerViewClasses.setAdapter(adapter);
 
         adapter.setOnAvaliarClickListener(classModel -> {
-            // Se você chegou até aqui, a comunicação FUNCIONOU!
 
             String alunoId = classModel.getAlunoId();
 
             if (alunoId == null || alunoId.isEmpty()) {
                 Toast.makeText(getContext(), "Erro: ID do aluno não encontrado para esta aula.", Toast.LENGTH_SHORT).show();
-                Log.e("CalendarFragment", "Tentativa de avaliar falhou: alunoId é nulo ou vazio.");
                 return;
             }
 
             Log.d("CalendarFragment", "Navegando para avaliar o aluno com ID: " + alunoId);
 
-            // Cria o novo fragmento
             AvaliacaoFragment avaliacaoFragment = AvaliacaoFragment.newInstance(alunoId);
 
             // Inicia a navegação para o AvaliacaoFragment
             getParentFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, avaliacaoFragment) // Certifique-se que 'R.id.fragment_container' é o ID correto do seu FrameLayout principal
-                    .addToBackStack(null) // Permite que o usuário use o botão "voltar"
+                    .replace(R.id.fragment_container, avaliacaoFragment) // Certifique-se que 'R.id.fragment_container' é o ID correto
+                    .addToBackStack(null)
                     .commit();
         });
     }

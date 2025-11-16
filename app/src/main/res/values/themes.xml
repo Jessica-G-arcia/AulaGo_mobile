@@ -60,6 +60,10 @@
         <item name="textAllCaps">false</item>
     </style>
 
+    <style name="RatingBarTheme" parent="Theme.AppCompat">
+        <item name="colorAccent">@color/amarelo</item>
+    </style>
+
     <style name="MyPopupMenuStyle" parent="ThemeOverlay.AppCompat.Light">
         <item name="android:textColorPrimary">@android:color/black</item>
     </style>

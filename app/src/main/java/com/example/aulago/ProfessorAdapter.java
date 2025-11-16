@@ -7,9 +7,12 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.Glide;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -58,20 +61,39 @@ public class ProfessorAdapter extends RecyclerView.Adapter<ProfessorAdapter.Prof
                 .into(holder.ivProfessorAvatar);
 
         // Lógica da Avaliação
-        if (professor.getReviewCount() > 0) {
-            holder.tvProfessorRating.setText(String.format(Locale.US, "⭐ %.1f", professor.getRating()));
-            holder.tvProfessorReviews.setText(String.format(Locale.US, "(%d avaliações)", professor.getReviewCount()));
-        } else {
-            holder.tvProfessorRating.setText("⭐ 0.0");
-            holder.tvProfessorReviews.setText("(0 avaliações)");
-        }
+        long contagem = professor.getRatingCount();
 
+        if (contagem > 0) {
+            // 1. Pega a média.
+            // Garanta que sua classe Professor tem o método getRatingMedia()
+            double media = professor.getRatingMedia();
+
+            // 2. Formata a nota média (ex: "⭐ 4.8")
+            String mediaFormatada = String.format(Locale.US, "⭐ %.1f", media);
+            holder.tvProfessorRating.setText(mediaFormatada);
+
+            // 3. Formata a contagem (ex: "(12 avaliações)")
+            String contagemFormatada = String.format(Locale.getDefault(), "(%d avaliaç%s)",
+                    contagem,
+                    contagem > 1 ? "ões" : "ão");
+            holder.tvProfessorReviews.setText(contagemFormatada);
+
+            // 4. Garante que eles estão visíveis
+            holder.tvProfessorRating.setVisibility(View.VISIBLE);
+            holder.tvProfessorReviews.setVisibility(View.VISIBLE);
+        } else {
+            // Se não há avaliações, mostra "Novo" e esconde a contagem
+            holder.tvProfessorRating.setText("⭐ Novo");
+            holder.tvProfessorReviews.setVisibility(View.GONE);
+        }
         // Define o clique para navegação
         holder.btnContact.setOnClickListener(v -> listener.onProfessorClick(professor));
     }
 
     @Override
-    public int getItemCount() { return filteredList.size(); }
+    public int getItemCount() {
+        return filteredList.size();
+    }
 
     // --- ViewHolder ---
     static class ProfessorViewHolder extends RecyclerView.ViewHolder {

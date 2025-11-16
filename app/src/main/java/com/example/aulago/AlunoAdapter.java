@@ -69,15 +69,31 @@ public class AlunoAdapter extends RecyclerView.Adapter<AlunoAdapter.AlunoViewHol
                 .circleCrop() // Arredonda a imagem
                 .into(holder.ivStudentAvatar);
 
-        // --- LÓGICA DA AVALIAÇÃO (AGORA VAI FUNCIONAR) ---
-        if (aluno.getReviewCount() > 0) {
-            // Se tem avaliações, mostra a média e a contagem
-            holder.tvStudentRating.setText(String.format(Locale.US, "⭐ %.1f", aluno.getRating()));
-            holder.tvStudentReviews.setText(String.format(Locale.US, "(%d avaliações)", aluno.getReviewCount()));
+        // --- LÓGICA DA AVALIAÇÃO
+        long contagem = aluno.getRatingCount();
+
+        if (contagem > 0) {
+            // 1. Pega a média.
+            // CORREÇÃO: Usa getRatingMedia() em vez de getRating()
+            double media = aluno.getRatingMedia();
+
+            // 2. Formata a nota média (ex: "⭐ 4.8")
+            String mediaFormatada = String.format(Locale.US, "⭐ %.1f", media);
+            holder.tvStudentRating.setText(mediaFormatada);
+
+            // 3. Formata a contagem (ex: "(12 avaliações)")
+            String contagemFormatada = String.format(Locale.getDefault(), "(%d avaliaç%s)",
+                    contagem,
+                    contagem > 1 ? "ões" : "ão");
+            holder.tvStudentReviews.setText(contagemFormatada);
+
+            // 4. Garante que eles estão visíveis
+            holder.tvStudentRating.setVisibility(View.VISIBLE);
+            holder.tvStudentReviews.setVisibility(View.VISIBLE);
         } else {
-            // Se não tem, mostra o padrão
-            holder.tvStudentRating.setText("⭐ 0.0");
-            holder.tvStudentReviews.setText("(0 avaliações)");
+            // Se não há avaliações, mostra "Novo" e esconde a contagem
+            holder.tvStudentRating.setText("⭐ Novo");
+            holder.tvStudentReviews.setVisibility(View.GONE);
         }
 
         // Define o clique no botão

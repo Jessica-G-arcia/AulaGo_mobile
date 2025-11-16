@@ -1,6 +1,7 @@
 package com.example.aulago;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,23 +11,29 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.example.aulago.databinding.FragmentAvaliacaoBinding; // Importante: o nome pode variar
+import com.bumptech.glide.Glide; // Importe o Glide
+import com.example.aulago.databinding.FragmentAvaliacaoBinding;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.Date;
 import java.util.Objects;
 
 public class AvaliacaoFragment extends Fragment {
 
-    // Argumento para receber o ID do usuário que será avaliado
+    // --- ARGUMENTO SIMPLIFICADO ---
     private static final String ARG_AVALIADO_ID = "avaliado_id";
 
-    private FragmentAvaliacaoBinding binding; // Objeto de View Binding
+    private FragmentAvaliacaoBinding binding;
     private RatingManager ratingManager;
+    private FirebaseFirestore db;
+    private FirebaseAuth auth;
     private String idDoUsuarioAvaliado;
 
     /**
-     * Método estático para criar uma nova instância do fragmento, passando o ID do usuário a ser avaliado.
-     * Esta é a forma correta de passar argumentos para um Fragment.
+     * MÉTODO newInstance ATUALIZADO (Agora só precisa do ID)
      */
     public static AvaliacaoFragment newInstance(String avaliadoId) {
         AvaliacaoFragment fragment = new AvaliacaoFragment();
@@ -39,17 +46,17 @@ public class AvaliacaoFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Pega o ID passado como argumento
         if (getArguments() != null) {
             idDoUsuarioAvaliado = getArguments().getString(ARG_AVALIADO_ID);
         }
         ratingManager = new RatingManager();
+        db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // Infla o layout usando View Binding
         binding = FragmentAvaliacaoBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -58,20 +65,50 @@ public class AvaliacaoFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Configura o listener do botão
+        // Busca os dados do usuário a ser avaliado para mostrar na UI
+        loadAvaliadoData();
+
         binding.btnEnviarAvaliacao.setOnClickListener(v -> {
             submeterAvaliacao();
         });
     }
 
+    /**
+     * Busca os dados do usuário (avaliado) para exibir na tela
+     */
+    private void loadAvaliadoData() {
+        if (idDoUsuarioAvaliado == null) return;
+
+        db.collection("users").document(idDoUsuarioAvaliado).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (binding == null) return; // Fragmento foi destruído
+                    if (documentSnapshot.exists()) {
+                        String nome = documentSnapshot.getString("nome");
+                        String avatarUrl = documentSnapshot.getString("avatarUrl");
+
+                        binding.tvAvaliacaoTitulo.setText("Avalie " + nome);
+
+                        Glide.with(requireContext())
+                                .load(avatarUrl)
+                                .placeholder(R.drawable.ic_person_placeholder)
+                                .error(R.drawable.ic_perfil)
+                                .into(binding.ivAvaliacaoProfile);
+                    }
+                });
+    }
+
+    /**
+     * MÉTODO submeterAvaliacao ATUALIZADO
+     */
     private void submeterAvaliacao() {
         // Validações
-        if (idDoUsuarioAvaliado == null || idDoUsuarioAvaliado.isEmpty()) {
-            Toast.makeText(getContext(), "Erro: ID do usuário a ser avaliado não encontrado.", Toast.LENGTH_SHORT).show();
+        FirebaseUser currentUser = auth.getCurrentUser();
+        if (idDoUsuarioAvaliado == null || idDoUsuarioAvaliado.isEmpty() || currentUser == null) {
+            Toast.makeText(getContext(), "Erro: Não foi possível identificar os usuários.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        String idDoAvaliador = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
+        String idDoAvaliador = currentUser.getUid();
         double nota = binding.ratingBarNota.getRating();
         String comentario = binding.etComentario.getText().toString();
 
@@ -80,37 +117,99 @@ public class AvaliacaoFragment extends Fragment {
             return;
         }
 
-        // Mostra um indicador de loading (opcional, mas recomendado)
         binding.btnEnviarAvaliacao.setEnabled(false);
         binding.btnEnviarAvaliacao.setText("Enviando...");
 
-        // Chama o RatingManager
-        ratingManager.submitRating(idDoUsuarioAvaliado, idDoAvaliador, nota, comentario, new RatingManager.RatingCallback() {
-            @Override
-            public void onSuccess() {
-                if (getContext() == null) return; // Evita crash se o fragment não estiver mais visível
-                
-                Toast.makeText(getContext(), "Avaliação enviada com sucesso!", Toast.LENGTH_SHORT).show();
-                // Fecha o fragment e volta para a tela anterior
-                getParentFragmentManager().popBackStack();
+        // Busca os dados dos perfis antes de salvar
+        fetchUserDataAndSubmit(idDoAvaliador, idDoUsuarioAvaliado, nota, comentario);
+    }
+
+    /**
+     * Busca os dados dos perfis (Avaliador e Avaliado)
+     * e então salva a avaliação.
+     */
+    private void fetchUserDataAndSubmit(String idDoAvaliador, String idDoAvaliado, double nota, String comentario) {
+
+        // 1. Busca o documento do Avaliador (usuário logado)
+        db.collection("users").document(idDoAvaliador).get().addOnSuccessListener(avaliadorDoc -> {
+            if (!avaliadorDoc.exists()) {
+                handleError(new Exception("Documento do avaliador não encontrado."));
+                return;
             }
 
-            @Override
-            public void onError(Exception e) {
-                if (getContext() == null) return;
+            // 2. Busca o documento do Avaliado (perfil)
+            db.collection("users").document(idDoAvaliado).get().addOnSuccessListener(avaliadoDoc -> {
+                if (!avaliadoDoc.exists()) {
+                    handleError(new Exception("Documento do avaliado não encontrado."));
+                    return;
+                }
 
-                Toast.makeText(getContext(), "Erro ao enviar avaliação: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                // Reabilita o botão em caso de erro
-                binding.btnEnviarAvaliacao.setEnabled(true);
-                binding.btnEnviarAvaliacao.setText("Enviar Avaliação");
-            }
-        });
+                // 3. Extrai TODOS os dados
+                String tipoAvaliador = avaliadorDoc.getString("userType"); // "aluno" ou "professor"
+                String nomeAvaliador = avaliadorDoc.getString("nome");
+                String avatarAvaliador = avaliadorDoc.getString("urlFotoPerfil");
+
+                String nomeAvaliado = avaliadoDoc.getString("nome");
+                String avatarAvaliado = avaliadoDoc.getString("urlFotoPerfil");
+
+                // 4. Monta o objeto ReviewModel COMPLETO
+                ReviewModel review = new ReviewModel();
+                review.setRating(nota);
+                review.setComentario(comentario);
+                review.setDataAvaliacao(new Date()); // @ServerTimestamp vai sobrescrever
+                review.setEscritoPor(tipoAvaliador);
+
+                if ("aluno".equals(tipoAvaliador)) {
+                    // Aluno (avaliador) avaliando Professor (avaliado)
+                    review.setAlunoId(idDoAvaliador);
+                    review.setAlunoNome(nomeAvaliador);
+                    review.setAlunoAvatarUrl(avatarAvaliador);
+                    review.setProfessorId(idDoAvaliado);
+                    review.setProfessorNome(nomeAvaliado);
+                    review.setProfessorAvatarUrl(avatarAvaliado);
+                } else {
+                    // Professor (avaliador) avaliando Aluno (avaliado)
+                    review.setProfessorId(idDoAvaliador);
+                    review.setProfessorNome(nomeAvaliador);
+                    review.setProfessorAvatarUrl(avatarAvaliador);
+                    review.setAlunoId(idDoAvaliado);
+                    review.setAlunoNome(nomeAvaliado);
+                    review.setAlunoAvatarUrl(avatarAvaliado);
+                }
+
+                // 5. Envia o objeto COMPLETO para o RatingManager
+                ratingManager.submitRating(review, idDoAvaliado, new RatingManager.RatingCallback() {
+                    @Override
+                    public void onSuccess() {
+                        if (getContext() == null) return;
+                        Toast.makeText(getContext(), "Avaliação enviada com sucesso!", Toast.LENGTH_SHORT).show();
+                        getParentFragmentManager().popBackStack();
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        handleError(e);
+                    }
+                });
+
+            }).addOnFailureListener(this::handleError);
+        }).addOnFailureListener(this::handleError);
+    }
+
+    // Função auxiliar para tratar erros
+    private void handleError(Exception e) {
+        if (getContext() == null) return;
+        Log.e("AvaliacaoFragment", "Erro ao submeter avaliação", e);
+        Toast.makeText(getContext(), "Erro: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        if (binding != null) {
+            binding.btnEnviarAvaliacao.setEnabled(true);
+            binding.btnEnviarAvaliacao.setText("Enviar Avaliação");
+        }
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        // Limpa a referência ao binding para evitar memory leaks
         binding = null;
     }
 }

@@ -10,6 +10,8 @@ public class ClassModel {
     private String professorId;
     private String alunoNome;
     private String professorNome;
+    private String alunoAvatarUrl;
+    private String professorAvatarUrl;
 
     // Detalhes da Aula
     private String idioma;
@@ -128,5 +130,21 @@ public class ClassModel {
 
     public void setModalidade(String modalidade) {
         this.modalidade = modalidade;
+    }
+
+    public String getAlunoAvatarUrl() {
+        return alunoAvatarUrl;
+    }
+
+    public void setAlunoAvatarUrl(String alunoAvatarUrl) {
+        this.alunoAvatarUrl = alunoAvatarUrl;
+    }
+
+    public String getProfessorAvatarUrl() {
+        return professorAvatarUrl;
+    }
+
+    public void setProfessorAvatarUrl(String professorAvatarUrl) {
+        this.professorAvatarUrl = professorAvatarUrl;
     }
 }

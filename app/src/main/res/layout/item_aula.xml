@@ -3,9 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginHorizontal="20dp"
+    android:layout_width="300dp" android:layout_height="wrap_content"
+    android:layout_marginHorizontal="8dp"
     android:layout_marginVertical="8dp"
     app:cardCornerRadius="16dp"
     app:cardBackgroundColor="@android:color/white"
@@ -13,33 +12,41 @@
     app:strokeWidth="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:padding="16dp">
 
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline_vertical"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/tv_data_aula"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_begin="233dp" />
+
+            android:drawableStart="@drawable/ic_calendar_mark" android:drawablePadding="8dp" android:drawableTint="?attr/colorPrimary"
+            android:fontFamily="@font/montserrat"
+
+            android:gravity="center_vertical" android:textColor="?attr/colorPrimary"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Hoje" />
 
         <TextView
             android:id="@+id/tv_aluno_aula"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:drawableStart="@drawable/ic_perfil"
+            android:layout_marginTop="16dp" android:drawableStart="@drawable/ic_perfil"
             android:drawablePadding="8dp"
             android:drawableTint="?android:attr/textColorSecondary"
             android:ellipsize="end"
             android:fontFamily="@font/montserrat"
-            android:maxLines="1"
+            android:lines="2"
+            android:gravity="center_vertical"
             android:textColor="?android:attr/textColorPrimary"
             android:textSize="15sp"
-            app:layout_constraintEnd_toStartOf="@id/guideline_vertical"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="Aluno: Lucas Marques" />
+            app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_data_aula" tools:text="Aluno: Lucas Marques" />
 
         <TextView
             android:id="@+id/tv_local_aula"
@@ -51,11 +58,11 @@
             android:drawableTint="?android:attr/textColorSecondary"
             android:ellipsize="end"
             android:fontFamily="@font/montserrat"
-            android:maxLines="1"
+            android:lines="2"
+            android:gravity="center_vertical"
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="14sp"
-            app:layout_constraintEnd_toStartOf="@id/guideline_vertical"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_aluno_aula"
             tools:text="Sorocaba - SP" />
 
@@ -71,29 +78,10 @@
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="14sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/guideline_vertical"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_local_aula"
             app:layout_constraintVertical_bias="0.0"
             tools:text="Horário: 8:00 às 9:00" />
-
-        <TextView
-            android:id="@+id/tv_data_aula"
-            android:layout_width="100dp"
-            android:layout_height="50dp"
-            android:drawableTop="@drawable/ic_calendar_mark"
-            android:drawablePadding="4dp"
-            android:drawableTint="?attr/colorPrimary"
-            android:fontFamily="@font/montserrat"
-            android:gravity="center"
-            android:textColor="?attr/colorPrimary"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/guideline_vertical"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="19/11/2025" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

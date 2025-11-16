@@ -1,6 +1,7 @@
 package com.example.aulago;
 
 import com.google.firebase.firestore.ServerTimestamp;
+
 import java.util.Date;
 
 // Este é o "Molde" (POJO) para o Firestore
@@ -68,5 +69,45 @@ public class ReviewModel {
 
     public String getEscritoPor() {
         return escritoPor;
+    }
+
+    public void setRating(double rating) {
+        this.rating = rating;
+    }
+
+    public void setComentario(String comentario) {
+        this.comentario = comentario;
+    }
+
+    public void setDataAvaliacao(Date dataAvaliacao) {
+        this.dataAvaliacao = dataAvaliacao;
+    }
+
+    public void setAlunoId(String alunoId) {
+        this.alunoId = alunoId;
+    }
+
+    public void setProfessorId(String professorId) {
+        this.professorId = professorId;
+    }
+
+    public void setAlunoNome(String alunoNome) {
+        this.alunoNome = alunoNome;
+    }
+
+    public void setAlunoAvatarUrl(String alunoAvatarUrl) {
+        this.alunoAvatarUrl = alunoAvatarUrl;
+    }
+
+    public void setProfessorNome(String professorNome) {
+        this.professorNome = professorNome;
+    }
+
+    public void setProfessorAvatarUrl(String professorAvatarUrl) {
+        this.professorAvatarUrl = professorAvatarUrl;
+    }
+
+    public void setEscritoPor(String escritoPor) {
+        this.escritoPor = escritoPor;
     }
 }

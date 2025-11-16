@@ -1,6 +1,7 @@
 package com.example.aulago;
 
 import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import com.google.firebase.firestore.CollectionReference;
@@ -24,65 +25,95 @@ public class RatingManager {
 
     public interface RatingCallback {
         void onSuccess();
+
         void onError(Exception e);
     }
 
-    public void submitRating(String avaliadoId, String avaliadorId, double nota, String comentario, RatingCallback callback) {
-        // Passo 1: Primeiro, buscamos todas as avaliações existentes para o usuário.
-        // Isso é feito FORA da transação.
+    /**
+     * MÉTODO submitRating ATUALIZADO
+     * Agora recebe o ReviewModel completo e calcula o MELHOR comentário.
+     */
+    public void submitRating(ReviewModel review, String avaliadoId, RatingCallback callback) {
+
+        double notaNovaAvaliacao = review.getRating();
+        String autorDoNovoComentario = "aluno".equals(review.getEscritoPor()) ? review.getAlunoNome() : review.getProfessorNome();
+
+        // Define qual campo usar para a busca (se o avaliado é um professor, buscamos pelo 'professorId', etc.)
+        String idFieldQuery = "aluno".equals(review.getEscritoPor()) ? "professorId" : "alunoId";
+
         db.collection("avaliacoes")
-                .whereEqualTo("avaliadoId", avaliadoId)
+                .whereEqualTo(idFieldQuery, avaliadoId) // Busca todas as avaliações DO usuário que está sendo AVALIADO
                 .get()
                 .addOnSuccessListener(existingRatings -> {
-                    // Passo 2: Com a lista de avaliações em mãos, calculamos a nova média.
-                    double novoTotalNotas = nota; // Começa com a nota da nova avaliação
-                    int novoTotalAvaliacoes = 1;  // Começa com 1 (a nova avaliação)
+                    double novoTotalNotas = notaNovaAvaliacao;
+                    int novoTotalAvaliacoes = 1;
 
+                    // Começamos assumindo que a NOVA avaliação é a melhor.
+                    double melhorNota = notaNovaAvaliacao;
+                    String melhorComentario = review.getComentario();
+                    String autorMelhorComentario = autorDoNovoComentario;
+
+                    // Itera sobre as avaliações JÁ EXISTENTES no banco
                     for (DocumentSnapshot doc : existingRatings) {
-                        if (doc.contains("nota")) {
-                            novoTotalNotas += doc.getDouble("nota");
+                        if (doc.contains("rating")) {
+                            double notaExistente = doc.getDouble("rating");
+                            novoTotalNotas += notaExistente;
                             novoTotalAvaliacoes++;
+
+                            // Compara a nota existente com a melhor nota encontrada até agora
+                            if (notaExistente >= melhorNota) {
+                                melhorNota = notaExistente;
+                                melhorComentario = doc.getString("comentario");
+
+                                // Determina o autor do comentário com base na avaliação existente
+                                String escritoPor = doc.getString("escritoPor");
+                                if ("aluno".equals(escritoPor)) {
+                                    autorMelhorComentario = doc.getString("alunoNome");
+                                } else {
+                                    autorMelhorComentario = doc.getString("professorNome");
+                                }
+                            }
                         }
                     }
 
                     double novaMedia = (novoTotalAvaliacoes > 0) ? novoTotalNotas / novoTotalAvaliacoes : 0.0;
                     double mediaArredondada = Math.round(novaMedia * 10.0) / 10.0;
+                    Log.d(TAG, "Cálculo Final: Média=" + mediaArredondada + ", Contagem=" + novoTotalAvaliacoes);
+                    Log.d(TAG, "Melhor Comentário: \"" + melhorComentario + "\" por " + autorMelhorComentario);
 
-                    Log.d(TAG, "Cálculo: Nova Média = " + mediaArredondada + " de " + novoTotalAvaliacoes + " avaliações.");
 
-                    // Passo 3: Usamos um "WriteBatch" para garantir que as duas escritas aconteçam juntas.
-                    // É como uma "mini-transação" apenas para operações de escrita.
+                    // --- ATUALIZAÇÃO NO FIREBASE ---
                     WriteBatch batch = db.batch();
 
-                    // 3.1. Prepara a escrita do novo documento de avaliação.
-                    DocumentReference newRatingRef = db.collection("avaliacoes").document(); // <-- Corrigido para .document()
-                    Map<String, Object> novaAvaliacao = new HashMap<>();
-                    novaAvaliacao.put("avaliadoId", avaliadoId);
-                    novaAvaliacao.put("avaliadorId", avaliadorId);
-                    novaAvaliacao.put("nota", nota);
-                    novaAvaliacao.put("comentario", comentario);
-                    novaAvaliacao.put("timestamp", new Date());
-                    batch.set(newRatingRef, novaAvaliacao);
+                    // 1. Salva a nova avaliação na coleção "avaliacoes"
+                    DocumentReference newRatingRef = db.collection("avaliacoes").document();
+                    batch.set(newRatingRef, review);
 
-                    // 3.2. Prepara a atualização no perfil do usuário.
-                    DocumentReference userRef = db.collection("users").document(avaliadoId); // <-- Corrigido para .document()
-                    batch.update(userRef, "ratingMedia", mediaArredondada);
-                    batch.update(userRef, "ratingCount", novoTotalAvaliacoes);
+                    // 2. Prepara a atualização no perfil do usuário na coleção "users"
+                    DocumentReference userRef = db.collection("users").document(avaliadoId);
 
-                    // 3.3. Executa todas as operações de escrita de uma só vez.
+                    // Atualiza TODOS os campos necessários
+                    Map<String, Object> updates = new HashMap<>();
+                    updates.put("ratingMedia", mediaArredondada);
+                    updates.put("ratingCount", novoTotalAvaliacoes);
+                    updates.put("comentarioMelhorAvaliado", melhorComentario);
+                    updates.put("autorComentarioMelhorAvaliado", autorMelhorComentario);
+
+                    batch.update(userRef, updates);
+
+                    // 3. Executa a transação
                     batch.commit()
                             .addOnSuccessListener(aVoid -> {
-                                Log.d(TAG, "Batch de escrita concluído com sucesso!");
+                                Log.d(TAG, "Sucesso! Campos de avaliação atualizados para o usuário " + avaliadoId);
                                 callback.onSuccess();
                             })
                             .addOnFailureListener(e -> {
-                                Log.e(TAG, "Falha no batch de escrita!", e);
+                                Log.e(TAG, "Erro ao atualizar campos de avaliação para o usuário " + avaliadoId, e);
                                 callback.onError(e);
                             });
-
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Falha ao buscar avaliações existentes!", e);
+                    Log.e(TAG, "Erro ao buscar avaliações existentes para o usuário " + avaliadoId, e);
                     callback.onError(e);
                 });
     }
