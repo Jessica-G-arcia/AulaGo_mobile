@@ -1,14 +1,17 @@
 package com.example.aulago;
 
 import android.content.Context;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -20,9 +23,12 @@ public class HomeAulaAdapter extends RecyclerView.Adapter<HomeAulaAdapter.AulaVi
     private List<ClassModel> aulasList;
     private Context context;
     private SimpleDateFormat dateFormatter;
+    private SimpleDateFormat dateComparator; // Para comparar "yyyyMMdd"
+    private String todayDateString; // String de "hoje"
 
     public HomeAulaAdapter(List<ClassModel> aulasList) {
         this.aulasList = aulasList;
+        // Formato de exibição para datas futuras
         this.dateFormatter = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
     }
 
@@ -38,21 +44,43 @@ public class HomeAulaAdapter extends RecyclerView.Adapter<HomeAulaAdapter.AulaVi
     public void onBindViewHolder(@NonNull AulaViewHolder holder, int position) {
         ClassModel aula = aulasList.get(position);
 
+        // 1. Define o nome do Aluno
         holder.tvAluno.setText("Aluno: " + aula.getAlunoNome());
-        holder.tvLocal.setText(aula.getLocal());
 
-        if (aula.getData() != null) {
-            holder.tvData.setText(dateFormatter.format(aula.getData()));
+        // 2. LÓGICA DE DATA (ÚNICA)
+        if (aula.getDataTimestamp() != null) {
+            long aulaMillis = aula.getDataTimestamp().toDate().getTime();
+            long nowMillis = System.currentTimeMillis();
+
+            // Gera a string relativa (Ex: "Hoje", "Amanhã")
+            CharSequence dataRelativa = DateUtils.getRelativeTimeSpanString(
+                    aulaMillis,
+                    nowMillis,
+                    DateUtils.DAY_IN_MILLIS
+            );
+            holder.tvData.setText(dataRelativa);
         }
 
-        String modalidade = (aula.getLocal() != null && !aula.getLocal().isEmpty()) ? "Presencial" : "Online";
+        // 3. LÓGICA DE MODALIDADE E HORÁRIO
+        String modalidade = aula.getModalidade();
+        if (modalidade == null || modalidade.isEmpty()) {
+            modalidade = "Presencial"; // Valor Padrão
+        }
 
+        // Define o horário (incluindo a modalidade)
         String horarioCompleto = "Horário: " + aula.getHorarioInicio() +
-                " às " + aula.getHorarioFim() +
-                " - " + modalidade;
-        holder.tvHorario.setText(horarioCompleto);
-    }
+                " às " + aula.getHorarioFim();
+        holder.tvHorario.setText(horarioCompleto); // (Definido apenas uma vez)
 
+        // 4. LÓGICA DE ÍCONE E LOCAL
+        if (modalidade.equalsIgnoreCase("Online") || modalidade.equalsIgnoreCase("Híbrida")) {
+            holder.tvLocal.setText("Online");
+            holder.tvLocal.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_camera, 0, 0, 0);
+        } else {
+            holder.tvLocal.setText(aula.getLocal());
+            holder.tvLocal.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_loc, 0, 0, 0);
+        }
+    }
     @Override
     public int getItemCount() {
         return aulasList != null ? aulasList.size() : 0;

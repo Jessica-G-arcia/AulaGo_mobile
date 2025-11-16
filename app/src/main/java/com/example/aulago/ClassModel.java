@@ -1,6 +1,6 @@
 package com.example.aulago;
 
-import java.util.Date;
+import com.google.firebase.Timestamp;
 
 // Esta classe substitui a antiga classe "Aula"
 public class ClassModel {
@@ -16,13 +16,14 @@ public class ClassModel {
     private String local;
 
     // Agendamento
-    private Date data;
+    private Timestamp dataTimestamp;
     private String horarioInicio;
     private String horarioFim;
 
     // Status e Avaliação
     private String status;         // Substitui 'concluida' (Ex: "Pendente", "Concluída")
-    private float avaliacao;     // Campo trazido da classe "Aula"
+    private float avaliacao; // Campo trazido da classe "Aula"
+    private String modalidade;
 
     // Construtor vazio - ESSENCIAL para o Firestore
     public ClassModel() {
@@ -78,13 +79,6 @@ public class ClassModel {
         this.local = local;
     }
 
-    public Date getData() {
-        return data;
-    }
-
-    public void setData(Date data) {
-        this.data = data;
-    }
 
     public String getHorarioInicio() {
         return horarioInicio;
@@ -117,5 +111,22 @@ public class ClassModel {
 
     public void setAvaliacao(float avaliacao) {
         this.avaliacao = avaliacao;
+    }
+
+
+    public Timestamp getDataTimestamp() {
+        return dataTimestamp;
+    }
+
+    public void setDataTimestamp(Timestamp dataTimestamp) {
+        this.dataTimestamp = dataTimestamp;
+    }
+
+    public String getModalidade() {
+        return modalidade;
+    }
+
+    public void setModalidade(String modalidade) {
+        this.modalidade = modalidade;
     }
 }

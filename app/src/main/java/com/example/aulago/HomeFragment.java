@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.aulago.databinding.FragmentHomeBinding;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser; // <-- Importe o FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -26,6 +27,8 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class HomeFragment extends Fragment {
@@ -55,7 +58,7 @@ public class HomeFragment extends Fragment {
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance(); // <-- ADICIONEI ESTA LINHA
         currentUserId = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : null;
-        currentUserType = loadUserTypeFromPreferences();
+        currentUserType = "professor";
 
         if (currentUserId == null) {
             // Lógica de erro, usuário não logado
@@ -224,27 +227,64 @@ public class HomeFragment extends Fragment {
     private void setupAulasCarousel(String idField) {
         homeAulaAdapter = new HomeAulaAdapter(new ArrayList<>());
         RecyclerView recyclerViewAulas = binding.recyclerAulas;
-        LinearLayoutManager layoutManagerAulas = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+        LinearLayoutManager layoutManagerAulas = new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false);
         recyclerViewAulas.setLayoutManager(layoutManagerAulas);
         recyclerViewAulas.setAdapter(homeAulaAdapter);
 
-        // TODO: Lógica dos botões de scroll (binding.btnAulasLeft, etc) ...
+        // --- LÓGICA DA DATA ---
+        // 1. Pega a partir do horario atual
+        Timestamp startTimestamp = new Timestamp(new Date());
 
+        // (O endTimestamp não é mais usado na consulta,
+        // mas pode ser útil para outra lógica no futuro)
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.SECOND, 59);
+        cal.set(Calendar.MILLISECOND, 999);
+        Date endOfToday = cal.getTime();
+        Timestamp endTimestamp = new Timestamp(endOfToday);
+
+
+        // Busca todas as aulas (limite 10) a partir do INÍCIO de hoje
         db.collection("aulas")
-                .whereEqualTo("status", "Agendada")
-                .whereEqualTo(idField, currentUserId) // Filtra pelo ID do Aluno ou Professor
-                .limit(10)
+                .whereEqualTo("status", "confirmada")
+                .whereEqualTo(idField, currentUserId)
+                .whereGreaterThanOrEqualTo("dataTimestamp", startTimestamp) // A partir do início de hoje
+                .orderBy("dataTimestamp") // Ordena pela data (mais próxima primeiro)
+                .limit(10) // Pega as próximas 10
                 .get()
                 .addOnCompleteListener(task -> {
+                    if (binding == null) return; // Proteção contra crash
+
                     if (task.isSuccessful()) {
-                        if (binding == null) return;
-                        List<ClassModel> aulas = new ArrayList<>();
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            aulas.add(document.toObject(ClassModel.class));
+                        List<ClassModel> aulas = task.getResult().toObjects(ClassModel.class);
+
+                        if (aulas.isEmpty()) {
+                            // Nenhuma aula HOJE nem no FUTURO.
+                            binding.recyclerAulas.setVisibility(View.GONE);
+                            binding.tvSemAulas.setText("Nenhuma aula agendada.");
+                            binding.tvSemAulas.setVisibility(View.VISIBLE);
+                            binding.tvTodayClassesTitle.setText("Aulas Agendadas");
+
+                        } else {
+                            // Temos aulas!
+                            binding.recyclerAulas.setVisibility(View.VISIBLE);
+                            binding.tvSemAulas.setVisibility(View.GONE);
+
+                            // Define o título fixo (como você pediu)
+                            binding.tvTodayClassesTitle.setText("Aulas Agendadas");
+
+                            // Envia a lista para o adapter
+                            homeAulaAdapter.updateList(aulas);
                         }
-                        homeAulaAdapter.updateList(aulas);
+
                     } else {
+                        // --- CASO 3: A TAREFA FALHOU (Ex: Erro de índice) ---
                         Log.e("FirebaseError", "Erro ao buscar aulas: ", task.getException());
+                        binding.recyclerAulas.setVisibility(View.GONE);
+                        binding.tvSemAulas.setText("Erro ao carregar aulas.");
+                        binding.tvSemAulas.setVisibility(View.VISIBLE);
                     }
                 });
     }

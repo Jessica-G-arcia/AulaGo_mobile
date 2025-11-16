@@ -82,7 +82,7 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
         }
 
         // --- 2. Lógica principal: Mostrar "Avaliar" ou o Status ---
-        Date classEndDateTime = getClassEndDateTime(classModel.getData(), classModel.getHorarioFim());
+        Date classEndDateTime = getClassEndDateTime(classModel.getDataTimestamp().toDate(), classModel.getHorarioFim());
         boolean hasPassed = classEndDateTime != null && new Date().after(classEndDateTime);
         boolean isCancelled = classModel.getStatus() != null && classModel.getStatus().equalsIgnoreCase("cancelada");
 
