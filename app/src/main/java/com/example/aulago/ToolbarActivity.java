@@ -1,52 +1,38 @@
 package com.example.aulago;
 
-import android.os.Bundle;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
+import android.os.Bundle;
 import android.util.Log;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.widget.ImageView;
-import android.view.View; // <-- ADICIONADO PARA OPÇÃO 1
+import android.view.ContextThemeWrapper;
+import android.view.View;
+import android.widget.PopupMenu;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.PopupMenu;
-
-// --- IMPORTS ADICIONADOS PARA OPÇÃO 1 ---
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
-// --- FIM DOS IMPORTS ---
+import androidx.fragment.app.Fragment;
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKeys;
+
+import com.bumptech.glide.Glide;
+import com.example.aulago.databinding.ActivityToolbarBinding;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.security.GeneralSecurityException;
 
-import androidx.fragment.app.Fragment;
-import android.content.Context;
-import androidx.appcompat.view.ContextThemeWrapper;
-
-// IMPORTS PARA A BIOMETRIA
-import androidx.security.crypto.EncryptedSharedPreferences;
-import androidx.security.crypto.MasterKeys;
-
-import com.bumptech.glide.Glide;
-// MUDANÇA 1: Import corrigido
-import com.example.aulago.databinding.ActivityToolbarBinding;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.ismaeldivita.chipnavigation.ChipNavigationBar;
-
-import de.hdodenhof.circleimageview.CircleImageView;
-
 public class ToolbarActivity extends AppCompatActivity {
 
-    // MUDANÇA 2: Declaração da variável corrigida
     private ActivityToolbarBinding binding;
     public static final String ROLE_PROFESSOR = "Professor";
     public static final String ROLE_ALUNO = "Aluno";
@@ -63,18 +49,18 @@ public class ToolbarActivity extends AppCompatActivity {
     private FirebaseAuth auth;
     private FirebaseFirestore db;
 
+    private String userStatus = "aluno";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // MUDANÇA 3: Inflação do layout corrigida
         binding = ActivityToolbarBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        // --- CHAMADA DO MÉTODO ADICIONADA AQUI ---
+        // --- Chamada para o layout ---
         ajustarLayout();
 
         setSupportActionBar(binding.toolbarLayout.toolbar);
@@ -83,18 +69,16 @@ public class ToolbarActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("");
         }
 
-        ImageView notificationIcon = binding.toolbarLayout.ivNotifications;
-        notificationIcon.setOnClickListener(view -> {
-            replaceFragment(new NotificationsFragment());
-        });
-
         loadUserDataAndSetupUI();
     }
 
+    /**
+     * Função principal que busca os dados do usuário no Firestore
+     * e configura toda a UI baseada nesses dados.
+     */
     private void loadUserDataAndSetupUI() {
         FirebaseUser user = auth.getCurrentUser();
         if (user == null) {
-            // Se o usuário for nulo, volta para o login
             Intent intent = new Intent(this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
@@ -105,59 +89,72 @@ public class ToolbarActivity extends AppCompatActivity {
         String uid = user.getUid();
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(document -> {
-                    String userRole = ROLE_ALUNO; // Padrão
+                    String userRole = ROLE_ALUNO;
                     String userPhotoUrl = null;
+                    this.userStatus = "aluno"; // Padrão
 
                     if (document.exists()) {
                         String status = document.getString("statusSolicitacao");
+
+                        if (status != null && !status.isEmpty()) {
+                            this.userStatus = status;
+                        }
+
                         if ("aprovado".equals(status)) {
                             userRole = ROLE_PROFESSOR;
                         }
                         userPhotoUrl = document.getString("urlFotoPerfil");
                     }
-                    setupUIWithRole(userRole, userPhotoUrl);
+
+                    if (binding != null) {
+                        Glide.with(this)
+                                .load(userPhotoUrl)
+                                .placeholder(R.drawable.img_avatar_circle)
+                                .error(R.drawable.img_avatar_circle)
+                                .into(binding.toolbarLayout.ivUserAvatar);
+                    }
+
+                    setupUIWithRole(userRole);
                 })
                 .addOnFailureListener(e -> {
-                    // Em caso de falha, carrega como aluno
-                    setupUIWithRole(ROLE_ALUNO, null);
+                    if (binding != null) {
+                        Glide.with(this)
+                                .load((String) null)
+                                .placeholder(R.drawable.img_avatar_circle)
+                                .error(R.drawable.img_avatar_circle)
+                                .into(binding.toolbarLayout.ivUserAvatar);
+                    }
+                    setupUIWithRole(ROLE_ALUNO);
                 });
     }
 
-    private void setupUIWithRole(String userRole, String userPhotoUrl) {
-        loadUserProfileImage(userPhotoUrl);
+    /**
+     * Configura toda a UI da Activity depois que os dados do usuário foram buscados.
+     */
+    private void setupUIWithRole(String userRole) {
+        BottomNavigationView bottomNav = binding.bottomNavigation;
+        bottomNav.getMenu().clear();
 
-        ChipNavigationBar bottomNav = binding.bottomNavigation;
         if (ROLE_PROFESSOR.equals(userRole)) {
-            bottomNav.setMenuResource(R.menu.bottom_menu_professor);
+            bottomNav.inflateMenu(R.menu.bottom_menu_professor);
         } else {
-            bottomNav.setMenuResource(R.menu.bottom_menu_aluno);
+            bottomNav.inflateMenu(R.menu.bottom_menu_aluno);
         }
 
-        setupNavigationListener(bottomNav, userRole);
-        setupAvatarClickListener(userRole);
+        setupClickListeners(userRole);
 
-        // Carrega o fragmento inicial se não houver um
         if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) == null) {
             replaceFragment(new HomeFragment());
-            bottomNav.setItemSelected(R.id.nav_home, true);
+            bottomNav.setSelectedItemId(R.id.nav_home);
         }
     }
 
-    private void loadUserProfileImage(String userPhotoUrl) {
-        CircleImageView avatarIcon = binding.toolbarLayout.ivUserAvatar;
-        if (userPhotoUrl != null && !userPhotoUrl.isEmpty()) {
-            Glide.with(this)
-                    .load(userPhotoUrl)
-                    .placeholder(R.drawable.img_avatar_circle)
-                    .error(R.drawable.img_avatar_circle)
-                    .into(avatarIcon);
-        } else {
-            avatarIcon.setImageResource(R.drawable.img_avatar_circle);
-        }
-    }
+    private void setupClickListeners(String userRole) {
+        BottomNavigationView bottomNav = binding.bottomNavigation;
 
-    private void setupNavigationListener(ChipNavigationBar bottomNav, String userRole) {
-        bottomNav.setOnItemSelectedListener(id -> {
+        bottomNav.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+
             if (id == R.id.nav_home) {
                 replaceFragment(new HomeFragment());
             } else if (id == R.id.nav_classes) {
@@ -166,67 +163,43 @@ public class ToolbarActivity extends AppCompatActivity {
                 replaceFragment(new CalendarFragment());
             } else if (id == R.id.nav_search) {
                 if (ROLE_PROFESSOR.equals(userRole)) {
-                    replaceFragment(new SearchAlunosFragment());
+                    if ("aprovado".equals(this.userStatus)) {
+                        replaceFragment(new SearchAlunosFragment());
+                    } else {
+                        replaceFragment(new LockedFeatureFragment());
+                    }
                 } else {
                     replaceFragment(new SearchProfessoresFragment());
                 }
             } else if (id == R.id.nav_profile) {
-                if (ROLE_PROFESSOR.equals(userRole)) {
-                    replaceFragment(new ProfessorPerfilFragment());
-                } else {
-                    replaceFragment(new AlunoPerfilFragment());
-                }
+                replaceFragment(ROLE_PROFESSOR.equals(userRole) ? new ProfessorPerfilFragment() : new AlunoPerfilFragment());
             }
+            return true;
         });
-    }
 
-    private void setupAvatarClickListener(String userRole) {
-        CircleImageView avatarIcon = binding.toolbarLayout.ivUserAvatar;
-        avatarIcon.setOnClickListener(view -> {
-            Context wrapper = new ContextThemeWrapper(this, R.style.MyPopupMenuStyle);
-            PopupMenu popup = new PopupMenu(wrapper, view);
+        // Listeners da barra de ferramentas superior
+        binding.toolbarLayout.ivNotifications.setOnClickListener(v ->
+                replaceFragment(new NotificationsFragment())
+        );
 
-            MenuInflater inflater = popup.getMenuInflater();
-            inflater.inflate(R.menu.profile_dropdown_menu, popup.getMenu());
+        // OPÇÃO A: Se você quer REMOVER os ícones antigos e usar APENAS o dropdown
+        // Comente ou remova estas linhas:
+    /*
+    binding.toolbarLayout.ivSettings.setOnClickListener(v ->
+        replaceFragment(new EditarDadosPessoaisFragment())
+    );
+    binding.toolbarLayout.ivLogout.setOnClickListener(v ->
+        showLogoutConfirmationDialog()
+    );
+    */
 
-            popup.setOnMenuItemClickListener(item -> {
-                int id = item.getItemId();
-                if (id == R.id.menu_profile) {
-                    if (ROLE_PROFESSOR.equals(userRole)) {
-                        replaceFragment(new ProfessorPerfilFragment());
-                    } else {
-                        replaceFragment(new AlunoPerfilFragment());
-                    }
-                    binding.bottomNavigation.setItemSelected(R.id.nav_profile, true);
-                    return true;
-                } else if (id == R.id.menu_settings) {
-                    replaceFragment(new EditarDadosPessoaisFragment());
-                    return true;
-                } else if (id == R.id.menu_logout) {
-                    showLogoutConfirmationDialog();
-                    return true;
-                }
-                return false;
-            });
+        // OPÇÃO B: Se você quer MANTER os ícones antigos E adicionar o dropdown
+        // Mantenha as linhas acima descomentadas
 
-            // Forçar ícones
-            try {
-                Field[] fields = popup.getClass().getDeclaredFields();
-                for (Field field : fields) {
-                    if ("mPopup".equals(field.getName())) {
-                        field.setAccessible(true);
-                        Object menuPopupHelper = field.get(popup);
-                        Class<?> classPopupHelper = Class.forName(menuPopupHelper.getClass().getName());
-                        Method setForceIcons = classPopupHelper.getMethod("setForceShowIcon", boolean.class);
-                        setForceIcons.invoke(menuPopupHelper, true);
-                        break;
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            popup.show();
-        });
+        // NOVO: Listener para o avatar que mostra o PopupMenu
+        binding.toolbarLayout.ivUserAvatar.setOnClickListener(v ->
+                showProfileMenu(v)
+        );
     }
 
     public void replaceFragment(Fragment fragment) {
@@ -236,7 +209,6 @@ public class ToolbarActivity extends AppCompatActivity {
                 .addToBackStack(null)
                 .commit();
     }
-
 
     private void showLogoutConfirmationDialog() {
         new AlertDialog.Builder(this)
@@ -250,27 +222,18 @@ public class ToolbarActivity extends AppCompatActivity {
     }
 
     private void performLogout() {
-        // 1. Encerrar a sessão do Firebase
         auth.signOut();
-
-        // 2. Limpar APENAS a flag da sessão "Lembrar Senha"
         SharedPreferences.Editor editor = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
         editor.putBoolean(KEY_REMEMBER_ME, false);
         editor.apply();
 
-        // 3. NÃO APAGAR AS CREDENCIAIS DE BIOMETRIA.
-        // 4. Voltar para a tela de login com a flag
         Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra("JUST_LOGGED_OUT", true); // Envia a flag
+        intent.putExtra("JUST_LOGGED_OUT", true);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
     }
 
-    /**
-     * Este método não é chamado no logout normal,
-     * mas é mantido aqui caso seja necessário em outro fluxo (ex: login google)
-     */
     private void apagarCredenciaisSeguras() {
         try {
             String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
@@ -281,52 +244,117 @@ public class ToolbarActivity extends AppCompatActivity {
                     EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                     EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
             );
-
-            // Apaga as chaves criptografadas
             securePreferences.edit()
                     .remove(KEY_USER_EMAIL)
                     .remove(KEY_USER_PASS)
                     .apply();
             Log.d("SecurePrefs", "Credenciais de biometria apagadas.");
-
         } catch (GeneralSecurityException | IOException e) {
             Log.e("SecurePrefs", "Erro ao apagar credenciais seguras", e);
         }
     }
 
-    // --- MÉTODO ADICIONADO DA OPÇÃO 1 ---
+    // --- MÉTODO DE LAYOUT CORRIGIDO (VERSÃO FINAL) ---
     private void ajustarLayout() {
-        // 'getRoot()' é a sua view principal (provavelmente um ConstraintLayout)
-        View mainView = binding.getRoot();
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
 
-        // Salva o padding original do seu XML (se houver)
-        int originalPaddingLeft = mainView.getPaddingLeft();
-        int originalPaddingTop = mainView.getPaddingTop();
-        int originalPaddingRight = mainView.getPaddingRight();
-        int originalPaddingBottom = mainView.getPaddingBottom();
+        View bottomNav = binding.bottomNavigation;
+        View toolbar = binding.toolbarLayout.toolbar;
+        View container = binding.fragmentContainer;
 
-        ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
-            // Pega os insets da barra de status (topo)
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+        // Salva os paddings originais
+        if (toolbar.getTag() == null) {
+            toolbar.setTag(toolbar.getPaddingTop());
+        }
+        final int originalToolbarTop = (int) toolbar.getTag();
 
-            // Pega os insets do TECLADO (IME)
-            Insets imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime());
+        if (bottomNav.getTag() == null) {
+            bottomNav.setTag(bottomNav.getPaddingBottom());
+        }
+        final int originalBottomNavBottom = (int) bottomNav.getTag();
 
-            // Pega os insets da barra de navegação (gestos/botões)
+        // Toolbar - Reage apenas à barra de status
+        ViewCompat.setOnApplyWindowInsetsListener(toolbar, (v, insets) -> {
+            Insets statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars());
+            v.setPadding(
+                    v.getPaddingLeft(),
+                    originalToolbarTop + statusBars.top,
+                    v.getPaddingRight(),
+                    v.getPaddingBottom()
+            );
+            return insets; // ✅ NÃO consome
+        });
+
+        // Bottom Navigation - Reage apenas à barra de navegação (NÃO ao teclado)
+        ViewCompat.setOnApplyWindowInsetsListener(bottomNav, (v, insets) -> {
             Insets navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
+            v.setPadding(
+                    v.getPaddingLeft(),
+                    v.getPaddingTop(),
+                    v.getPaddingRight(),
+                    originalBottomNavBottom + navBars.bottom
+            );
+            return insets; // ✅ NÃO consome
+        });
 
-            // Calcula o padding
-            int paddingLeft = originalPaddingLeft + systemBars.left;
-            int paddingTop = originalPaddingTop + systemBars.top; // <-- Adiciona padding no topo
-            int paddingRight = originalPaddingRight + systemBars.right;
-
-            // O padding de baixo é o original + o MAIOR valor entre o teclado e a barra de navegação
-            int paddingBottom = originalPaddingBottom + Math.max(imeInsets.bottom, navBars.bottom); // <-- Adiciona padding embaixo
-
-            // Aplica o padding
-            v.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
-
-            return insets;
+        // Container - NÃO aplica padding para o teclado
+        // Deixa o ScrollView dentro do Fragment lidar com isso
+        ViewCompat.setOnApplyWindowInsetsListener(container, (v, insets) -> {
+            // Simplesmente retorna os insets sem modificar
+            return insets; // ✅ Permite que o ScrollView reaja
         });
     }
+
+    /**
+     * Mostra o menu dropdown quando clica na foto de perfil
+     * @param anchor View que serve como âncora para o menu (o avatar)
+     */
+//    private void showProfileMenu(View anchor) {
+//        PopupMenu popupMenu = new PopupMenu(this, anchor);
+//        popupMenu.getMenuInflater().inflate(R.menu.profile_dropdown_menu, popupMenu.getMenu());
+//
+//        popupMenu.setOnMenuItemClickListener(item -> {
+//            int id = item.getItemId();
+//
+//            if (id == R.id.menu_edit_profile) {
+//                replaceFragment(new EditarDadosPessoaisFragment());
+//                return true;
+//
+//            } else if (id == R.id.menu_logout) {
+//                showLogoutConfirmationDialog();
+//                return true;
+//            }
+//
+//            return false;
+//        });
+//
+//        popupMenu.show();
+//    }
+
+    private void showProfileMenu(View anchor) {
+        PopupMenu popupMenu = new PopupMenu(this, anchor);
+
+        // Adiciona itens manualmente
+        popupMenu.getMenu().add(0, 1, 0, "Editar cadastro");
+        popupMenu.getMenu().add(0, 2, 1, "Sair");
+
+        popupMenu.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == 1) {
+                replaceFragment(new EditarDadosPessoaisFragment());
+                return true;
+            } else if (item.getItemId() == 2) {
+                showLogoutConfirmationDialog();
+                return true;
+            }
+            return false;
+        });
+
+        popupMenu.show();
+    }
+
+
+
+
+
+
 }

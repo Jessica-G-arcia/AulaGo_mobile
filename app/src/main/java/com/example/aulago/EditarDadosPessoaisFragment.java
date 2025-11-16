@@ -1,9 +1,5 @@
 package com.example.aulago;
 
-
-
-import static android.os.Build.VERSION_CODES.N;
-
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -21,7 +17,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
-import java.util.List; // <-- IMPORT NECESSÁRIO
+import java.util.List;
 import java.util.Map;
 
 public class EditarDadosPessoaisFragment extends Fragment {
@@ -99,10 +95,11 @@ public class EditarDadosPessoaisFragment extends Fragment {
                         binding.inputCidade.setText(document.getString("cidade"));
                         binding.inputEstado.setText(document.getString("estado"));
 
-                        // --- LÓGICA DE DADOS BANCÁRIOS (NOVA) ---
-                        // Verifica se o usuário é professor
-                        List<String> roles = (List<String>) document.get("roles");
-                        if (roles != null && roles.contains("professor")) {
+                        // --- LÓGICA DE DADOS BANCÁRIOS (CORRIGIDA) ---
+                        // A verificação correta é pelo "statusSolicitacao",
+                        // igual você faz na ToolbarActivity.
+                        String status = document.getString("statusSolicitacao");
+                        if ("aprovado".equals(status)) {
                             // É professor, mostra a seção
                             binding.layoutDadosBancarios.setVisibility(View.VISIBLE);
 
@@ -112,7 +109,7 @@ public class EditarDadosPessoaisFragment extends Fragment {
                             binding.inputConta.setText(document.getString("conta"));
                             binding.inputPix.setText(document.getString("pix"));
                         } else {
-                            // Não é professor, esconde a seção
+                            // Não é professor ou está pendente, esconde a seção
                             binding.layoutDadosBancarios.setVisibility(View.GONE);
                         }
                         // --- FIM DA LÓGICA ---
@@ -179,9 +176,6 @@ public class EditarDadosPessoaisFragment extends Fragment {
                 .addOnFailureListener(e -> {
                     if (!isAdded()) return;
                     progressDialog.dismiss();
-
-                    // --- CORREÇÃO AQUI ---
-                    // O 'N' estava fora das aspas
                     Toast.makeText(requireContext(), "Erro ao salvar: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }

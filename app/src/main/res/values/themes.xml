@@ -64,4 +64,12 @@
         <item name="itemRippleColor">@android:color/transparent</item>
     </style>
 
+    <style name="MenuDropDown" parent="Widget.Material3.PopupMenu">
+        <item name="android:popupBackground">@android:color/white</item>
+        <item name="android:textColorPrimary">@android:color/black</item>
+    </style>
+
+
+
+
 </resources>

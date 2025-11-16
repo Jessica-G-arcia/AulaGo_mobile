@@ -25,17 +25,21 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbarLayout" />
 
-    <com.ismaeldivita.chipnavigation.ChipNavigationBar
+    <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:background="@drawable/fundo_barra_arredondado"
+        style="@style/BottomNavigationStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/card_background"
+        android:backgroundTint="@color/laranja"
+
         android:elevation="8dp"
-        app:cnb_menuResource="@menu/bottom_menu_professor"
-        app:cnb_radius="28dp"
-        app:cnb_unselectedColor="@color/cinza_texto"
+
+        app:labelVisibilityMode="labeled"
+
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="@id/fragment_container"
+        app:menu="@menu/bottom_menu_professor" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

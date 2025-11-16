@@ -10,15 +10,16 @@
         android:id="@+id/tab_layout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="25dp"
+        android:background="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:tabGravity="fill"
-        app:tabIndicatorColor="@color/azul_app"
+        app:tabIndicatorColor="@color/azul"
         app:tabMode="fixed"
-        app:tabRippleColor="@android:color/transparent"
-        app:tabSelectedTextColor="@color/azul_app"
+        app:tabRippleColor="@android:color/white"
+        app:tabSelectedTextColor="@color/azul"
         app:tabTextColor="@color/cinza_texto" />
 
     <androidx.viewpager2.widget.ViewPager2
