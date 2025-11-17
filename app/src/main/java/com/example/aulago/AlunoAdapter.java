@@ -58,7 +58,7 @@ public class AlunoAdapter extends RecyclerView.Adapter<AlunoAdapter.AlunoViewHol
 
         // Define os dados básicos (Corrigido de getHome() para getNome())
         holder.tvStudentName.setText(aluno.getNome());
-        holder.tvStudentAge.setText(String.format(Locale.US, "%d anos", aluno.getIdade()));
+        holder.tvStudentAge.setText("Idade não informada");
         holder.tvStudentDescription.setText(aluno.getBio());
 
         // Carrega a foto de perfil
@@ -94,6 +94,18 @@ public class AlunoAdapter extends RecyclerView.Adapter<AlunoAdapter.AlunoViewHol
             // Se não há avaliações, mostra "Novo" e esconde a contagem
             holder.tvStudentRating.setText("⭐ Novo");
             holder.tvStudentReviews.setVisibility(View.GONE);
+        }
+
+        // 1. Chame o método
+        Integer idade = aluno.getIdade();
+
+        // 2. VERIFIQUE SE É NULO!
+        if (idade != null) {
+            holder.tvStudentAge.setText(idade + " anos"); // Concatenação simples
+            holder.tvStudentAge.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvStudentAge.setText("Idade não informada");
+            holder.tvStudentAge.setVisibility(View.VISIBLE);
         }
 
         // Define o clique no botão

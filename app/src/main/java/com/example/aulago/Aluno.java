@@ -4,6 +4,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.firebase.firestore.DocumentId;
+import com.google.firebase.firestore.Exclude;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 public class Aluno implements Parcelable {
 
@@ -16,14 +21,13 @@ public class Aluno implements Parcelable {
     private String urlFotoPerfil;
     private String bio;
     private String userType;
-    private int idade;
+    private String dataNascimento;
     private double ratingMedia;
     private long ratingCount;
 
 
     // 2. Construtor vazio (OBRIGATÓRIO para o Firebase)
-    public Aluno() {
-    }
+    public Aluno() {}
 
     // 3. Getters (Usados pelo Adapter e Fragment)
     public String getId() {
@@ -50,8 +54,49 @@ public class Aluno implements Parcelable {
         return userType;
     }
 
-    public int getIdade() {
-        return idade;
+
+
+
+
+    /**
+     * Calcula a idade com base na dataNascimento.
+     * Retorna null se a data for inválida ou não existir.
+     * A anotação @Exclude impede o Firestore de tentar salvar este método.
+     */
+    @Exclude
+    public Integer getIdade() {
+        if (dataNascimento == null || dataNascimento.isEmpty()) {
+            return null; // Não há data de nascimento
+        }
+
+        try {
+            // 1. Define o formato da data
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+
+            // 2. Converte a String (agora dtNasc é String)
+            java.util.Date dataNasc = sdf.parse(dataNascimento); // <--- ISTO VAI FUNCIONAR
+
+            // 3. Cria um calendário para a data de nascimento
+            Calendar calNasc = Calendar.getInstance();
+            calNasc.setTime(dataNasc);
+
+            // 4. Cria um calendário para HOJE
+            Calendar hoje = Calendar.getInstance();
+
+            // 5. Calcula a diferença de anos
+            int idade = hoje.get(Calendar.YEAR) - calNasc.get(Calendar.YEAR);
+
+            // 6. Verifica se o aniversário deste ano já passou
+            if (hoje.get(Calendar.DAY_OF_YEAR) < calNasc.get(Calendar.DAY_OF_YEAR)) {
+                idade--; // Se não passou, diminui 1 ano
+            }
+
+            return idade;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 
@@ -71,7 +116,7 @@ public class Aluno implements Parcelable {
         urlFotoPerfil = in.readString();
         bio = in.readString();
         userType = in.readString();
-        idade = in.readInt();
+        dataNascimento = in.readString();
         ratingCount = in.readLong();
         ratingMedia = in.readDouble();
     }
@@ -84,7 +129,7 @@ public class Aluno implements Parcelable {
         dest.writeString(urlFotoPerfil);
         dest.writeString(bio);
         dest.writeString(userType);
-        dest.writeInt(idade);
+        dest.writeString(dataNascimento);
         dest.writeLong(ratingCount);
         dest.writeDouble(ratingMedia);
     }
@@ -120,5 +165,13 @@ public class Aluno implements Parcelable {
 
     public void setRatingCount(long ratingCount) {
         this.ratingCount = ratingCount;
+    }
+
+    public String getDataNascimento() {
+        return dataNascimento;
+    }
+
+    public void setDataNascimento(String dataNascimento) {
+        this.dataNascimento = dataNascimento;
     }
 }
