@@ -1,40 +1,20 @@
 package com.example.aulago;
 
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.os.Bundle;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.view.View;
 // import android.widget.TextView; // Import não é mais necessário
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
-import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 
-import android.content.Context;
 
-import androidx.appcompat.view.ContextThemeWrapper;
-
-// IMPORTS ADICIONADOS PARA A CORREÇÃO DE COR
-import android.content.Context;
 
 import androidx.appcompat.view.ContextThemeWrapper; // <-- 1. NOVO IMPORT
 import androidx.security.crypto.EncryptedSharedPreferences;
@@ -47,9 +27,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -67,7 +44,7 @@ public class ToolbarActivity extends AppCompatActivity {
     private static final String KEY_USER_EMAIL = "userEmail";
     private static final String KEY_USER_PASS = "userPass";
     private static final String KEY_BIOMETRIC_EMAIL_ALIAS = "biometricEmailAlias";
-    // --- FIM DAS CONSTANTES ---
+
 
     private FirebaseAuth auth;
     private FirebaseFirestore db;
@@ -91,19 +68,16 @@ public class ToolbarActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("");
         }
 
-        ImageView notificationIcon = binding.toolbarLayout.ivNotifications;
-        notificationIcon.setOnClickListener(view -> {
-            replaceFragment(new NotificationsFragment());
+        binding.toolbarLayout.ivChatbot.setOnClickListener(v -> {
+            replaceFragment(new ChatFragment());
         });
 
         loadUserDataAndSetupUI();
-        configurarLayoutImersivoHibrido();
     }
 
     private void loadUserDataAndSetupUI() {
         FirebaseUser user = auth.getCurrentUser();
         if (user == null) {
-            // Se o usuário for nulo, volta para o login
             Intent intent = new Intent(this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
@@ -182,11 +156,9 @@ public class ToolbarActivity extends AppCompatActivity {
             return true;
         });
 
-        // --- Listeners da Toolbar Superior ---
-
-//        binding.toolbarLayout.ivChatbot.setOnClickListener(v ->
-//                replaceFragment(new ChatFragment())
-//        );
+        binding.toolbarLayout.ivChatbot.setOnClickListener(v ->
+                replaceFragment(new ChatFragment())
+        );
 
         binding.toolbarLayout.ivNotifications.setOnClickListener(v ->
                 replaceFragment(new NotificationsFragment())
@@ -208,7 +180,6 @@ public class ToolbarActivity extends AppCompatActivity {
                 .addToBackStack(null)
                 .commit();
     }
-
 
     private void showLogoutConfirmationDialog() {
         new AlertDialog.Builder(this)
@@ -300,48 +271,4 @@ public class ToolbarActivity extends AppCompatActivity {
             return insets;
         });
     }
-
-    // --- MÉTODO DE LAYOUT CORRIGIDO ---
-    private void configurarLayoutImersivoHibrido() {
-        // 1. Diz ao sistema que vamos cuidar do layout
-        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
-
-        View mainView = binding.getRoot();
-        int originalPaddingLeft = mainView.getPaddingLeft();
-        int originalPaddingTop = mainView.getPaddingTop();
-        int originalPaddingRight = mainView.getPaddingRight();
-        int originalPaddingBottom = mainView.getPaddingBottom();
-
-        // (A linha 'extraPaddingBottom' foi REMOVIDA)
-
-        // 2. Ouve as mudanças de insets (barras e teclado)
-        ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
-
-            // Pega o tamanho da barra de status (topo)
-            Insets statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars());
-            // Pega o tamanho do teclado (para o rodapé)
-            Insets imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime());
-
-            // Calcula o padding
-            int paddingLeft = originalPaddingLeft + statusBars.left;
-            int paddingTop = originalPaddingTop + statusBars.top; // Respeita a barra de status
-            int paddingRight = originalPaddingRight + statusBars.right;
-
-            // O padding de baixo agora é SÓ o original + o teclado
-            int paddingBottom = originalPaddingBottom + imeInsets.bottom;
-
-            v.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
-
-            return insets;
-        });
-
-        // 3. Esconde a barra de navegação (embaixo)
-        WindowInsetsControllerCompat controller = new WindowInsetsControllerCompat(getWindow(), mainView);
-        //controller.hide(WindowInsetsCompat.Type.navigationBars());
-        controller.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-    }
-
-    // --- MÉTODO dpToPx REMOVIDO ---
-    // (Você pode apagar o método dpToPx, pois não o usamos mais)
-    // private int dpToPx(int dp) { ... }
 }
