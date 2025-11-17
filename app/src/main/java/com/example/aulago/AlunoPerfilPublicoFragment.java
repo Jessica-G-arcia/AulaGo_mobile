@@ -170,8 +170,8 @@ public class AlunoPerfilPublicoFragment extends Fragment {
                     tvNomeAluno.setText(documentSnapshot.getString("nome"));
 
                     // Avatar
-                    String fotoUrl = documentSnapshot.getString("urlFotoPerfil");
-                    Glide.with(requireContext()).load(fotoUrl)
+                    String urlFotoPerfil = documentSnapshot.getString("urlFotoPerfil");
+                    Glide.with(requireContext()).load(urlFotoPerfil)
                             .placeholder(R.drawable.img_avatar_circle)
                             .error(R.drawable.img_avatar_circle)
                             .into(ivAvatar);

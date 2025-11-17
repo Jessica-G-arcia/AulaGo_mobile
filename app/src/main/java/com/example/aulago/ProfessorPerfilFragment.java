@@ -263,11 +263,11 @@ public class ProfessorPerfilFragment extends Fragment {
                         }
 
                         // Carregar foto do avatar
-                        String fotoUrl = document.getString("urlFotoPerfil");
-                        if (fotoUrl != null && !fotoUrl.isEmpty()) {
+                        String urlFotoPerfil = document.getString("urlFotoPerfil");
+                        if (urlFotoPerfil != null && !urlFotoPerfil.isEmpty()) {
                             // MUDOU: 'this' para 'requireContext()'
                             Glide.with(requireContext())
-                                    .load(fotoUrl)
+                                    .load(urlFotoPerfil)
                                     .placeholder(R.drawable.img_avatar_circle)
                                     .error(R.drawable.img_avatar_circle)
                                     .into(ivAvatar);

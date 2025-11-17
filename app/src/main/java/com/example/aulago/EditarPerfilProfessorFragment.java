@@ -43,7 +43,7 @@ public class EditarPerfilProfessorFragment extends Fragment { // <-- MUDOU
     // Lógica de Foto
     private ActivityResultLauncher<String> mGetContent;
     private Uri imageUri;
-    private String currentFotoUrl;
+    private String currentUrlFotoPerfil;
 
     // 'onCreate' do Fragmento: para inicializar dados não-visuais
     @Override
@@ -125,11 +125,11 @@ public class EditarPerfilProfessorFragment extends Fragment { // <-- MUDOU
                             etValorOnline.setText(String.valueOf(document.getDouble("valorOnline")));
                         }
 
-                        currentFotoUrl = document.getString("urlFotoPerfil");
-                        if (currentFotoUrl != null && !currentFotoUrl.isEmpty()) {
+                        currentUrlFotoPerfil = document.getString("urlFotoPerfil");
+                        if (currentUrlFotoPerfil != null && !currentUrlFotoPerfil.isEmpty()) {
                             // MUDOU: 'this' para 'requireContext()'
                             Glide.with(requireContext())
-                                    .load(currentFotoUrl)
+                                    .load(currentUrlFotoPerfil)
                                     .placeholder(R.drawable.img_avatar_circle)
                                     .into(ivFotoPerfil);
                         }
@@ -149,7 +149,7 @@ public class EditarPerfilProfessorFragment extends Fragment { // <-- MUDOU
         if (imageUri != null) {
             fazerUploadDaImagem();
         } else {
-            salvarDadosNoFirestore(currentFotoUrl);
+            salvarDadosNoFirestore(currentUrlFotoPerfil);
         }
     }
 
@@ -176,7 +176,7 @@ public class EditarPerfilProfessorFragment extends Fragment { // <-- MUDOU
     /**
      * Passo Final: Salva TODOS os dados (texto + URL da foto) no Firestore.
      */
-    private void salvarDadosNoFirestore(String fotoUrl) {
+    private void salvarDadosNoFirestore(String urlFotoPerfil) {
         String especialidade = etEspecialidade.getText().toString().trim();
         String modalidade = etModalidade.getText().toString().trim();
         String bio = etBio.getText().toString().trim();
@@ -205,8 +205,8 @@ public class EditarPerfilProfessorFragment extends Fragment { // <-- MUDOU
         professorData.put("valorPresencial", valorP);
         professorData.put("valorOnline", valorO);
 
-        if (fotoUrl != null) {
-            professorData.put("urlFotoPerfil", fotoUrl);
+        if (urlFotoPerfil != null) {
+            professorData.put("urlFotoPerfil", urlFotoPerfil);
         }
 
         db.collection("users").document(uid)

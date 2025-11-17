@@ -174,9 +174,9 @@ public class AlunoPerfilFragment extends Fragment {
 
                         tvNomeAluno.setText(documentSnapshot.getString("nome"));
 
-                        String fotoUrl = documentSnapshot.getString("urlFotoPerfil");
+                        String urlFotoPerfil = documentSnapshot.getString("urlFotoPerfil");
                         Glide.with(requireContext())
-                                .load(fotoUrl)
+                                .load(urlFotoPerfil)
                                 .placeholder(R.drawable.img_avatar_circle)
                                 .error(R.drawable.img_avatar_circle)
                                 .into(ivAvatarAluno);

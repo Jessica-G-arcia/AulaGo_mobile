@@ -126,10 +126,10 @@ public class EditarPerfilAlunoFragment extends Fragment { // MUDOU
                         binding.etObjetivosAluno.setText(document.getString("objetivos"));
 
                         // Exibir foto de perfil, se tiver
-                        String fotoUrl = document.getString("fotoUrl");
-                        if (fotoUrl != null && !fotoUrl.isEmpty()) {
+                        String urlFotoPerfil = document.getString("urlFotoPerfil");
+                        if (urlFotoPerfil != null && !urlFotoPerfil.isEmpty()) {
                             Glide.with(this)
-                                    .load(fotoUrl)
+                                    .load(urlFotoPerfil)
                                     .placeholder(R.drawable.img_avatar_circle)
                                     .into(binding.ivFotoPerfil);
                         } else {
@@ -211,7 +211,7 @@ public class EditarPerfilAlunoFragment extends Fragment { // MUDOU
         fotoRef.putFile(uri)
                 .addOnSuccessListener(taskSnapshot -> fotoRef.getDownloadUrl().addOnSuccessListener(downloadUri -> {
                     db.collection("users").document(uid)
-                            .update("fotoUrl", downloadUri.toString())
+                            .update("urlFotoPerfil", downloadUri.toString())
                             .addOnSuccessListener(aVoid -> {
                                 if (!isAdded() || binding == null) return;
                                 progressDialog.dismiss();
