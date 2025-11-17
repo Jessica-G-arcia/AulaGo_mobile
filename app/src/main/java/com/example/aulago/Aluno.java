@@ -2,7 +2,6 @@ package com.example.aulago;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import com.google.firebase.firestore.DocumentId;
 import com.google.firebase.firestore.Exclude;
 

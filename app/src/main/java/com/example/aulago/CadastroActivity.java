@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-// Removido o Toast
+import android.widget.ProgressBar; // <-- Import
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -15,15 +15,18 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.snackbar.Snackbar;
 
-// Removido o import do 'Matcher' e 'Pattern'
-// (Movido para dentro do método 'validarSenha')
+// Imports do Firebase (NOVOS NESTA TELA)
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.List; // <-- Import
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CadastroActivity extends AppCompatActivity {
 
-    // --- CORREÇÃO DAS CHAVES ---
-    // Deixei igual ao CadastroActivity2 (o código que eu te passei)
-    public static final String KEY_DADOS_USUARIO = "dadosUsuario"; // Use este
-    public static final String KEY_SENHA = "senha"; // Use este
+    public static final String KEY_DADOS_USUARIO = "dadosUsuario";
+    public static final String KEY_SENHA = "senha";
     public static final String KEY_FLUXO_GOOGLE = "fluxoGoogle";
     public static final String KEY_DADOS_GOOGLE = "dadosGoogle";
 
@@ -33,11 +36,22 @@ public class CadastroActivity extends AppCompatActivity {
     private Button btnContinuar, btnCancelar;
     private boolean isGoogleFlow = false;
 
+    // --- VARIÁVEIS NOVAS ---
+    private FirebaseAuth auth;
+    private FirebaseFirestore db;
+    private ProgressBar progressBar;
+    // --- FIM DAS VARIÁVEIS NOVAS ---
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_cadastro);
+
+        // --- INICIALIZAÇÃO DO FIREBASE ---
+        auth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+        // --- FIM DA INICIALIZAÇÃO ---
 
         inicializarViews();
         configurarListeners();
@@ -53,18 +67,12 @@ public class CadastroActivity extends AppCompatActivity {
             DadosUsuario dadosGoogle = (DadosUsuario) intent.getSerializableExtra(KEY_DADOS_GOOGLE);
 
             if (dadosGoogle != null) {
-                // CORREÇÃO: Usar getters
                 inputNome.setText(dadosGoogle.getNome());
                 inputEmail.setText(dadosGoogle.getEmail());
-
                 inputNome.setEnabled(true);
                 inputEmail.setEnabled(false);
-
-                // CORREÇÃO: Não precisamos de senha fake, o fluxo 'isGoogleFlow'
-                // vai pular a validação de senha.
                 inputSenha.setEnabled(false);
                 textInputLayoutSenha.setHelperText(null);
-
                 Snackbar.make(mainLayout, "Complete seu cadastro para continuar.", Snackbar.LENGTH_LONG).show();
             }
         }
@@ -81,79 +89,57 @@ public class CadastroActivity extends AppCompatActivity {
         inputSenha = findViewById(R.id.inputSenha);
         btnContinuar = findViewById(R.id.btnContinuar);
         btnCancelar = findViewById(R.id.btnCancelar);
+        progressBar = findViewById(R.id.progressBarVerificacao); // <-- NOVO
 
-        // (Seu código de Máscara - está ótimo)
+        // Máscaras (Seu código)
         inputCpf.addTextChangedListener(MaskUtil.insert(inputCpf, MaskUtil.MaskType.CPF));
         inputTelefone.addTextChangedListener(MaskUtil.insert(inputTelefone, MaskUtil.MaskType.FONE));
         inputDtNasc.addTextChangedListener(MaskUtil.insert(inputDtNasc, MaskUtil.MaskType.DATA));
     }
 
     private void configurarListeners() {
-        btnContinuar.setOnClickListener(v -> redirecionarParaProximaTela());
+        btnContinuar.setOnClickListener(v -> validarEVerificarDuplicidade()); // <-- MUDOU
         btnCancelar.setOnClickListener(v -> finish());
     }
 
     private void ajustarLayout() {
-        // 'main' é o seu ConstraintLayout
+        // (Seu código de ajuste de layout Edge-to-Edge)
         View mainView = findViewById(R.id.main);
-
-        // 1. Salva o padding original que você definiu no XML
-        // (Isso captura seus 24dp de start/end e 8dp de top/bottom)
         int originalPaddingLeft = mainView.getPaddingLeft();
         int originalPaddingTop = mainView.getPaddingTop();
         int originalPaddingRight = mainView.getPaddingRight();
         int originalPaddingBottom = mainView.getPaddingBottom();
-
         ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
-            // 2. Pega os insets da barra de status (topo)
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-
-            // 3. Pega os insets do TECLADO (IME)
             Insets imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime());
-
-            // 4. Pega os insets da barra de navegação (gestos/botões)
             Insets navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
 
-            // 5. Calcula o padding
             int paddingLeft = originalPaddingLeft + systemBars.left;
             int paddingTop = originalPaddingTop + systemBars.top;
             int paddingRight = originalPaddingRight + systemBars.right;
-
-            // O padding de baixo é o original + o MAIOR valor entre o teclado e a barra de navegação
             int paddingBottom = originalPaddingBottom + Math.max(imeInsets.bottom, navBars.bottom);
 
-            // 6. Aplica o padding
             v.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
-
             return insets;
         });
     }
 
     private String validarSenha(String senha) {
-        // (Seu código de validação de senha - está ótimo)
-        if (senha.length() < 6) {
-            return "A senha deve ter no mínimo 6 caracteres.";
-        }
+        if (senha.length() < 6) return "A senha deve ter no mínimo 6 caracteres.";
         final String MAIUSCULA_PATTERN = ".*[A-Z].*";
         final String MINUSCULA_PATTERN = ".*[a-z].*";
         final String NUMERO_PATTERN = ".*[0-9].*";
         final String ESPECIAL_PATTERN = ".*[^a-zA-Z0-9].*";
-        if (!senha.matches(MAIUSCULA_PATTERN)) {
-            return "A senha deve conter pelo menos uma letra maiúscula.";
-        }
-        if (!senha.matches(MINUSCULA_PATTERN)) {
-            return "A senha deve conter pelo menos uma letra minúscula.";
-        }
-        if (!senha.matches(NUMERO_PATTERN)) {
-            return "A senha deve conter pelo menos um número.";
-        }
-        if (!senha.matches(ESPECIAL_PATTERN)) {
-            return "A senha deve conter pelo menos um caractere especial (ex: @, #, $).";
-        }
-        return null; // Senha válida
+        if (!senha.matches(MAIUSCULA_PATTERN)) return "A senha deve conter pelo menos uma letra maiúscula.";
+        if (!senha.matches(MINUSCULA_PATTERN)) return "A senha deve conter pelo menos uma letra minúscula.";
+        if (!senha.matches(NUMERO_PATTERN)) return "A senha deve conter pelo menos um número.";
+        if (!senha.matches(ESPECIAL_PATTERN)) return "A senha deve conter pelo menos um caractere especial (ex: @, #, $).";
+        return null;
     }
 
-    private void redirecionarParaProximaTela() {
+    // --- MÉTODO ANTIGO (redirecionarParaProximaTela) FOI DIVIDIDO E RENOMEADO ---
+
+    private void validarEVerificarDuplicidade() {
         String nome = inputNome.getText().toString().trim();
         String cpf = inputCpf.getText().toString().trim();
         String dtNasc = inputDtNasc.getText().toString().trim();
@@ -171,17 +157,15 @@ public class CadastroActivity extends AppCompatActivity {
         if (telefone.isEmpty()) camposVazios = true;
         if (email.isEmpty() && inputEmail.isEnabled()) camposVazios = true;
         if (senha.isEmpty() && inputSenha.isEnabled() && !isGoogleFlow)
-            camposVazios = true; // Senha só é obrigatória se NÃO for Google
+            camposVazios = true;
 
         if (camposVazios) {
-            Snackbar.make(mainLayout, "Preencha todos os campos obrigatórios da primeira etapa.", Snackbar.LENGTH_LONG).show();
+            Snackbar.make(mainLayout, "Preencha todos os campos obrigatórios.", Snackbar.LENGTH_LONG).show();
             return;
         }
 
-        // (Removi a validação duplicada de cpf, dtNasc, telefone)
-
         // 2. Validação da Senha
-        if (!isGoogleFlow) { // SÓ valida a senha se NÃO for fluxo Google
+        if (!isGoogleFlow) {
             String erroSenha = validarSenha(senha);
             if (erroSenha != null) {
                 textInputLayoutSenha.setError(erroSenha);
@@ -190,24 +174,97 @@ public class CadastroActivity extends AppCompatActivity {
         }
         textInputLayoutSenha.setError(null);
 
+        // 3. Inicia a verificação de duplicidade
+        setLoading(true); // Ativa o ProgressBar
 
-        // 3. --- CORREÇÃO CRÍTICA NA CRIAÇÃO DOS DADOS ---
-        // (Usando a lógica do Código 2, que é a correta)
+        // O fluxo do Google não precisa checar o e-mail (já foi validado no Login),
+        // mas PRECISA checar o CPF.
+        if (isGoogleFlow) {
+            verificarCpf(email, cpf, senha);
+        } else {
+            // O fluxo de E-mail/Senha checa o E-mail PRIMEIRO.
+            verificarEmail(email, cpf, senha);
+        }
+    }
 
+    // --- NOVOS MÉTODOS DE VERIFICAÇÃO ---
+
+    /**
+     * Passo 1: Verifica se o e-mail já existe no Firebase Auth.
+     */
+    private void verificarEmail(String email, String cpf, String senha) {
+        auth.fetchSignInMethodsForEmail(email)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        List<String> methods = task.getResult().getSignInMethods();
+                        if (methods != null && !methods.isEmpty()) {
+                            // Email JÁ EXISTE no Auth
+                            setLoading(false);
+                            Snackbar.make(mainLayout, "Este e-mail já está em uso.", Snackbar.LENGTH_LONG).show();
+                        } else {
+                            // Email OK! Agora checa o CPF (Passo 2)
+                            verificarCpf(email, cpf, senha);
+                        }
+                    } else {
+                        // Erro ao checar e-mail
+                        setLoading(false);
+                        Snackbar.make(mainLayout, "Erro ao verificar e-mail.", Snackbar.LENGTH_LONG).show();
+                    }
+                });
+    }
+
+    /**
+     * Passo 2: Verifica se o CPF já existe no Firestore.
+     */
+    private void verificarCpf(String email, String cpf, String senha) {
+        db.collection("users").whereEqualTo("cpf", cpf).limit(1).get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        if (task.getResult() != null && !task.getResult().isEmpty()) {
+                            // CPF JÁ EXISTE no Firestore
+                            setLoading(false);
+                            Snackbar.make(mainLayout, "Este CPF já está em uso.", Snackbar.LENGTH_LONG).show();
+                        } else {
+                            // TUDO OK! Pode prosseguir para a próxima tela (Passo 3)
+                            setLoading(false);
+                            iniciarCadastroActivity2(email, cpf, senha);
+                        }
+                    } else {
+                        // Erro ao checar CPF
+                        setLoading(false);
+                        Snackbar.make(mainLayout, "Erro ao verificar CPF.", Snackbar.LENGTH_LONG).show();
+                    }
+                });
+    }
+
+    /**
+     * Passo 3: Reúne os dados e inicia a Activity 2.
+     */
+    private void iniciarCadastroActivity2(String email, String cpf, String senha) {
         DadosUsuario dadosUsuario = new DadosUsuario();
-        // Use os "setters" para preencher o objeto
-        dadosUsuario.setNome(nome);
+        dadosUsuario.setNome(inputNome.getText().toString().trim());
         dadosUsuario.setCpf(cpf);
-        dadosUsuario.setDtNasc(dtNasc);
-        dadosUsuario.setTelefone(telefone);
+        dadosUsuario.setDtNasc(inputDtNasc.getText().toString().trim());
+        dadosUsuario.setTelefone(inputTelefone.getText().toString().trim());
         dadosUsuario.setEmail(email);
-        // NÃO COLOQUE A SENHA NO OBJETO!
 
-        // 4. Envia os dados para CadastroActivity2
         Intent intent = new Intent(this, CadastroActivity2.class);
-        intent.putExtra(KEY_DADOS_USUARIO, dadosUsuario); // Chave correta
+        intent.putExtra(KEY_DADOS_USUARIO, dadosUsuario);
         intent.putExtra(KEY_SENHA, senha); // Passa a senha separadamente
         intent.putExtra(KEY_FLUXO_GOOGLE, isGoogleFlow);
         startActivity(intent);
+    }
+
+    /**
+     * Controla a visibilidade do ProgressBar e ativa/desativa o botão.
+     */
+    private void setLoading(boolean isLoading) {
+        if (isLoading) {
+            progressBar.setVisibility(View.VISIBLE);
+            btnContinuar.setEnabled(false);
+        } else {
+            progressBar.setVisibility(View.GONE);
+            btnContinuar.setEnabled(true);
+        }
     }
 }

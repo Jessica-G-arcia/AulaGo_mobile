@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -15,6 +16,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import android.view.View;
+// import android.widget.TextView; // Import não é mais necessário
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -37,21 +40,19 @@ import androidx.appcompat.view.ContextThemeWrapper; // <-- 1. NOVO IMPORT
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKeys;
 
-import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.example.aulago.databinding.ActivityToolbarBinding;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.ismaeldivita.chipnavigation.ChipNavigationBar;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
-import de.hdodenhof.circleimageview.CircleImageView;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 
 public class ToolbarActivity extends AppCompatActivity {
 
@@ -70,6 +71,7 @@ public class ToolbarActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
     private FirebaseFirestore db;
+    private String userStatus = "aluno";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,7 +82,7 @@ public class ToolbarActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        // --- CHAMADA DO MÉTODO ADICIONADA AQUI ---
+        // Configura o layout edge-to-edge (para o teclado funcionar)
         ajustarLayout();
 
         setSupportActionBar(binding.toolbarLayout.toolbar);
@@ -98,13 +100,10 @@ public class ToolbarActivity extends AppCompatActivity {
         configurarLayoutImersivoHibrido();
     }
 
-    /**
-     * Função principal que busca os dados do usuário no Firestore
-     * e configura toda a UI baseada nesses dados.
-     */
     private void loadUserDataAndSetupUI() {
         FirebaseUser user = auth.getCurrentUser();
         if (user == null) {
+            // Se o usuário for nulo, volta para o login
             Intent intent = new Intent(this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
@@ -115,28 +114,28 @@ public class ToolbarActivity extends AppCompatActivity {
         String uid = user.getUid();
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(document -> {
-                    String userRole = ROLE_ALUNO; // Assume "Aluno" por padrão
-                    String userPhotoUrl = null;
+                    String userRole = ROLE_ALUNO;
+                    this.userStatus = "nenhum";
 
                     if (document.exists()) {
+                        String tipoUsuario = document.getString("userType");
                         String status = document.getString("statusSolicitacao");
-                        if ("aprovado".equals(status)) {
+                        this.userStatus = status != null ? status : "nenhum";
+
+                        if ("professor".equals(tipoUsuario)) {
                             userRole = ROLE_PROFESSOR;
                         }
-                        userPhotoUrl = document.getString("urlFotoPerfil");
                     }
 
-                    setupUIWithRole(userRole, userPhotoUrl);
+                    setupUIWithRole(userRole);
                 })
                 .addOnFailureListener(e -> {
-                    setupUIWithRole(ROLE_ALUNO, null);
+                    setupUIWithRole(ROLE_ALUNO);
                 });
     }
 
-    /**
-     * Configura toda a UI da Activity depois que os dados do usuário foram buscados.
-     */
-    private void setupUIWithRole(String userRole, String userPhotoUrl) {
+
+    private void setupUIWithRole(String userRole) {
         BottomNavigationView bottomNav = binding.bottomNavigation;
         bottomNav.getMenu().clear();
 
@@ -145,7 +144,6 @@ public class ToolbarActivity extends AppCompatActivity {
         } else {
             bottomNav.inflateMenu(R.menu.bottom_menu_aluno);
         }
-
 
         setupClickListeners(userRole);
 
@@ -158,11 +156,10 @@ public class ToolbarActivity extends AppCompatActivity {
     private void setupClickListeners(String userRole) {
         BottomNavigationView bottomNav = binding.bottomNavigation;
 
+        // --- Listener do Bottom Navigation ---
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
 
-
-            // Lógica de navegação que você já tinha
             if (id == R.id.nav_home) {
                 replaceFragment(new HomeFragment());
             } else if (id == R.id.nav_classes) {
@@ -170,24 +167,39 @@ public class ToolbarActivity extends AppCompatActivity {
             } else if (id == R.id.nav_calendar) {
                 replaceFragment(new CalendarFragment());
             } else if (id == R.id.nav_search) {
-                replaceFragment(ROLE_PROFESSOR.equals(userRole) ? new SearchAlunosFragment() : new SearchProfessoresFragment());
+                if (ROLE_PROFESSOR.equals(userRole)) {
+                    if ("aprovado".equals(this.userStatus)) {
+                        replaceFragment(new SearchAlunosFragment());
+                    } else {
+                        replaceFragment(new LockedFeatureFragment());
+                    }
+                } else {
+                    replaceFragment(new SearchProfessoresFragment());
+                }
             } else if (id == R.id.nav_profile) {
                 replaceFragment(ROLE_PROFESSOR.equals(userRole) ? new ProfessorPerfilFragment() : new AlunoPerfilFragment());
             }
             return true;
         });
 
-        // Listeners da barra de ferramentas superior (continuam iguais)
-        ImageView notificationsIcon = binding.toolbarLayout.ivNotifications;
-        notificationsIcon.setOnClickListener(v -> replaceFragment(new NotificationsFragment()));
+        // --- Listeners da Toolbar Superior ---
 
-        ImageView settingsIcon = binding.toolbarLayout.ivSettings;
-        settingsIcon.setOnClickListener(v -> replaceFragment(new EditarDadosPessoaisFragment()));
+//        binding.toolbarLayout.ivChatbot.setOnClickListener(v ->
+//                replaceFragment(new ChatFragment())
+//        );
 
-        ImageView logoutIcon = binding.toolbarLayout.ivLogout;
-        logoutIcon.setOnClickListener(v -> showLogoutConfirmationDialog());
+        binding.toolbarLayout.ivNotifications.setOnClickListener(v ->
+                replaceFragment(new NotificationsFragment())
+        );
+
+        binding.toolbarLayout.ivSettings.setOnClickListener(v ->
+                replaceFragment(new EditarDadosPessoaisFragment())
+        );
+
+        binding.toolbarLayout.ivLogout.setOnClickListener(v ->
+                showLogoutConfirmationDialog()
+        );
     }
-
 
     public void replaceFragment(Fragment fragment) {
         getSupportFragmentManager()
@@ -196,6 +208,7 @@ public class ToolbarActivity extends AppCompatActivity {
                 .addToBackStack(null)
                 .commit();
     }
+
 
     private void showLogoutConfirmationDialog() {
         new AlertDialog.Builder(this)
@@ -210,17 +223,20 @@ public class ToolbarActivity extends AppCompatActivity {
 
     private void performLogout() {
         auth.signOut();
+
+        SharedPreferences.Editor editor = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
+        editor.putBoolean(KEY_REMEMBER_ME, false);
+        editor.apply();
+
+        apagarCredenciaisSeguras();
+
         Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra("JUST_LOGGED_OUT", true); // Envia a flag
+        intent.putExtra("JUST_LOGGED_OUT", true);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
     }
 
-    /**
-     * Este método não é chamado no logout normal,
-     * mas é mantido aqui caso seja necessário em outro fluxo (ex: login google)
-     */
     private void apagarCredenciaisSeguras() {
         try {
             String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
@@ -231,51 +247,56 @@ public class ToolbarActivity extends AppCompatActivity {
                     EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                     EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
             );
-
-            // Apaga as chaves criptografadas
             securePreferences.edit()
                     .remove(KEY_USER_EMAIL)
                     .remove(KEY_USER_PASS)
                     .apply();
             Log.d("SecurePrefs", "Credenciais de biometria apagadas.");
-
         } catch (GeneralSecurityException | IOException e) {
             Log.e("SecurePrefs", "Erro ao apagar credenciais seguras", e);
         }
     }
 
-    // --- MÉTODO ADICIONADO DA OPÇÃO 1 ---
     private void ajustarLayout() {
-        // 'getRoot()' é a sua view principal (provavelmente um ConstraintLayout)
-        View mainView = binding.getRoot();
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
 
-        // Salva o padding original do seu XML (se houver)
-        int originalPaddingLeft = mainView.getPaddingLeft();
-        int originalPaddingTop = mainView.getPaddingTop();
-        int originalPaddingRight = mainView.getPaddingRight();
-        int originalPaddingBottom = mainView.getPaddingBottom();
+        View bottomNav = binding.bottomNavigation;
+        View toolbar = binding.toolbarLayout.toolbar;
+        View container = binding.fragmentContainer;
 
-        ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
-            // Pega os insets da barra de status (topo)
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+        if (toolbar.getTag() == null) {
+            toolbar.setTag(toolbar.getPaddingTop());
+        }
+        final int originalToolbarTop = (int) toolbar.getTag();
 
-            // Pega os insets do TECLADO (IME)
-            Insets imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime());
+        if (bottomNav.getTag() == null) {
+            bottomNav.setTag(bottomNav.getPaddingBottom());
+        }
+        final int originalBottomNavBottom = (int) bottomNav.getTag();
 
-            // Pega os insets da barra de navegação (gestos/botões)
+        ViewCompat.setOnApplyWindowInsetsListener(toolbar, (v, insets) -> {
+            Insets statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars());
+            v.setPadding(
+                    v.getPaddingLeft(),
+                    originalToolbarTop + statusBars.top,
+                    v.getPaddingRight(),
+                    v.getPaddingBottom()
+            );
+            return insets;
+        });
+
+        ViewCompat.setOnApplyWindowInsetsListener(bottomNav, (v, insets) -> {
             Insets navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
+            v.setPadding(
+                    v.getPaddingLeft(),
+                    v.getPaddingTop(),
+                    v.getPaddingRight(),
+                    originalBottomNavBottom + navBars.bottom
+            );
+            return insets;
+        });
 
-            // Calcula o padding
-            int paddingLeft = originalPaddingLeft + systemBars.left;
-            int paddingTop = originalPaddingTop + systemBars.top; // <-- Adiciona padding no topo
-            int paddingRight = originalPaddingRight + systemBars.right;
-
-            // O padding de baixo é o original + o MAIOR valor entre o teclado e a barra de navegação
-            int paddingBottom = originalPaddingBottom + Math.max(imeInsets.bottom, navBars.bottom); // <-- Adiciona padding embaixo
-
-            // Aplica o padding
-            v.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
-
+        ViewCompat.setOnApplyWindowInsetsListener(container, (v, insets) -> {
             return insets;
         });
     }

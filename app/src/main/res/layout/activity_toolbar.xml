@@ -9,7 +9,7 @@
     <include
         android:id="@+id/toolbarLayout"
         layout="@layout/toolbar_main"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -19,11 +19,10 @@
         android:id="@+id/fragment_container"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="60dp"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
-        app:layout_constraintEnd_toEndOf="@id/bottom_navigation"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/toolbarLayout" />
+        app:layout_constraintTop_toBottomOf="@id/toolbarLayout" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
@@ -32,14 +31,11 @@
         android:layout_height="wrap_content"
         android:background="@drawable/card_background"
         android:backgroundTint="@color/laranja50"
-
         android:elevation="8dp"
-
         app:labelVisibilityMode="labeled"
-
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@id/fragment_container"
+        app:layout_constraintStart_toStartOf="parent"
         app:menu="@menu/bottom_menu_professor" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
