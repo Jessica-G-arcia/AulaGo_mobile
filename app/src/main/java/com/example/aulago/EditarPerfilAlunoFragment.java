@@ -1,48 +1,65 @@
 package com.example.aulago;
 
 import android.app.ProgressDialog;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment; // MUDOU
+import androidx.fragment.app.Fragment;
 
-// IMPORTANTE: View Binding
+import com.bumptech.glide.Glide;
 import com.example.aulago.databinding.FragmentEditarPerfilAlunoBinding;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class EditarPerfilAlunoFragment extends Fragment { // MUDOU
+public class EditarPerfilAlunoFragment extends Fragment {
 
-    // 1. View Binding (substitui todos os findViewByIds)
     private FragmentEditarPerfilAlunoBinding binding;
-
-    // 2. Outras variáveis
     private ProgressDialog progressDialog;
     private FirebaseFirestore db;
     private FirebaseAuth auth;
+    private FirebaseStorage storage;
     private String uid;
+
+    // Lançador para buscar foto da galeria
+    private ActivityResultLauncher<String> fotoPickerLauncher;
+    private Uri fotoUriSelecionada;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Inicializa dados não-visuais
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+        storage = FirebaseStorage.getInstance();
+
+        fotoPickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.GetContent(),
+                uri -> {
+                    if (uri != null) {
+                        fotoUriSelecionada = uri;
+                        binding.ivFotoPerfil.setImageURI(uri);
+                        uploadFotoParaFirebaseStorage(uri);
+                    }
+                }
+        );
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // 3. Infla o layout com View Binding
         binding = FragmentEditarPerfilAlunoBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -58,35 +75,27 @@ public class EditarPerfilAlunoFragment extends Fragment { // MUDOU
         }
         uid = user.getUid();
 
-        // Inicializa o ProgressDialog
         progressDialog = new ProgressDialog(requireContext());
         progressDialog.setCancelable(false);
 
-        // Configura os cliques
         configurarListeners();
-
-        // Carrega os dados
         carregarDadosDoUsuario();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        binding = null; // Limpa o binding
+        binding = null;
     }
 
     private void configurarListeners() {
         binding.btnSalvarPerfil.setOnClickListener(v -> salvarPerfilPublico());
-
-        // --- CORREÇÃO DE LÓGICA ---
-        // Em vez de iniciar uma Activity, agora trocamos o Fragment
+        binding.btnEscolherFoto.setOnClickListener(v -> fotoPickerLauncher.launch("image/*"));
         binding.btnSolicitarProfessor.setOnClickListener(v -> {
-            // Pede para a Activity "pai" (ToolbarActivity) fazer a troca
             if (getActivity() instanceof ToolbarActivity) {
                 ((ToolbarActivity) getActivity()).replaceFragment(new SolicitarSerProfessorFragment());
             }
         });
-        // --- FIM DA CORREÇÃO ---
     }
 
     private void carregarDadosDoUsuario() {
@@ -95,21 +104,28 @@ public class EditarPerfilAlunoFragment extends Fragment { // MUDOU
 
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(document -> {
-                    // Checagem de segurança do Fragment
                     if (!isAdded() || binding == null) return;
                     progressDialog.dismiss();
 
                     if (document.exists()) {
-                        // Preenche os campos do perfil
                         binding.etBioAluno.setText(document.getString("bio"));
                         binding.etNivelAluno.setText(document.getString("nivel"));
                         binding.etModalidadePreferida.setText(document.getString("preferenciaModalidade"));
                         binding.etObjetivosAluno.setText(document.getString("objetivos"));
 
-                        // Controla o status de professor
+                        // Exibir foto de perfil, se tiver
+                        String fotoUrl = document.getString("fotoUrl");
+                        if (fotoUrl != null && !fotoUrl.isEmpty()) {
+                            Glide.with(this)
+                                    .load(fotoUrl)
+                                    .placeholder(R.drawable.img_avatar_circle)
+                                    .into(binding.ivFotoPerfil);
+                        } else {
+                            binding.ivFotoPerfil.setImageResource(R.drawable.img_avatar_circle);
+                        }
+
                         String status = document.getString("statusSolicitacao");
                         controlarStatusProfessor(status);
-
                     } else {
                         Toast.makeText(requireContext(), "Erro: Documento não encontrado.", Toast.LENGTH_SHORT).show();
                     }
@@ -121,13 +137,8 @@ public class EditarPerfilAlunoFragment extends Fragment { // MUDOU
                 });
     }
 
-    /**
-     * Controla qual item (botão ou texto) deve ser mostrado na seção "Status"
-     */
     private void controlarStatusProfessor(String status) {
         if (status == null) status = "nenhum";
-
-        // Usa 'binding' para acessar as views
         switch (status) {
             case "pendente_analise":
                 binding.tvStatusSolicitacao.setText("Status: Em Análise");
@@ -153,9 +164,6 @@ public class EditarPerfilAlunoFragment extends Fragment { // MUDOU
         }
     }
 
-    /**
-     * Salva os dados do PERFIL PÚBLICO no Firestore
-     */
     private void salvarPerfilPublico() {
         progressDialog.setMessage("Salvando perfil...");
         progressDialog.show();
@@ -172,14 +180,45 @@ public class EditarPerfilAlunoFragment extends Fragment { // MUDOU
                     if (!isAdded() || binding == null) return;
                     progressDialog.dismiss();
                     Toast.makeText(requireContext(), "Perfil público salvo!", Toast.LENGTH_SHORT).show();
-
-                    // Volta para a tela anterior
                     requireActivity().onBackPressed();
                 })
                 .addOnFailureListener(e -> {
                     if (!isAdded() || binding == null) return;
                     progressDialog.dismiss();
                     Toast.makeText(requireContext(), "Erro ao salvar: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    // Upload da foto para Storage e salvando URL no Firestore
+    private void uploadFotoParaFirebaseStorage(Uri uri) {
+        progressDialog.setMessage("Enviando foto...");
+        progressDialog.show();
+
+        StorageReference fotoRef = storage.getReference().child("fotos_perfil").child(uid + "_perfil.jpg");
+        fotoRef.putFile(uri)
+                .addOnSuccessListener(taskSnapshot -> fotoRef.getDownloadUrl().addOnSuccessListener(downloadUri -> {
+                    db.collection("users").document(uid)
+                            .update("fotoUrl", downloadUri.toString())
+                            .addOnSuccessListener(aVoid -> {
+                                if (!isAdded() || binding == null) return;
+                                progressDialog.dismiss();
+                                Toast.makeText(requireContext(), "Foto alterada!", Toast.LENGTH_SHORT).show();
+                                // Atualiza a imagem após upload
+                                Glide.with(this)
+                                        .load(downloadUri)
+                                        .placeholder(R.drawable.img_avatar_circle)
+                                        .into(binding.ivFotoPerfil);
+                            })
+                            .addOnFailureListener(e -> {
+                                if (!isAdded() || binding == null) return;
+                                progressDialog.dismiss();
+                                Toast.makeText(requireContext(), "Erro ao salvar foto: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
+                }))
+                .addOnFailureListener(e -> {
+                    if (!isAdded() || binding == null) return;
+                    progressDialog.dismiss();
+                    Toast.makeText(requireContext(), "Erro ao enviar foto: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 }

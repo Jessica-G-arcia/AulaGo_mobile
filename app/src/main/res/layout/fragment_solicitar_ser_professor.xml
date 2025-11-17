@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:fitsSystemWindows="false">
 
     <LinearLayout
         android:id="@+id/main"
@@ -69,12 +69,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:visibility="gone">
-
-            <TextView
-                android:id="@+id/tvInfoPontuacao"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Info Pontuação" />
 
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -150,6 +144,22 @@
             android:layout_marginTop="24dp"
             android:backgroundTint="#219EBC"
             android:text="Enviar para Análise" />
+
+
+        <TextView
+            android:id="@+id/tvlistacertificados"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:text="Certificados enviados"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewCertificados"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp" />
 
     </LinearLayout>
 </ScrollView>
