@@ -60,6 +60,10 @@ public class ToolbarActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("");
         }
 
+        binding.toolbarLayout.ivChatbot.setOnClickListener(v -> {
+            replaceFragment(new ChatFragment());
+        });
+
         loadUserDataAndSetupUI();
     }
 
@@ -144,11 +148,9 @@ public class ToolbarActivity extends AppCompatActivity {
             return true;
         });
 
-        // --- Listeners da Toolbar Superior ---
-
-//        binding.toolbarLayout.ivChatbot.setOnClickListener(v ->
-//                replaceFragment(new ChatFragment())
-//        );
+        binding.toolbarLayout.ivChatbot.setOnClickListener(v ->
+                replaceFragment(new ChatFragment())
+        );
 
         binding.toolbarLayout.ivNotifications.setOnClickListener(v ->
                 replaceFragment(new NotificationsFragment())
