@@ -25,39 +25,27 @@
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@mipmap/logo_aulago_foreground" />
 
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Continue o seu cadastro"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large"
-            android:textColor="@android:color/black"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageView" />
-
         <!-- 1. CAMPO CEP -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/textInputLayoutCep"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:textColorHint="@color/black"
             app:cursorColor="#FF9800"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/title">
+            app:layout_constraintTop_toBottomOf="@+id/imageView">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/inputCep"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="CEP"
-                android:textColor="@android:color/black"
                 android:inputType="number"
-                android:maxLength="8"/>
+                android:maxLength="8"
+                android:textColor="@android:color/black" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- 2. ENDEREÇO (Logradouro - Preenchido pela API) -->
@@ -227,11 +215,51 @@
         </com.google.android.material.textfield.TextInputLayout>
 
 
+        <TextView
+            android:id="@+id/tvusuario"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Eu quero usar o AulaGo como:"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textInputLayoutGenero" />
+
+        <RadioGroup
+            android:id="@+id/rgTipoUsuario"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@+id/tvusuario"
+            tools:layout_editor_absoluteX="24dp">
+
+            <RadioButton
+                android:id="@+id/rbAluno"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:buttonTint="#DD6D2F"
+                android:checked="true"
+                android:text="Aluno"
+                android:textColor="@android:color/black" />
+
+            <RadioButton
+                android:id="@+id/rbProfessor"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:buttonTint="#DD6D2F"
+                android:text="Professor"
+                android:textColor="@android:color/black" />
+        </RadioGroup>
+
         <Button
             android:id="@+id/btnCadastrar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="8dp"
             android:backgroundTint="#DD6D2F"
             android:text="Cadastrar"
             android:textColor="#FFFFFF"
@@ -239,20 +267,21 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textInputLayoutGenero" />
 
-        <Button
-            android:id="@+id/btnCancelar"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Cancelar"
-            android:textColor="#DD6D2F"
-            android:textSize="16sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btnCadastrar" />
+            app:layout_constraintTop_toBottomOf="@+id/rgTipoUsuario" />
+
+                <Button
+                    android:id="@+id/btnCancelar"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Cancelar"
+                    android:textColor="#DD6D2F"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/btnCadastrar" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

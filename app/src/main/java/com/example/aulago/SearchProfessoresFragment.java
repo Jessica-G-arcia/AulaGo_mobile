@@ -36,7 +36,7 @@ public class SearchProfessoresFragment extends Fragment implements ProfessorAdap
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         // Reutiliza o mesmo layout de busca, se os IDs forem iguais
-        View view = inflater.inflate(R.layout.fragment_search_alunos, container, false);
+        View view = inflater.inflate(R.layout.fragment_search_professores, container, false);
         db = FirebaseFirestore.getInstance();
         return view;
     }

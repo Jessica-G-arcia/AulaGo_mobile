@@ -77,21 +77,17 @@ public class ToolbarActivity extends AppCompatActivity {
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(document -> {
                     String userRole = ROLE_ALUNO;
-                    this.userStatus = "aluno";
+                    this.userStatus = "nenhum";
 
                     if (document.exists()) {
+                        String tipoUsuario = document.getString("userType");
                         String status = document.getString("statusSolicitacao");
-                        // String userName = document.getString("nome"); // Não é mais necessário aqui
+                        this.userStatus = status != null ? status : "nenhum";
 
-                        if (status != null && !status.isEmpty()) {
-                            this.userStatus = status;
-                        }
-                        if ("aprovado".equals(status)) {
+                        if ("professor".equals(tipoUsuario)) {
                             userRole = ROLE_PROFESSOR;
                         }
                     }
-
-                    // --- Bloco do "Olá, [nome]" FOI REMOVIDO DAQUI ---
 
                     setupUIWithRole(userRole);
                 })
@@ -99,6 +95,7 @@ public class ToolbarActivity extends AppCompatActivity {
                     setupUIWithRole(ROLE_ALUNO);
                 });
     }
+
 
     private void setupUIWithRole(String userRole) {
         BottomNavigationView bottomNav = binding.bottomNavigation;

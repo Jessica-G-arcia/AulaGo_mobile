@@ -20,7 +20,7 @@
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Você pesquisou por Alunos de Inglês..."
+        android:text="Você pesquisou por Professores de Inglês..."
         android:textStyle="bold"
         android:textSize="18sp"
         android:textColor="#2C3E50"

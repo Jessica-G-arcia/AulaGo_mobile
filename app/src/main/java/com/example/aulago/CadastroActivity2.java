@@ -11,6 +11,8 @@ import android.widget.Toast;
 import android.util.Log;
 import android.view.inputmethod.EditorInfo;
 import android.widget.TextView;
+import android.widget.RadioButton; // <-- IMPORT NOVO
+import android.widget.RadioGroup;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -33,6 +35,7 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FieldValue;
 
 // Importe o HashMap e Map para a lógica de salvar
 import java.util.HashMap;
@@ -56,6 +59,7 @@ public class CadastroActivity2 extends AppCompatActivity {
 
     private View mainLayout;
     private boolean isGoogleFlow = false;
+    private RadioGroup rgTipoUsuario;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,6 +104,7 @@ public class CadastroActivity2 extends AppCompatActivity {
         spinnerGenero = findViewById(R.id.spinnerGenero);
         btnCadastrar = findViewById(R.id.btnCadastrar);
         btnCancelar = findViewById(R.id.btnCancelar);
+        rgTipoUsuario = findViewById(R.id.rgTipoUsuario);
     }
 
     private void configurarListeners() {
@@ -282,6 +287,18 @@ public class CadastroActivity2 extends AppCompatActivity {
         // Cria um Map para salvar os dados
         Map<String, Object> userData = new HashMap<>();
 
+        String tipoUsuarioSelecionado = "aluno"; // Padrão
+        String statusSolicitacao = "nenhum";
+
+        int selectedId = rgTipoUsuario.getCheckedRadioButtonId();
+
+        if (selectedId == R.id.rbProfessor) {
+            tipoUsuarioSelecionado = "professor";
+            // O professor nasce com status "nenhum" (ainda não enviou docs).
+            // Isso fará ele cair na tela de bloqueio (LockedFeatureFragment) quando tentar ver alunos.
+            statusSolicitacao = "nenhum";
+        }
+
         // Dados Pessoais (Telas 1 e 2)
         userData.put("uid", uid);
         userData.put("nome", dadosUsuario.getNome());
@@ -301,11 +318,19 @@ public class CadastroActivity2 extends AppCompatActivity {
         userData.put("estado", dadosUsuario.getEstado());
 
         // Campos de Controle Padrão
-        userData.put("userType", "aluno");
+        userData.put("userType", tipoUsuarioSelecionado);
+        userData.put("statusSolicitacao", statusSolicitacao);
         userData.put("statusVerificacao", "nenhum");
         userData.put("comprovanteUrl", "");
         userData.put("fotoUrl", "");
         userData.put("dataCadastro", FieldValue.serverTimestamp());
+
+
+        // Inicializa campos para evitar NullPointerException depois
+        if (tipoUsuarioSelecionado.equals("professor")) {
+            userData.put("professorVerificado", false);
+            userData.put("certificadoUrl", "");
+        }
 
         // Salva o Map no Firestore
         db.collection("users").document(uid)
