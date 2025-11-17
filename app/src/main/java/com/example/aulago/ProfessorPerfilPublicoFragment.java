@@ -195,11 +195,14 @@ public class ProfessorPerfilPublicoFragment extends Fragment {
                     String valorPresencialDisplay = formatPriceSafely(documentSnapshot, "valorPresencial");
                     String valorOnlineDisplay = formatPriceSafely(documentSnapshot, "valorOnline");
 
+                    // Bio
+                    String bio = documentSnapshot.getString("bio");
+                    tvBio.setText((bio != null && !bio.isEmpty()) ? bio : "Nenhuma bio disponível.");
                     controlarValores(valorPresencialDisplay, valorOnlineDisplay);
 
                     // --- 3. CARREGAMENTO DE RATING ---
-                    Double media = documentSnapshot.getDouble("rating");
-                    Long contagem = documentSnapshot.getLong("reviewCount");
+                    Double media = documentSnapshot.getDouble("ratingMedia");
+                    Long contagem = documentSnapshot.getLong("ratingCount");
                     controlarRating(media, contagem);
                 })
                 .addOnFailureListener(e -> {
@@ -253,41 +256,30 @@ public class ProfessorPerfilPublicoFragment extends Fragment {
         }
     }
 
-
-    // -------------------------------------------------------------------
-    // AVALIAÇÕES E AÇÕES
-    // -------------------------------------------------------------------
-
     private void setupReviewRecyclerView(View view) {
-        if (reviewList.isEmpty()) {
-            tvEmptyReviews.setVisibility(View.VISIBLE); // ⬅️ Isto deve aparecer
-            rvAvaliacoes.setVisibility(View.GONE);
-        } else {
-            tvEmptyReviews.setVisibility(View.GONE);
-            rvAvaliacoes.setVisibility(View.VISIBLE); // ⬅️ Isto deve aparecer
-            if (reviewAdapter != null) {
-                reviewAdapter.updateList(reviewList); // Atualiza os dados
-            }
-        }
+        if (getContext() == null || rvAvaliacoes == null) return;
+
+        reviewAdapter = new ReviewAdapter(getContext(), reviewList, ReviewAdapter.MODO_EXIBIR_ALUNO);
+        rvAvaliacoes.setLayoutManager(new LinearLayoutManager(getContext()));
+        rvAvaliacoes.setAdapter(reviewAdapter);
     }
 
     private void fetchReviewsForProfessor(String idDoProfessor) {
-        db.collection("users").document(idDoProfessor).collection("avaliacoes");
-        db.collection("users").document(idDoProfessor).collection("avaliacoes")
-                .whereIn("escritoPor", Arrays.asList("aluno"))
+        db.collection("avaliacoes")
+                .whereEqualTo("professorId", idDoProfessor)
+                .whereEqualTo("escritoPor", "aluno")
                 .orderBy("dataAvaliacao", Query.Direction.DESCENDING)
                 .get()
+
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (!isAdded() || getContext() == null) return;
                     reviewList.clear();
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         reviewList.add(document.toObject(ReviewModel.class));
                     }
-                    if (reviewAdapter != null) {
-                        reviewAdapter.updateList(reviewList);
-                    }
 
-                    // Mostra ou esconde a mensagem de "sem avaliações"
+                    reviewAdapter.updateList(reviewList);
+
                     if (reviewList.isEmpty()) {
                         tvEmptyReviews.setVisibility(View.VISIBLE);
                         rvAvaliacoes.setVisibility(View.GONE);

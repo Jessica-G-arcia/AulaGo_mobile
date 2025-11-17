@@ -76,7 +76,7 @@ public class EditarPerfilAlunoFragment extends Fragment { // MUDOU
     }
 
     private void configurarListeners() {
-        binding.btnSalvarPerfilAluno.setOnClickListener(v -> salvarPerfilPublico());
+        binding.btnSalvarPerfil.setOnClickListener(v -> salvarPerfilPublico());
 
         // --- CORREÇÃO DE LÓGICA ---
         // Em vez de iniciar uma Activity, agora trocamos o Fragment

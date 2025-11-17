@@ -54,6 +54,7 @@ public class AlunoPerfilPublicoFragment extends Fragment {
 
     /**
      * Método de fábrica OBRIGATÓRIO.
+     *
      * @param alunoId O ID do aluno que você quer ver.
      */
     public static AlunoPerfilPublicoFragment newInstance(String alunoId) {
@@ -148,8 +149,14 @@ public class AlunoPerfilPublicoFragment extends Fragment {
                     groupAvaliacoes.setVisibility(View.VISIBLE);
                 }
             }
-            @Override public void onTabUnselected(TabLayout.Tab tab) {}
-            @Override public void onTabReselected(TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+            }
         });
     }
 
@@ -201,9 +208,9 @@ public class AlunoPerfilPublicoFragment extends Fragment {
                     }
 
                     // Carrega Média de Rating
-                    if (documentSnapshot.contains("rating") && documentSnapshot.contains("reviewCount")) {
-                        double media = documentSnapshot.getDouble("rating");
-                        long contagem = documentSnapshot.getLong("reviewCount");
+                    if (documentSnapshot.contains("ratingMedia") && documentSnapshot.contains("ratingCount")) {
+                        double media = documentSnapshot.getDouble("ratingMedia");
+                        long contagem = documentSnapshot.getLong("ratingCount");
 
                         if (contagem > 0) {
                             tvAlunoRatingMedia.setText(String.format(Locale.US, "%.1f", media));
@@ -238,11 +245,14 @@ public class AlunoPerfilPublicoFragment extends Fragment {
      * Busca as avaliações feitas por professores para este aluno
      */
     private void fetchReviewsForAluno(String idDoAluno) {
-        db.collection("users").document(idDoAluno).collection("reviews")
+        db.collection("avaliacoes")
+                // Filtra por avaliações ONDE o alunoId é o do perfil
+                .whereEqualTo("alunoId", idDoAluno)
                 // Filtra apenas por reviews escritas por "professor"
                 .whereEqualTo("escritoPor", "professor")
                 .orderBy("dataAvaliacao", Query.Direction.DESCENDING)
                 .get()
+
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (!isAdded() || getContext() == null) return;
                     reviewList.clear();

@@ -7,6 +7,7 @@
         <item name="android:windowBackground">@android:color/white</item>
         <item name="fontFamily">@font/montserrat</item>
 
+
     </style>
 
     <style name="Theme.AulaGo.Splash" parent="Theme.SplashScreen">
@@ -17,6 +18,9 @@
 
     <style name="Theme.AulaGo" parent="Base.Theme.AulaGo" />
 
+    <style name="BottomNavigationStyle" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="itemRippleColor">@android:color/transparent</item>
+    </style>
 
     <style name="CustomCalendarViewTheme" parent="Theme.Material3.DayNight">
         <item name="colorPrimary">@color/azul</item>
@@ -56,20 +60,12 @@
         <item name="textAllCaps">false</item>
     </style>
 
+    <style name="RatingBarTheme" parent="Theme.AppCompat">
+        <item name="colorAccent">@color/amarelo</item>
+    </style>
+
     <style name="MyPopupMenuStyle" parent="ThemeOverlay.AppCompat.Light">
         <item name="android:textColorPrimary">@android:color/black</item>
     </style>
-
-    <style name="BottomNavigationStyle" parent="Widget.MaterialComponents.BottomNavigationView">
-        <item name="itemRippleColor">@android:color/transparent</item>
-    </style>
-
-    <style name="MenuDropDown" parent="Widget.Material3.PopupMenu">
-        <item name="android:popupBackground">@android:color/white</item>
-        <item name="android:textColorPrimary">@android:color/black</item>
-    </style>
-
-
-
 
 </resources>

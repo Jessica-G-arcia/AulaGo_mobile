@@ -24,6 +24,6 @@ public class AulasPagerAdapter extends FragmentStateAdapter {
 
     @Override
     public int getItemCount() {
-        return 2; 
+        return 2;
     }
 }

@@ -2,6 +2,7 @@ package com.example.aulago;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import com.google.firebase.firestore.DocumentId;
 
 public class Aluno implements Parcelable {
@@ -16,23 +17,42 @@ public class Aluno implements Parcelable {
     private String bio;
     private String userType;
     private int idade;
-    private double rating;
-    private long reviewCount;
-    // Adicione aqui qualquer outro campo que você tenha no Firebase (ex: uid)
+    private double ratingMedia;
+    private long ratingCount;
+
 
     // 2. Construtor vazio (OBRIGATÓRIO para o Firebase)
-    public Aluno() {}
+    public Aluno() {
+    }
 
     // 3. Getters (Usados pelo Adapter e Fragment)
-    public String getId() { return this.id; }
-    public String getNome() { return nome; }
-    public String getEmail() { return email; }
-    public String getUrlFotoPerfil() { return urlFotoPerfil; }
-    public String getBio() { return bio; }
-    public String getUserType() { return userType; }
-    public int getIdade() { return idade; }
-    public double getRating() { return rating; }
-    public long getReviewCount() { return reviewCount; }
+    public String getId() {
+        return this.id;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getUrlFotoPerfil() {
+        return urlFotoPerfil;
+    }
+
+    public String getBio() {
+        return bio;
+    }
+
+    public String getUserType() {
+        return userType;
+    }
+
+    public int getIdade() {
+        return idade;
+    }
 
 
     // 4. Setter (USADO PARA DEFINIR O ID MANUALMENTE)
@@ -52,8 +72,8 @@ public class Aluno implements Parcelable {
         bio = in.readString();
         userType = in.readString();
         idade = in.readInt();
-        rating = in.readDouble();
-        reviewCount = in.readLong();
+        ratingCount = in.readLong();
+        ratingMedia = in.readDouble();
     }
 
     @Override
@@ -65,8 +85,8 @@ public class Aluno implements Parcelable {
         dest.writeString(bio);
         dest.writeString(userType);
         dest.writeInt(idade);
-        dest.writeDouble(rating);
-        dest.writeLong(reviewCount);
+        dest.writeLong(ratingCount);
+        dest.writeDouble(ratingMedia);
     }
 
     @Override
@@ -85,4 +105,20 @@ public class Aluno implements Parcelable {
             return new Aluno[size];
         }
     };
+
+    public double getRatingMedia() {
+        return ratingMedia;
+    }
+
+    public void setRatingMedia(double ratingMedia) {
+        this.ratingMedia = ratingMedia;
+    }
+
+    public long getRatingCount() {
+        return ratingCount;
+    }
+
+    public void setRatingCount(long ratingCount) {
+        this.ratingCount = ratingCount;
+    }
 }

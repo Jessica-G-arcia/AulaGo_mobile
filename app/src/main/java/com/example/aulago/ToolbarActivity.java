@@ -2,13 +2,10 @@ package com.example.aulago;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.ContextThemeWrapper;
 import android.view.View;
-import android.widget.PopupMenu;
-
+// import android.widget.TextView; // Import não é mais necessário
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -19,7 +16,6 @@ import androidx.fragment.app.Fragment;
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKeys;
 
-import com.bumptech.glide.Glide;
 import com.example.aulago.databinding.ActivityToolbarBinding;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -27,8 +23,6 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.security.GeneralSecurityException;
 
 public class ToolbarActivity extends AppCompatActivity {
@@ -43,12 +37,9 @@ public class ToolbarActivity extends AppCompatActivity {
     private static final String SECURE_PREFS_NAME = "SecureAuthPrefs";
     private static final String KEY_USER_EMAIL = "userEmail";
     private static final String KEY_USER_PASS = "userPass";
-    private static final String KEY_BIOMETRIC_EMAIL_ALIAS = "biometricEmailAlias";
-    // --- FIM DAS CONSTANTES ---
 
     private FirebaseAuth auth;
     private FirebaseFirestore db;
-
     private String userStatus = "aluno";
 
     @Override
@@ -60,7 +51,7 @@ public class ToolbarActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        // --- Chamada para o layout ---
+        // Configura o layout edge-to-edge (para o teclado funcionar)
         ajustarLayout();
 
         setSupportActionBar(binding.toolbarLayout.toolbar);
@@ -72,10 +63,6 @@ public class ToolbarActivity extends AppCompatActivity {
         loadUserDataAndSetupUI();
     }
 
-    /**
-     * Função principal que busca os dados do usuário no Firestore
-     * e configura toda a UI baseada nesses dados.
-     */
     private void loadUserDataAndSetupUI() {
         FirebaseUser user = auth.getCurrentUser();
         if (user == null) {
@@ -90,47 +77,29 @@ public class ToolbarActivity extends AppCompatActivity {
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(document -> {
                     String userRole = ROLE_ALUNO;
-                    String userPhotoUrl = null;
-                    this.userStatus = "aluno"; // Padrão
+                    this.userStatus = "aluno";
 
                     if (document.exists()) {
                         String status = document.getString("statusSolicitacao");
+                        // String userName = document.getString("nome"); // Não é mais necessário aqui
 
                         if (status != null && !status.isEmpty()) {
                             this.userStatus = status;
                         }
-
                         if ("aprovado".equals(status)) {
                             userRole = ROLE_PROFESSOR;
                         }
-                        userPhotoUrl = document.getString("urlFotoPerfil");
                     }
 
-                    if (binding != null) {
-                        Glide.with(this)
-                                .load(userPhotoUrl)
-                                .placeholder(R.drawable.img_avatar_circle)
-                                .error(R.drawable.img_avatar_circle)
-                                .into(binding.toolbarLayout.ivUserAvatar);
-                    }
+                    // --- Bloco do "Olá, [nome]" FOI REMOVIDO DAQUI ---
 
                     setupUIWithRole(userRole);
                 })
                 .addOnFailureListener(e -> {
-                    if (binding != null) {
-                        Glide.with(this)
-                                .load((String) null)
-                                .placeholder(R.drawable.img_avatar_circle)
-                                .error(R.drawable.img_avatar_circle)
-                                .into(binding.toolbarLayout.ivUserAvatar);
-                    }
                     setupUIWithRole(ROLE_ALUNO);
                 });
     }
 
-    /**
-     * Configura toda a UI da Activity depois que os dados do usuário foram buscados.
-     */
     private void setupUIWithRole(String userRole) {
         BottomNavigationView bottomNav = binding.bottomNavigation;
         bottomNav.getMenu().clear();
@@ -152,6 +121,7 @@ public class ToolbarActivity extends AppCompatActivity {
     private void setupClickListeners(String userRole) {
         BottomNavigationView bottomNav = binding.bottomNavigation;
 
+        // --- Listener do Bottom Navigation ---
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
 
@@ -177,28 +147,22 @@ public class ToolbarActivity extends AppCompatActivity {
             return true;
         });
 
-        // Listeners da barra de ferramentas superior
+        // --- Listeners da Toolbar Superior ---
+
+//        binding.toolbarLayout.ivChatbot.setOnClickListener(v ->
+//                replaceFragment(new ChatFragment())
+//        );
+
         binding.toolbarLayout.ivNotifications.setOnClickListener(v ->
                 replaceFragment(new NotificationsFragment())
         );
 
-        // OPÇÃO A: Se você quer REMOVER os ícones antigos e usar APENAS o dropdown
-        // Comente ou remova estas linhas:
-    /*
-    binding.toolbarLayout.ivSettings.setOnClickListener(v ->
-        replaceFragment(new EditarDadosPessoaisFragment())
-    );
-    binding.toolbarLayout.ivLogout.setOnClickListener(v ->
-        showLogoutConfirmationDialog()
-    );
-    */
+        binding.toolbarLayout.ivSettings.setOnClickListener(v ->
+                replaceFragment(new EditarDadosPessoaisFragment())
+        );
 
-        // OPÇÃO B: Se você quer MANTER os ícones antigos E adicionar o dropdown
-        // Mantenha as linhas acima descomentadas
-
-        // NOVO: Listener para o avatar que mostra o PopupMenu
-        binding.toolbarLayout.ivUserAvatar.setOnClickListener(v ->
-                showProfileMenu(v)
+        binding.toolbarLayout.ivLogout.setOnClickListener(v ->
+                showLogoutConfirmationDialog()
         );
     }
 
@@ -223,9 +187,12 @@ public class ToolbarActivity extends AppCompatActivity {
 
     private void performLogout() {
         auth.signOut();
+
         SharedPreferences.Editor editor = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
         editor.putBoolean(KEY_REMEMBER_ME, false);
         editor.apply();
+
+        apagarCredenciaisSeguras();
 
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra("JUST_LOGGED_OUT", true);
@@ -254,7 +221,6 @@ public class ToolbarActivity extends AppCompatActivity {
         }
     }
 
-    // --- MÉTODO DE LAYOUT CORRIGIDO (VERSÃO FINAL) ---
     private void ajustarLayout() {
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
 
@@ -262,7 +228,6 @@ public class ToolbarActivity extends AppCompatActivity {
         View toolbar = binding.toolbarLayout.toolbar;
         View container = binding.fragmentContainer;
 
-        // Salva os paddings originais
         if (toolbar.getTag() == null) {
             toolbar.setTag(toolbar.getPaddingTop());
         }
@@ -273,7 +238,6 @@ public class ToolbarActivity extends AppCompatActivity {
         }
         final int originalBottomNavBottom = (int) bottomNav.getTag();
 
-        // Toolbar - Reage apenas à barra de status
         ViewCompat.setOnApplyWindowInsetsListener(toolbar, (v, insets) -> {
             Insets statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars());
             v.setPadding(
@@ -282,10 +246,9 @@ public class ToolbarActivity extends AppCompatActivity {
                     v.getPaddingRight(),
                     v.getPaddingBottom()
             );
-            return insets; // ✅ NÃO consome
+            return insets;
         });
 
-        // Bottom Navigation - Reage apenas à barra de navegação (NÃO ao teclado)
         ViewCompat.setOnApplyWindowInsetsListener(bottomNav, (v, insets) -> {
             Insets navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
             v.setPadding(
@@ -294,67 +257,11 @@ public class ToolbarActivity extends AppCompatActivity {
                     v.getPaddingRight(),
                     originalBottomNavBottom + navBars.bottom
             );
-            return insets; // ✅ NÃO consome
+            return insets;
         });
 
-        // Container - NÃO aplica padding para o teclado
-        // Deixa o ScrollView dentro do Fragment lidar com isso
         ViewCompat.setOnApplyWindowInsetsListener(container, (v, insets) -> {
-            // Simplesmente retorna os insets sem modificar
-            return insets; // ✅ Permite que o ScrollView reaja
+            return insets;
         });
     }
-
-    /**
-     * Mostra o menu dropdown quando clica na foto de perfil
-     * @param anchor View que serve como âncora para o menu (o avatar)
-     */
-//    private void showProfileMenu(View anchor) {
-//        PopupMenu popupMenu = new PopupMenu(this, anchor);
-//        popupMenu.getMenuInflater().inflate(R.menu.profile_dropdown_menu, popupMenu.getMenu());
-//
-//        popupMenu.setOnMenuItemClickListener(item -> {
-//            int id = item.getItemId();
-//
-//            if (id == R.id.menu_edit_profile) {
-//                replaceFragment(new EditarDadosPessoaisFragment());
-//                return true;
-//
-//            } else if (id == R.id.menu_logout) {
-//                showLogoutConfirmationDialog();
-//                return true;
-//            }
-//
-//            return false;
-//        });
-//
-//        popupMenu.show();
-//    }
-
-    private void showProfileMenu(View anchor) {
-        PopupMenu popupMenu = new PopupMenu(this, anchor);
-
-        // Adiciona itens manualmente
-        popupMenu.getMenu().add(0, 1, 0, "Editar cadastro");
-        popupMenu.getMenu().add(0, 2, 1, "Sair");
-
-        popupMenu.setOnMenuItemClickListener(item -> {
-            if (item.getItemId() == 1) {
-                replaceFragment(new EditarDadosPessoaisFragment());
-                return true;
-            } else if (item.getItemId() == 2) {
-                showLogoutConfirmationDialog();
-                return true;
-            }
-            return false;
-        });
-
-        popupMenu.show();
-    }
-
-
-
-
-
-
 }

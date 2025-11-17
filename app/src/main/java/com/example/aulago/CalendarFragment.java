@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.CalendarView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,6 +21,7 @@ import com.bumptech.glide.Glide;
 import com.example.aulago.databinding.FragmentCalendarBinding; // IMPORTANTE: View Binding
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -106,13 +108,31 @@ public class CalendarFragment extends Fragment { // MUDOU
 
 
     private void setupRecyclerView() {
-        // MUDOU: Usa binding e requireContext()
         binding.recyclerViewClasses.setLayoutManager(new LinearLayoutManager(requireContext()));
         adapter = new ClassAdapter(requireContext(), new ArrayList<>());
         binding.recyclerViewClasses.setAdapter(adapter);
+
+        adapter.setOnAvaliarClickListener(classModel -> {
+
+            String alunoId = classModel.getAlunoId();
+
+            if (alunoId == null || alunoId.isEmpty()) {
+                Toast.makeText(getContext(), "Erro: ID do aluno não encontrado para esta aula.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            Log.d("CalendarFragment", "Navegando para avaliar o aluno com ID: " + alunoId);
+
+            AvaliacaoFragment avaliacaoFragment = AvaliacaoFragment.newInstance(alunoId);
+
+            // Inicia a navegação para o AvaliacaoFragment
+            getParentFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, avaliacaoFragment) // Certifique-se que 'R.id.fragment_container' é o ID correto
+                    .addToBackStack(null)
+                    .commit();
+        });
     }
 
-    // Esta função é a mesma, pois já estava correta (filtrando por professorId)
     private void loadClassesFromFirebase() {
         if (currentUserId == null) return;
         Log.d("Firestore", "Buscando aulas para o PROFESSOR ID: " + currentUserId);
@@ -126,14 +146,22 @@ public class CalendarFragment extends Fragment { // MUDOU
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             try {
                                 ClassModel classModel = new ClassModel();
-                                String dataString = document.getString("data");
-                                Date data = parseDate(dataString);
-                                if (data == null) {
-                                    Log.w("Firestore", "Ignorando aula com data inválida: " + document.getId());
+
+
+                                // 1. Busque o campo "dataTimestamp" como um Timestamp
+                                Timestamp dataTimestamp = document.getTimestamp("dataTimestamp");
+
+                                // 2. Verifique se o campo existe no documento
+                                if (dataTimestamp == null) {
+                                    Log.w("Firestore", "Ignorando aula com dataTimestamp nulo: " + document.getId());
                                     continue;
                                 }
+
+                                // 3. Passe o objeto Timestamp (tipo correto) para o setter
+                                classModel.setDataTimestamp(dataTimestamp);
+
+
                                 // Preenche o resto
-                                classModel.setData(data);
                                 classModel.setAlunoId(document.getString("alunoId"));
                                 classModel.setProfessorId(document.getString("professorId"));
                                 classModel.setAlunoNome(document.getString("alunoNome"));
@@ -194,7 +222,6 @@ public class CalendarFragment extends Fragment { // MUDOU
         }
     }
 
-    // --- MÉTODOS QUE NÃO MUDAM (PURA LÓGICA) ---
 
     /**
      * MELHORIA: Retorna a saudação correta baseada na hora do dia.
@@ -218,9 +245,9 @@ public class CalendarFragment extends Fragment { // MUDOU
         targetCal.setTime(date);
 
         for (ClassModel classModel : allClasses) {
-            if (classModel.getData() == null) continue;
+            if (classModel.getDataTimestamp() == null) continue;
             Calendar classCal = Calendar.getInstance();
-            classCal.setTime(classModel.getData());
+            classCal.setTime(classModel.getDataTimestamp().toDate());
 
             if (isSameDay(targetCal, classCal)) {
                 filteredClasses.add(classModel);

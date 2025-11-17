@@ -3,12 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="?android:attr/colorBackground"
+    tools:context=".ProfessorPerfilFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingBottom="90dp">
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -38,10 +42,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start|bottom"
+                android:layout_marginStart="16dp"
                 android:gravity="center_vertical|start"
                 android:orientation="horizontal"
-                android:padding="10dp"
-                android:layout_marginStart="16dp">
+                android:padding="10dp">
 
                 <TextView
                     android:id="@+id/tvProfessorRatingMedia"
@@ -60,8 +64,8 @@
                     android:layout_marginStart="4dp"
                     android:isIndicator="true"
                     android:numStars="5"
-                    android:stepSize="0.1"
                     android:progressTint="@color/amarelo"
+                    android:stepSize="0.1"
                     tools:rating="4.8" />
             </LinearLayout>
 
@@ -86,83 +90,76 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:orientation="horizontal"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp">
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:paddingTop="12dp"
+            android:paddingHorizontal="16dp">
+
+            <TextView
+                android:id="@+id/inputNome"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/montserrat"
+                android:text="Carregando nome..."
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
+                android:gravity="center">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/statusProfessor"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="horizontal">
+                    android:layout_marginEnd="6dp"
+                    android:text="✓"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    app:chipBackgroundColor="#4CAF50"
+                    app:chipEndPadding="8dp"
+                    app:chipMinHeight="28dp"
+                    app:chipStartPadding="8dp"
+                    app:chipStrokeWidth="0dp"
+                    tools:visibility="visible" />
 
-                    <TextView
-                        android:id="@+id/inputNome"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/montserrat"
-                        android:text="Carregando nome..."
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipPlanoPro"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:text="★"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:visibility="gone"
+                    app:chipBackgroundColor="@color/amarelo"
+                    app:chipEndPadding="8dp"
+                    app:chipMinHeight="28dp"
+                    app:chipStartPadding="8dp"
+                    app:chipStrokeWidth="0dp"
+                    tools:visibility="visible" />
 
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/statusProfessor"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:text="✓"
-                        android:textColor="@android:color/white"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:visibility="gone"
-                        app:chipBackgroundColor="#4CAF50"
-                        app:chipEndPadding="8dp"
-                        app:chipMinHeight="28dp"
-                        app:chipStartPadding="8dp"
-                        app:chipStrokeWidth="0dp"
-                        tools:visibility="visible" />
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chipPlanoPro"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
-                        android:text="★"
-                        android:textColor="@color/black"
-                        android:textSize="16sp"
-                        android:visibility="gone"
-                        app:chipBackgroundColor="@color/amarelo"
-                        app:chipEndPadding="8dp"
-                        app:chipMinHeight="28dp"
-                        app:chipStartPadding="8dp"
-                        app:chipStrokeWidth="0dp"
-                        tools:visibility="visible" />
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chipPlanoPremium"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
-                        android:text="👑"
-                        android:textColor="@android:color/white"
-                        android:textSize="14sp"
-                        android:visibility="gone"
-                        app:chipBackgroundColor="@color/marinho"
-                        app:chipEndPadding="6dp"
-                        app:chipMinHeight="28dp"
-                        app:chipStartPadding="6dp"
-                        app:chipStrokeWidth="0dp"
-                        tools:visibility="visible" />
-
-                </LinearLayout>
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipPlanoPremium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="👑"
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp"
+                    android:visibility="gone"
+                    app:chipBackgroundColor="@color/marinho"
+                    app:chipEndPadding="6dp"
+                    app:chipMinHeight="28dp"
+                    app:chipStartPadding="6dp"
+                    app:chipStrokeWidth="0dp"
+                    tools:visibility="visible" />
             </LinearLayout>
+
         </LinearLayout>
 
         <LinearLayout
@@ -288,32 +285,9 @@
             android:id="@+id/groupBio"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingVertical="20dp">
+            android:orientation="vertical">
 
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="10dp"
-                android:padding="20dp"
-                app:cardCornerRadius="10dp"
-                app:cardElevation="4dp">
-
-                <TextView
-                    android:id="@+id/tvBio"
-                    style="@style/TextAppearance.AppCompat.Caption"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/card_background"
-                    android:fontFamily="@font/montserrat"
-                    android:padding="16dp"
-                    android:text='Pense na bio como a capa de trás de um livro 📖.
-        É o resumo que faz o aluno pensar: "Uau, é disso que eu preciso!"'
-                    android:textSize="14dp"
-                    android:textStyle="italic" />
-
-            </androidx.cardview.widget.CardView>
-
+            <include layout="@layout/bio_card" />
 
         </LinearLayout>
 
@@ -345,7 +319,6 @@
                 tools:listitem="@layout/review_card" />
 
         </LinearLayout>
-
 
     </LinearLayout>
 

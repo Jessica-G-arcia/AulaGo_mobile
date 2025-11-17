@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -74,7 +75,15 @@ public class SearchAlunosFragment extends Fragment implements AlunoAdapter.OnAlu
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             // O @DocumentId no Aluno.java vai pegar o ID do doc
                             Aluno aluno = document.toObject(Aluno.class);
+
                             aluno.setId(document.getString("uid"));
+
+                            if (document.contains("ratingMedia")) {
+                                aluno.setRatingMedia(document.getDouble("ratingMedia"));
+                            }
+                            if (document.contains("ratingCount")) {
+                                aluno.setRatingCount(document.getLong("ratingCount"));
+                            }
 
                             listaDeAlunos.add(aluno);
                         }
@@ -92,7 +101,8 @@ public class SearchAlunosFragment extends Fragment implements AlunoAdapter.OnAlu
     private void setupSearchFilter() {
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -103,7 +113,8 @@ public class SearchAlunosFragment extends Fragment implements AlunoAdapter.OnAlu
             }
 
             @Override
-            public void afterTextChanged(Editable s) {}
+            public void afterTextChanged(Editable s) {
+            }
         });
     }
 

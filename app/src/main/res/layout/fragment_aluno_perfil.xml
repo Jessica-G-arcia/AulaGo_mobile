@@ -9,7 +9,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical">
 
         <FrameLayout
@@ -189,31 +189,13 @@
         </com.google.android.material.tabs.TabLayout>
 
         <LinearLayout
-            android:id="@+id/groupBioAluno"
+            android:id="@+id/groupBio"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:paddingVertical="16dp">
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="35dp"
-                app:cardCornerRadius="10dp"
-                app:cardElevation="4dp">
+            <include layout="@layout/bio_card" />
 
-                <TextView
-                    android:id="@+id/tvBioAluno"
-                    style="@style/TextAppearance.AppCompat.Caption"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/card_background"
-                    android:padding="16dp"
-                    android:text='Pense na bio como a capa de trás de um livro 📖.'
-                    android:textSize="14dp"
-                    android:textStyle="italic" />
-
-            </androidx.cardview.widget.CardView>
         </LinearLayout>
 
         <LinearLayout
@@ -225,9 +207,23 @@
             android:visibility="gone">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:id="@+id/tvEmptyReviews"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Carregando avaliações..." />
+                android:gravity="center"
+                android:padding="32dp"
+                android:text="Ainda não há avaliações."
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textSize="14sp"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvAvaliacoes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                tools:listitem="@layout/review_card" />
 
         </LinearLayout>
 

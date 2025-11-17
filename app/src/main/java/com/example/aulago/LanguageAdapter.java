@@ -8,11 +8,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide; // <-- IMPORTAR O GLIDE
+
 import java.util.List;
 
 public class LanguageAdapter extends RecyclerView.Adapter<LanguageAdapter.LanguageViewHolder> {
 
     private List<Language> languageList;
+    private Context context; // <-- Adicionar contexto para o Glide
 
     public LanguageAdapter(List<Language> languageList) {
         this.languageList = languageList;
@@ -26,7 +30,9 @@ public class LanguageAdapter extends RecyclerView.Adapter<LanguageAdapter.Langua
     @NonNull
     @Override
     public LanguageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_language, parent, false);
+        // Inicializar o contexto aqui
+        this.context = parent.getContext();
+        View view = LayoutInflater.from(context).inflate(R.layout.item_language, parent, false);
         return new LanguageViewHolder(view);
     }
 
@@ -34,21 +40,25 @@ public class LanguageAdapter extends RecyclerView.Adapter<LanguageAdapter.Langua
     public void onBindViewHolder(@NonNull LanguageViewHolder holder, int position) {
         Language language = languageList.get(position);
         holder.languageName.setText(language.getName());
-        String flagRef = language.getFlagRef();
-        int flagId = getResourceId(holder.itemView.getContext(), flagRef);
-        if (flagId != 0) { // Se encontrou o drawable
-            holder.flagImage.setImageResource(flagId);
+
+        String url = language.getFlagUrl();
+
+        if (url != null && !url.isEmpty()) {
+            Glide.with(context)
+                    .load(url) // Carrega a imagem da URL
+                    .placeholder(R.drawable.ic_flag) // Opcional: uma imagem padrão enquanto carrega
+                    .error(R.drawable.ic_flag) // Opcional: uma imagem de erro se falhar
+                    .into(holder.flagImage); // Onde a imagem será exibida
+        } else {
+            // Caso a URL seja nula ou vazia, mostra uma imagem padrão
+            holder.flagImage.setImageResource(R.drawable.ic_flag);
         }
     }
 
-    private int getResourceId(Context context, String name) {
-        if (name == null) return 0;
-        return context.getResources().getIdentifier(name, "drawable", context.getPackageName());
-    }
 
     @Override
     public int getItemCount() {
-        return languageList.size();
+        return languageList != null ? languageList.size() : 0;
     }
 
     public static class LanguageViewHolder extends RecyclerView.ViewHolder {
