@@ -1,31 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:androidT="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/nav_home"
         android:icon="@drawable/ic_home"
-        android:title="Home"
-        app:cnb_backgroundColor="@color/azul" />
-
+        android:title="Home" />
     <item
         android:id="@+id/nav_classes"
-        android:icon="@drawable/ic_classes"
-        android:title="Aulas"
-        app:cnb_backgroundColor="@color/amarelo" />
-
-
+        android:icon="@drawable/ic_aulas"
+        android:title="Aulas" />
     <item
         android:id="@+id/nav_search"
-        android:icon="@drawable/ic_search"
-        android:title="Buscar"
-        app:cnb_backgroundColor="@color/laranja" />
-
+        android:icon="@drawable/ic_buscar"
+        android:title="Buscar" />
     <item
         android:id="@+id/nav_profile"
-        android:icon="@drawable/ic_person"
-        android:title="Meu Perfil"
-        app:cnb_backgroundColor="@color/marinho" />
-
+        android:icon="@drawable/ic_perfil"
+        android:title="Perfil" />
 </menu>
