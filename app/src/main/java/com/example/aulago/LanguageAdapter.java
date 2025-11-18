@@ -8,15 +8,23 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.bumptech.glide.Glide; // <-- IMPORTAR O GLIDE
-
+import com.bumptech.glide.Glide;
 import java.util.List;
 
 public class LanguageAdapter extends RecyclerView.Adapter<LanguageAdapter.LanguageViewHolder> {
 
     private List<Language> languageList;
-    private Context context; // <-- Adicionar contexto para o Glide
+    private Context context;
+    private OnFlagClickListener flagClickListener;
+
+    // Interface para o clique na bandeira
+    public interface OnFlagClickListener {
+        void onFlagClick(Language language);
+    }
+
+    public void setOnFlagClickListener(OnFlagClickListener listener) {
+        this.flagClickListener = listener;
+    }
 
     public LanguageAdapter(List<Language> languageList) {
         this.languageList = languageList;
@@ -30,7 +38,6 @@ public class LanguageAdapter extends RecyclerView.Adapter<LanguageAdapter.Langua
     @NonNull
     @Override
     public LanguageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Inicializar o contexto aqui
         this.context = parent.getContext();
         View view = LayoutInflater.from(context).inflate(R.layout.item_language, parent, false);
         return new LanguageViewHolder(view);
@@ -42,19 +49,26 @@ public class LanguageAdapter extends RecyclerView.Adapter<LanguageAdapter.Langua
         holder.languageName.setText(language.getName());
 
         String url = language.getFlagUrl();
-
         if (url != null && !url.isEmpty()) {
             Glide.with(context)
-                    .load(url) // Carrega a imagem da URL
-                    .placeholder(R.drawable.ic_flag) // Opcional: uma imagem padrão enquanto carrega
-                    .error(R.drawable.ic_flag) // Opcional: uma imagem de erro se falhar
-                    .into(holder.flagImage); // Onde a imagem será exibida
+                    .load(url)
+                    .placeholder(R.drawable.ic_flag)
+                    .error(R.drawable.ic_flag)
+                    .into(holder.flagImage);
         } else {
-            // Caso a URL seja nula ou vazia, mostra uma imagem padrão
             holder.flagImage.setImageResource(R.drawable.ic_flag);
         }
-    }
 
+        // Opacidade: inglês destacado, outros apagados
+        holder.flagImage.setAlpha(language.getName().equalsIgnoreCase("Inglês") ? 1.0f : 0.3f);
+
+        // Clique na bandeira
+        holder.itemView.setOnClickListener(v -> {
+            if (flagClickListener != null) {
+                flagClickListener.onFlagClick(language);
+            }
+        });
+    }
 
     @Override
     public int getItemCount() {

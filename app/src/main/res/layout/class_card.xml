@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
-    app:cardElevation="1dp"
+    app:cardElevation="2dp"
     app:cardCornerRadius="20dp">
 
     <LinearLayout
@@ -13,15 +14,28 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="16dp"
-
         android:background="@color/white">
 
+        <!-- Coluna: data + horários -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
             android:layout_marginEnd="16dp">
+
+            <!-- DATA no topo -->
+            <TextView
+                android:id="@+id/tvDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="20/11/2025"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/laranja"
+                android:layout_marginBottom="6dp"
+                android:layout_gravity="center_horizontal"
+                tools:ignore="HardcodedText"/>
 
             <TextView
                 android:id="@+id/tvStartTime"
@@ -51,6 +65,7 @@
 
         </LinearLayout>
 
+        <!-- Coluna central -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -76,7 +91,7 @@
                 android:text="Inglês"
                 android:textSize="14sp"
                 android:textColor="?attr/colorOnSurfaceVariant"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="0dp"
                 android:maxLines="1"
                 android:ellipsize="end"
                 tools:ignore="HardcodedText" />
@@ -103,8 +118,21 @@
                     android:textSize="14sp" />
             </LinearLayout>
 
+            <TextView
+                android:id="@+id/tvLocal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Av. Central, 1025"
+                android:textSize="14sp"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:layout_marginTop="4dp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                tools:ignore="HardcodedText" />
+
         </LinearLayout>
 
+        <!-- Coluna status/rating -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -133,9 +161,6 @@
                 app:chipStrokeWidth="0dp"
                 android:textColor="@color/marinho"
                 tools:ignore="HardcodedText" />
-
         </LinearLayout>
-
     </LinearLayout>
-
 </com.google.android.material.card.MaterialCardView>
