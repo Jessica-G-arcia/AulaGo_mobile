@@ -68,7 +68,7 @@
             android:clickable="true"
             android:contentDescription="Configurações"
             android:focusable="true"
-            android:src="@drawable/ic_settings"
+            android:src="@drawable/ic_edit"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/iv_logout"
             app:layout_constraintTop_toTopOf="parent" />
