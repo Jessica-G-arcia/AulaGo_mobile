@@ -81,7 +81,7 @@ public class AvaliacaoFragment extends Fragment {
 
         db.collection("users").document(idDoUsuarioAvaliado).get()
                 .addOnSuccessListener(documentSnapshot -> {
-                    if (binding == null) return; // Fragmento foi destruído
+                    if (binding == null || !isAdded()) return; // Fragmento foi destruído
                     if (documentSnapshot.exists()) {
                         String nome = documentSnapshot.getString("nome");
                         String urlFotoPerfil = documentSnapshot.getString("urlFotoPerfil");

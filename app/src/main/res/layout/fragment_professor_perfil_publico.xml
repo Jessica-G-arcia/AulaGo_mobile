@@ -47,8 +47,8 @@
                     android:layout_marginStart="4dp"
                     android:isIndicator="true"
                     android:numStars="5"
-                    android:stepSize="0.1"
                     android:progressTint="@color/amarelo"
+                    android:stepSize="0.1"
                     tools:rating="4.8" />
             </LinearLayout>
 
@@ -172,11 +172,26 @@
             android:padding="10dp">
 
             <TextView
+                android:id="@+id/inputIdioma"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:drawableStart="@drawable/ic_flag"
+                android:drawablePadding="10dp"
+                android:fontFamily="@font/montserrat"
+                android:gravity="center_vertical"
+                android:textColor="?android:attr/textColorPrimary"
+                android:visibility="visible"
+                app:drawableTint="@color/azul"
+                tools:text="Idiomas: Inglês" />
+
+            <TextView
                 android:id="@+id/inputEspecialidade"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:drawableStart="@drawable/ic_trophy"
                 android:drawablePadding="10dp"
+                android:layout_marginTop="10dp"
                 android:fontFamily="@font/montserrat"
                 android:gravity="center_vertical"
                 android:textColor="?android:attr/textColorPrimary"
@@ -199,57 +214,63 @@
                 tools:text="Modalidade: Presencial e Online" />
 
             <LinearLayout
-                android:id="@+id/groupValorPresencial"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                tools:visibility="visible">
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="5dp">
 
-                <TextView
+                <LinearLayout
+                    android:id="@+id/groupValorPresencial"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:drawableStart="@drawable/ic_presencial"
-                    android:drawablePadding="12dp"
+                    android:layout_marginTop="5dp"
                     android:gravity="center_vertical"
-                    android:text="Presencial: "
-                    app:drawableTint="@color/azul" />
+                    android:orientation="horizontal"
+                    tools:visibility="visible">
 
-                <TextView
-                    android:id="@+id/inputValorPresencial"
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:drawableStart="@drawable/ic_presencial"
+                        android:drawablePadding="12dp"
+                        android:gravity="center_vertical"
+                        android:text="Presencial: "
+                        app:drawableTint="@color/azul" />
+
+                    <TextView
+                        android:id="@+id/inputValorPresencial"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="R$ 150,00" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/groupValorOnline"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="R$ 150,00" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/groupValorOnline"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                tools:visibility="visible">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:drawableStart="@drawable/ic_online"
-                    android:drawablePadding="12dp"
-                    android:fontFamily="@font/montserrat"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="5dp"
                     android:gravity="center_vertical"
-                    android:text="Online: "
-                    app:drawableTint="@color/azul" />
+                    android:orientation="horizontal"
+                    tools:visibility="visible">
 
-                <TextView
-                    android:id="@+id/inputValorOnline"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/montserrat"
-                    tools:text="R$ 100,00" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:drawableStart="@drawable/ic_online"
+                        android:drawablePadding="12dp"
+                        android:fontFamily="@font/montserrat"
+                        android:gravity="center_vertical"
+                        android:text="Online: "
+                        app:drawableTint="@color/azul" />
 
+                    <TextView
+                        android:id="@+id/inputValorOnline"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/montserrat"
+                        tools:text="R$ 100,00" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 

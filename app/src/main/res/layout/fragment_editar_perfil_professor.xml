@@ -70,7 +70,7 @@
             android:layout_marginTop="16dp">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etIdiomaAluno"
+                android:id="@+id/etIdioma"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Idioma principal (Ex: Inglês)"
@@ -163,5 +163,17 @@
             android:layout_marginTop="32dp"
             android:text="Salvar Perfil" />
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSolicitarProfessor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="24dp"
+            android:backgroundTint="#219EBC"
+            android:text="Mudar para aluno"
+            android:textColor="@color/white"
+            android:visibility="gone"
+            app:cornerRadius="20dp"
+            tools:visibility="visible" />
     </LinearLayout>
 </ScrollView>

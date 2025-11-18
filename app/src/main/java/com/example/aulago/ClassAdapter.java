@@ -76,9 +76,6 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
             } else if (local.contains("presencial")) {
                 holder.tvEmojiModalidade.setText("📍");
                 holder.tvModalidade.setText("Aula Presencial");
-            } else {
-                holder.tvEmojiModalidade.setText("•");
-                holder.tvModalidade.setText(classModel.getLocal());
             }
         } else {
             holder.tvEmojiModalidade.setVisibility(View.GONE);

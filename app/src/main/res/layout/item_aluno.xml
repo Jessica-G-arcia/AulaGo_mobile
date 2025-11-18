@@ -63,7 +63,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="6dp"
-                android:textColor="#95A5A6"
+                android:textColor="@color/cinza_claro"
                 tools:text="(12 avaliações)" />
         </LinearLayout>
 
@@ -82,17 +82,19 @@
             tools:text="Idioma(s): Inglês" />
 
         <!-- CITAÇÃO -->
+
         <TextView
             android:id="@+id/tvUserQuote"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="24dp"
+            android:alpha="0.85"
             android:fontFamily="@font/montserrat"
             android:textColor="?attr/colorOnPrimary"
             android:textStyle="italic"
-            android:alpha="0.85"
             app:layout_constraintEnd_toEndOf="@id/tvUserName"
-            app:layout_constraintStart_toStartOf="@id/tvUserName"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvUserSpecialty"
             tools:text="&quot;Rafaela tem um aprendizado rápido, super educada. Aluna sensacional!&quot;" />
 
@@ -101,12 +103,13 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
+            android:alpha="0.85"
             android:fontFamily="@font/montserrat"
             android:gravity="end"
             android:textColor="?attr/colorOnPrimary"
             android:textStyle="bold"
-            android:alpha="0.85"
             app:layout_constraintEnd_toEndOf="@id/tvUserName"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="@id/tvUserName"
             app:layout_constraintTop_toBottomOf="@id/tvUserQuote"
             tools:text="Rogério Lima" />

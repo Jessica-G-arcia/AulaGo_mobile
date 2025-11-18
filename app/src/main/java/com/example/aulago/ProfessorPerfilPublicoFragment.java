@@ -37,7 +37,7 @@ public class ProfessorPerfilPublicoFragment extends Fragment {
     private String professorId;
 
     // --- VIEWS DO XML ---
-    private TextView tvNomeProfessor, tvEspecialidade, tvModalidade;
+    private TextView tvNomeProfessor, tvEspecialidade, tvModalidade, tvIdioma;
     private TextView tvValorPresencial, tvValorOnline, tvBio, tvEmptyReviews;
     private TextView tvProfessorRatingMedia;
     private RatingBar rbProfessorRating;
@@ -127,6 +127,7 @@ public class ProfessorPerfilPublicoFragment extends Fragment {
         btnContratar = view.findViewById(R.id.btnEditar); // ID no XML é btnEditar, mas a função é Contratar
 
         // Infos Principais
+        tvIdioma = view.findViewById(R.id.inputIdioma);
         tvEspecialidade = view.findViewById(R.id.inputEspecialidade);
         tvModalidade = view.findViewById(R.id.inputModalidade);
         groupValorPresencial = view.findViewById(R.id.groupValorPresencial);
@@ -183,6 +184,7 @@ public class ProfessorPerfilPublicoFragment extends Fragment {
 
                     // --- 1. CARREGAMENTO DE INFO BÁSICA (String) ---
                     tvNomeProfessor.setText(documentSnapshot.getString("nome"));
+                    tvIdioma.setText("Idioma: " + documentSnapshot.getString("idioma"));
                     tvEspecialidade.setText("Especialidade: " + documentSnapshot.getString("especialidade"));
                     tvModalidade.setText("Modalidade: " + documentSnapshot.getString("modalidade"));
                     tvBio.setText(documentSnapshot.getString("bio")); // Assume que o resto do código trata null/empty

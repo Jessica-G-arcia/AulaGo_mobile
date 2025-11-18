@@ -15,7 +15,6 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 
 
-
 import androidx.appcompat.view.ContextThemeWrapper; // <-- 1. NOVO IMPORT
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKeys;
@@ -88,6 +87,11 @@ public class ToolbarActivity extends AppCompatActivity {
         String uid = user.getUid();
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(document -> {
+
+                    if (isFinishing() || isDestroyed()) {
+                        return;
+                    }
+
                     String userRole = ROLE_ALUNO;
                     this.userStatus = "nenhum";
 
@@ -104,6 +108,8 @@ public class ToolbarActivity extends AppCompatActivity {
                     setupUIWithRole(userRole);
                 })
                 .addOnFailureListener(e -> {
+                    if (isFinishing() || isDestroyed()) return;
+
                     setupUIWithRole(ROLE_ALUNO);
                 });
     }
@@ -174,11 +180,18 @@ public class ToolbarActivity extends AppCompatActivity {
     }
 
     public void replaceFragment(Fragment fragment) {
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, fragment)
-                .addToBackStack(null)
-                .commit();
+        if (getSupportFragmentManager().isDestroyed() || isFinishing()) {
+            return;
+        }
+        try {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, fragment)
+                    .addToBackStack(null)
+                    .commitAllowingStateLoss();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void showLogoutConfirmationDialog() {

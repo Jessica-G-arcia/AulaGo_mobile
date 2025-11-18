@@ -6,28 +6,19 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CalendarView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment; // MUDOU
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.example.aulago.databinding.FragmentCalendarBinding; // IMPORTANTE: View Binding
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.example.aulago.databinding.FragmentCalendarBinding;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -37,12 +28,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class CalendarFragment extends Fragment { // MUDOU
+public class CalendarFragment extends Fragment {
 
-    // 1. View Binding (substitui todos os findViewById)
     private FragmentCalendarBinding binding;
-
-    // 2. Variáveis de Lógica (as mesmas de antes)
     private ClassAdapter adapter;
     private List<ClassModel> allClasses;
     private Calendar selectedCalendar;
@@ -52,22 +40,17 @@ public class CalendarFragment extends Fragment { // MUDOU
     private FirebaseAuth mAuth;
     private String currentUserId;
 
-    // 3. onCreate (Para inicializar variáveis, não views)
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
-
-        // Inicializa variáveis que não são views
         allClasses = new ArrayList<>();
         uiDateFormat = new SimpleDateFormat("dd 'de' MMMM 'de' yyyy", new Locale("pt", "BR"));
         firebaseDataFormat = new SimpleDateFormat("dd/MM/yyyy", new Locale("pt", "BR"));
         selectedCalendar = Calendar.getInstance();
     }
 
-    // 4. onCreateView (Para inflar o XML)
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -75,59 +58,46 @@ public class CalendarFragment extends Fragment { // MUDOU
         return binding.getRoot();
     }
 
-    // 5. onViewCreated (Para configurar as views e carregar dados)
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
-            // MUDOU: Usa requireActivity() para o contexto
             startActivity(new Intent(requireActivity(), MainActivity.class));
             requireActivity().finish();
             return;
         }
         currentUserId = currentUser.getUid();
 
-
-        // Configura os componentes
         setupRecyclerView();
         setupCalendar();
-
-        // Carrega as aulas do PROFESSOR logado
         loadClassesFromFirebase();
     }
 
-    // 6. onDestroyView (Limpa o binding)
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        binding = null; // Previne memory leaks
+        binding = null; // O binding vira null aqui
     }
 
-
-
     private void setupRecyclerView() {
+        // Verificação de segurança
+        if (binding == null) return;
+
         binding.recyclerViewClasses.setLayoutManager(new LinearLayoutManager(requireContext()));
         adapter = new ClassAdapter(requireContext(), new ArrayList<>());
         binding.recyclerViewClasses.setAdapter(adapter);
 
         adapter.setOnAvaliarClickListener(classModel -> {
-
             String alunoId = classModel.getAlunoId();
-
             if (alunoId == null || alunoId.isEmpty()) {
-                Toast.makeText(getContext(), "Erro: ID do aluno não encontrado para esta aula.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Erro: ID do aluno não encontrado.", Toast.LENGTH_SHORT).show();
                 return;
             }
-
-            Log.d("CalendarFragment", "Navegando para avaliar o aluno com ID: " + alunoId);
-
             AvaliacaoFragment avaliacaoFragment = AvaliacaoFragment.newInstance(alunoId);
-
-            // Inicia a navegação para o AvaliacaoFragment
             getParentFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, avaliacaoFragment) // Certifique-se que 'R.id.fragment_container' é o ID correto
+                    .replace(R.id.fragment_container, avaliacaoFragment)
                     .addToBackStack(null)
                     .commit();
         });
@@ -135,33 +105,24 @@ public class CalendarFragment extends Fragment { // MUDOU
 
     private void loadClassesFromFirebase() {
         if (currentUserId == null) return;
-        Log.d("Firestore", "Buscando aulas para o PROFESSOR ID: " + currentUserId);
 
         db.collection("aulas")
                 .whereEqualTo("professorId", currentUserId)
                 .get()
                 .addOnCompleteListener(task -> {
+                    // 1. CORREÇÃO CRUCIAL: Se o usuário saiu da tela, paramos aqui.
+                    if (binding == null) return;
+
                     if (task.isSuccessful()) {
                         allClasses.clear();
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             try {
                                 ClassModel classModel = new ClassModel();
-
-
-                                // 1. Busque o campo "dataTimestamp" como um Timestamp
                                 Timestamp dataTimestamp = document.getTimestamp("dataTimestamp");
 
-                                // 2. Verifique se o campo existe no documento
-                                if (dataTimestamp == null) {
-                                    Log.w("Firestore", "Ignorando aula com dataTimestamp nulo: " + document.getId());
-                                    continue;
-                                }
+                                if (dataTimestamp == null) continue;
 
-                                // 3. Passe o objeto Timestamp (tipo correto) para o setter
                                 classModel.setDataTimestamp(dataTimestamp);
-
-
-                                // Preenche o resto
                                 classModel.setAlunoId(document.getString("alunoId"));
                                 classModel.setProfessorId(document.getString("professorId"));
                                 classModel.setAlunoNome(document.getString("alunoNome"));
@@ -177,17 +138,17 @@ public class CalendarFragment extends Fragment { // MUDOU
                                 Log.e("Firestore", "Erro ao processar aula: " + document.getId(), e);
                             }
                         }
-                        updateClassList(); // Atualiza a lista com os dados do dia atual
+                        updateClassList();
                     } else {
-                        Log.w("Firestore", "Erro ao carregar aulas (Professor)", task.getException());
+                        Log.w("Firestore", "Erro ao carregar aulas", task.getException());
                     }
                 });
     }
 
-
     private void setupCalendar() {
+        if (binding == null) return;
+
         try {
-            // MUDOU: Usa binding e requireContext()
             binding.calendarView.setBackgroundColor(requireContext().getResources().getColor(android.R.color.transparent));
         } catch (Exception e) {
             e.printStackTrace();
@@ -200,6 +161,9 @@ public class CalendarFragment extends Fragment { // MUDOU
     }
 
     private void updateClassList() {
+        // 2. CORREÇÃO CRUCIAL: Verifica se binding existe antes de tocar na tela
+        if (binding == null) return;
+
         List<ClassModel> filteredClasses = getClassesForDate(selectedCalendar.getTime());
         String formattedDate = uiDateFormat.format(selectedCalendar.getTime());
 
@@ -219,23 +183,6 @@ public class CalendarFragment extends Fragment { // MUDOU
             binding.emptyState.setVisibility(View.GONE);
             binding.recyclerViewClasses.setVisibility(View.VISIBLE);
             adapter.updateList(filteredClasses);
-        }
-    }
-
-
-    /**
-     * MELHORIA: Retorna a saudação correta baseada na hora do dia.
-     */
-    private String getGreeting() {
-        Calendar c = Calendar.getInstance();
-        int timeOfDay = c.get(Calendar.HOUR_OF_DAY);
-
-        if (timeOfDay >= 0 && timeOfDay < 12) {
-            return "Bom dia";
-        } else if (timeOfDay >= 12 && timeOfDay < 18) {
-            return "Boa tarde";
-        } else {
-            return "Boa noite";
         }
     }
 
@@ -259,15 +206,5 @@ public class CalendarFragment extends Fragment { // MUDOU
     private boolean isSameDay(Calendar cal1, Calendar cal2) {
         return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
                 cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
-    }
-
-    private Date parseDate(String dateString) {
-        if (dateString == null) return null;
-        try {
-            return firebaseDataFormat.parse(dateString);
-        } catch (ParseException e) {
-            Log.e("ParseDate", "Erro ao formatar data: " + dateString, e);
-            return null;
-        }
     }
 }

@@ -4,14 +4,15 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +39,6 @@ public class ProfessorAdapter extends RecyclerView.Adapter<ProfessorAdapter.Prof
     @NonNull
     @Override
     public ProfessorViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // ✅ Corrigido: Infla o layout específico do Professor
         View view = LayoutInflater.from(context).inflate(R.layout.item_professor_card, parent, false);
         return new ProfessorViewHolder(view);
     }
@@ -47,12 +47,61 @@ public class ProfessorAdapter extends RecyclerView.Adapter<ProfessorAdapter.Prof
     public void onBindViewHolder(@NonNull ProfessorViewHolder holder, int position) {
         Professor professor = filteredList.get(position);
 
-        // Define os dados
+        // --- 1. NOME ---
         holder.tvProfessorName.setText(professor.getNome());
-        holder.tvProfessorSpecialty.setText("Especialidade: " + professor.getEspecialidade());
-        holder.tvProfessorBio.setText(professor.getBio());
 
-        // Carrega a imagem
+        // --- 2. IDADE (tvProfessorAge) ---
+        if (professor.getIdade() != null) {
+            holder.tvProfessorAge.setText(professor.getIdade() + " anos");
+            holder.tvProfessorAge.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvProfessorAge.setVisibility(View.GONE);
+        }
+
+        // --- 3. ESPECIALIDADE (tvProfessorDescription) ---
+        // Usamos o campo de descrição para mostrar a especialidade
+        if (professor.getEspecialidade() != null && !professor.getEspecialidade().isEmpty()) {
+            holder.tvProfessorDescription.setText(professor.getEspecialidade());
+            holder.tvProfessorDescription.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvProfessorDescription.setText("Especialidade não informada");
+        }
+
+        // Garante que o botão "Ver mais" esteja oculto (conforme solicitado anteriormente)
+        holder.tvShowMore.setVisibility(View.GONE);
+
+
+        // --- 4. TAG: IDIOMA ---
+        if (professor.getIdioma() != null && !professor.getIdioma().isEmpty()) {
+            holder.tvProfessorLanguage.setText(professor.getIdioma());
+            holder.layoutTagLanguage.setVisibility(View.VISIBLE);
+        } else {
+            holder.layoutTagLanguage.setVisibility(View.GONE);
+        }
+
+        // --- 5. TAG: MODALIDADE ---
+        String modalidade = (professor.getPreferenciaModalidade() != null) ? professor.getPreferenciaModalidade() : "Online";
+
+        if (professor.getPreferenciaModalidade() != null && !professor.getPreferenciaModalidade().isEmpty()) {
+            holder.tvProfessorModality.setText(modalidade);
+            holder.layoutTagModality.setVisibility(View.VISIBLE);
+
+            // Troca o ícone dentro da tag (Câmera vs Perfil/Local)
+            if (modalidade.equalsIgnoreCase("Presencial")) {
+                holder.ivProfessorModalityIcon.setImageResource(R.drawable.ic_perfil); // ou ic_location se tiver
+            } else {
+                holder.ivProfessorModalityIcon.setImageResource(R.drawable.ic_camera); // certifique-se de ter esse drawble, ou use ic_mundo
+            }
+        } else {
+            holder.layoutTagModality.setVisibility(View.GONE);
+        }
+
+        // --- 6. DISTÂNCIA ---
+        holder.tvProfessorDistance.setText("9 km de você");
+        // Se quiser esconder caso não tenha distância:
+        // holder.layoutDistance.setVisibility(View.VISIBLE);
+
+        // --- 7. FOTO ---
         Glide.with(context)
                 .load(professor.getUrlFotoPerfil())
                 .placeholder(R.drawable.img_avatar_circle)
@@ -60,33 +109,24 @@ public class ProfessorAdapter extends RecyclerView.Adapter<ProfessorAdapter.Prof
                 .circleCrop()
                 .into(holder.ivProfessorAvatar);
 
-        // Lógica da Avaliação
+        // --- 8. AVALIAÇÃO ---
         long contagem = professor.getRatingCount();
-
         if (contagem > 0) {
-            // 1. Pega a média.
-            // Garanta que sua classe Professor tem o método getRatingMedia()
             double media = professor.getRatingMedia();
+            holder.tvProfessorRating.setText(String.format(Locale.US, "⭐ %.1f", media));
 
-            // 2. Formata a nota média (ex: "⭐ 4.8")
-            String mediaFormatada = String.format(Locale.US, "⭐ %.1f", media);
-            holder.tvProfessorRating.setText(mediaFormatada);
-
-            // 3. Formata a contagem (ex: "(12 avaliações)")
             String contagemFormatada = String.format(Locale.getDefault(), "(%d avaliaç%s)",
-                    contagem,
-                    contagem > 1 ? "ões" : "ão");
+                    contagem, contagem > 1 ? "ões" : "ão");
             holder.tvProfessorReviews.setText(contagemFormatada);
 
-            // 4. Garante que eles estão visíveis
             holder.tvProfessorRating.setVisibility(View.VISIBLE);
             holder.tvProfessorReviews.setVisibility(View.VISIBLE);
         } else {
-            // Se não há avaliações, mostra "Novo" e esconde a contagem
             holder.tvProfessorRating.setText("⭐ Novo");
             holder.tvProfessorReviews.setVisibility(View.GONE);
         }
-        // Define o clique para navegação
+
+        // --- 9. CLIQUE ---
         holder.btnContact.setOnClickListener(v -> listener.onProfessorClick(professor));
     }
 
@@ -95,27 +135,66 @@ public class ProfessorAdapter extends RecyclerView.Adapter<ProfessorAdapter.Prof
         return filteredList.size();
     }
 
-    // --- ViewHolder ---
+    // ================= VIEW HOLDER =================
+    // Mapeamento exato do seu XML enviado
     static class ProfessorViewHolder extends RecyclerView.ViewHolder {
+
         ImageView ivProfessorAvatar;
-        // IDs mapeados para o novo layout de Professor
-        TextView tvProfessorName, tvProfessorSpecialty, tvProfessorBio, tvProfessorRating, tvProfessorReviews;
-        Button btnContact;
+        TextView tvProfessorName;
+        TextView tvProfessorAge;
+        TextView tvProfessorRating, tvProfessorReviews;
+
+        // Tags (Layouts e Conteúdo)
+        LinearLayout layoutTagLanguage;
+        TextView tvProfessorLanguage;
+
+        LinearLayout layoutTagModality;
+        TextView tvProfessorModality;
+        ImageView ivProfessorModalityIcon;
+
+        // Área da Descrição/Especialidade
+        TextView tvProfessorDescription;
+        TextView tvShowMore;
+
+        // Área da Distância
+        LinearLayout layoutDistance;
+        TextView tvProfessorDistance;
+
+        MaterialButton btnContact;
 
         public ProfessorViewHolder(@NonNull View itemView) {
             super(itemView);
 
+            // Cabeçalho
             ivProfessorAvatar = itemView.findViewById(R.id.ivProfessorAvatar);
             tvProfessorName = itemView.findViewById(R.id.tvProfessorName);
-            tvProfessorSpecialty = itemView.findViewById(R.id.tvProfessorSpecialty);
-            tvProfessorBio = itemView.findViewById(R.id.tvProfessorBio);
+            tvProfessorAge = itemView.findViewById(R.id.tvProfessorAge);
             tvProfessorRating = itemView.findViewById(R.id.tvProfessorRating);
             tvProfessorReviews = itemView.findViewById(R.id.tvProfessorReviews);
+
+            // Tag Idioma
+            layoutTagLanguage = itemView.findViewById(R.id.layoutTagLanguage);
+            tvProfessorLanguage = itemView.findViewById(R.id.tvProfessorLanguage);
+
+            // Tag Modalidade
+            layoutTagModality = itemView.findViewById(R.id.layoutTagModality);
+            tvProfessorModality = itemView.findViewById(R.id.tvProfessorModality);
+            ivProfessorModalityIcon = itemView.findViewById(R.id.ivProfessorModalityIcon);
+
+            // Descrição
+            tvProfessorDescription = itemView.findViewById(R.id.tvProfessorDescription);
+            tvShowMore = itemView.findViewById(R.id.tvShowMore);
+
+            // Distância
+            layoutDistance = itemView.findViewById(R.id.layoutDistance);
+            tvProfessorDistance = itemView.findViewById(R.id.tvProfessorDistance);
+
+            // Botão
             btnContact = itemView.findViewById(R.id.btnContact);
         }
     }
 
-    // --- Métodos de Filtro e Atualização (Permanecem os mesmos) ---
+    // --- MÉTODOS DE FILTRO ---
     public void updateList(List<Professor> newList) {
         fullList.clear();
         fullList.addAll(newList);
@@ -131,7 +210,9 @@ public class ProfessorAdapter extends RecyclerView.Adapter<ProfessorAdapter.Prof
         } else {
             text = text.toLowerCase().trim();
             for (Professor prof : fullList) {
-                if (prof.getNome().toLowerCase().contains(text)) {
+                if (prof.getNome().toLowerCase().contains(text) ||
+                        (prof.getEspecialidade() != null && prof.getEspecialidade().toLowerCase().contains(text)) ||
+                        (prof.getIdioma() != null && prof.getIdioma().toLowerCase().contains(text))) {
                     filteredList.add(prof);
                 }
             }

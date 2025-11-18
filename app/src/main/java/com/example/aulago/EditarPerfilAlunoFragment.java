@@ -137,6 +137,9 @@ public class EditarPerfilAlunoFragment extends Fragment {
                         // Lógica Híbrida Inteligente de Status
                         String status = document.getString("statusSolicitacao");
                         String role = document.getString("role");
+                        if (role == null) {
+                            role = document.getString("userType");
+                        }
 
                         controlarStatusEBotao(status, role);
 
@@ -154,34 +157,37 @@ public class EditarPerfilAlunoFragment extends Fragment {
     // Fusão da lógica de Status (A) com Role (B)
     private void controlarStatusEBotao(String status, String role) {
         if (status == null) status = "nenhum";
+        if (role == null) role = "aluno"; // Valor padrão para evitar erro
 
-        // Prioridade 1: Se o usuário já é professor (Lógica B)
-        if ("professor".equals(role) || "aprovado".equals(status)) {
-            binding.tvStatusSolicitacao.setText("Status: Professor Aprovado");
+        // 1. Se é PROFESSOR (verifica status 'aprovado' ou role/userType 'professor')
+        if (role.equalsIgnoreCase("professor") || status.equalsIgnoreCase("aprovado")) {
+
+            binding.tvStatusSolicitacao.setText("Conta de Professor Ativa");
+            binding.tvStatusSolicitacao.setTextColor(getResources().getColor(R.color.verde_escuro)); // Exemplo de cor
             binding.tvStatusSolicitacao.setVisibility(View.VISIBLE);
 
+            // Botão vira "Mudar para Perfil Professor"
             binding.btnSolicitarProfessor.setText("Mudar para Perfil Professor");
             binding.btnSolicitarProfessor.setVisibility(View.VISIBLE);
             return;
         }
 
-        // Prioridade 2: Status da solicitação (Lógica A)
+        // 2. Demais status
         switch (status) {
             case "pendente_analise":
-                binding.tvStatusSolicitacao.setText("Status: Em Análise");
+                binding.tvStatusSolicitacao.setText("Solicitação em Análise");
                 binding.tvStatusSolicitacao.setVisibility(View.VISIBLE);
-                binding.btnSolicitarProfessor.setVisibility(View.GONE); // Esconde botão para não reenviar
+                binding.btnSolicitarProfessor.setVisibility(View.GONE); // Esconde para não duplicar pedido
                 break;
 
             case "rejeitado":
-                binding.tvStatusSolicitacao.setText("Status: Solicitação Rejeitada");
+                binding.tvStatusSolicitacao.setText("Solicitação Rejeitada");
                 binding.tvStatusSolicitacao.setVisibility(View.VISIBLE);
                 binding.btnSolicitarProfessor.setText("Reenviar Solicitação");
                 binding.btnSolicitarProfessor.setVisibility(View.VISIBLE);
                 break;
 
-            case "nenhum":
-            default:
+            default: // "nenhum"
                 binding.tvStatusSolicitacao.setVisibility(View.GONE);
                 binding.btnSolicitarProfessor.setText("Quero ser Professor");
                 binding.btnSolicitarProfessor.setVisibility(View.VISIBLE);
