@@ -153,6 +153,34 @@ public class HomeFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(languageAdapter);
 
+        // Coloque isso logo após criar o adapter e o RecyclerView dos idiomas
+        languageAdapter.setOnFlagClickListener(language -> {
+            if (language.getName().equalsIgnoreCase("Inglês")) {
+                Fragment nextFragment;
+                if ("aluno".equalsIgnoreCase(currentUserType)) {
+                    // Usuário é aluno → busca professores
+                    nextFragment = new SearchProfessoresFragment(); // ou SearchProfessoresFragment.newInstance(), conforme seu projeto
+                } else {
+                    // Qualquer outro tipo, por padrão professor → busca alunos
+                    nextFragment = new SearchAlunosFragment(); // ou SearchAlunosFragment.newInstance(), conforme seu projeto
+                }
+
+                requireActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, nextFragment)
+                        .addToBackStack(null)
+                        .commit();
+            } else {
+                new android.app.AlertDialog.Builder(requireContext())
+                        .setTitle("Em breve")
+                        .setMessage("Este idioma estará disponível em breve!")
+                        .setPositiveButton("OK", null)
+                        .show();
+            }
+        });
+
+
+
         // TODO: Lógica dos botões de scroll (binding.btnScrollLeft, etc)
 
         db.collection("languages") // Você precisa ter essa coleção

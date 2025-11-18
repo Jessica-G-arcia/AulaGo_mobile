@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.chip.Chip;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -25,16 +26,10 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
     private List<ClassModel> classList;
     private OnAvaliarClickListener onAvaliarClickListener;
 
-    /**
-     * Interface para comunicar o clique no botão "Avaliar" para o Fragment.
-     */
     public interface OnAvaliarClickListener {
         void onAvaliarClick(ClassModel classModel);
     }
 
-    /**
-     * Método usado pelo Fragment para "ouvir" os eventos de clique.
-     */
     public void setOnAvaliarClickListener(OnAvaliarClickListener listener) {
         this.onAvaliarClickListener = listener;
     }
@@ -55,13 +50,22 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
     public void onBindViewHolder(@NonNull ClassViewHolder holder, int position) {
         ClassModel classModel = classList.get(position);
 
-        // --- 1. Preenche os dados da aula no card ---
+        // DATA DA AULA
+        if (classModel.getDataTimestamp() != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            String dataFormatada = sdf.format(classModel.getDataTimestamp().toDate());
+            holder.tvDate.setText(dataFormatada);
+        } else {
+            holder.tvDate.setText("--/--/----");
+        }
+
+        // Demais dados
         holder.tvStartTime.setText(classModel.getHorarioInicio());
         holder.tvEndTime.setText(classModel.getHorarioFim());
         holder.tvTeacher.setText(classModel.getAlunoNome());
         holder.tvClassName.setText(classModel.getIdioma());
 
-        // Lógica da Modalidade
+        // Modalidade e emoji
         if (classModel.getLocal() != null) {
             String local = classModel.getLocal().toLowerCase(Locale.getDefault());
             holder.tvEmojiModalidade.setVisibility(View.VISIBLE);
@@ -81,27 +85,22 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
             holder.tvModalidade.setVisibility(View.GONE);
         }
 
-        // --- 2. Lógica principal: Mostrar "Avaliar" ou o Status ---
+        // Status/Avaliar
         Date classEndDateTime = getClassEndDateTime(classModel.getDataTimestamp().toDate(), classModel.getHorarioFim());
         boolean hasPassed = classEndDateTime != null && new Date().after(classEndDateTime);
         boolean isCancelled = classModel.getStatus() != null && classModel.getStatus().equalsIgnoreCase("cancelada");
 
-        // CONDIÇÃO: A aula já terminou E não foi cancelada
         if (hasPassed && !isCancelled) {
             holder.chipStatus.setText("Avaliar");
             holder.chipStatus.setClickable(true);
             holder.chipStatus.setChipBackgroundColor(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.verde_claro)));
             holder.chipStatus.setTextColor(ContextCompat.getColor(context, R.color.verde_escuro));
-
-            // Ação de clique para notificar o Fragment
             holder.chipStatus.setOnClickListener(v -> {
                 if (onAvaliarClickListener != null) {
                     onAvaliarClickListener.onAvaliarClick(classModel);
                 }
             });
-
         } else {
-            // Se a aula ainda não terminou ou foi cancelada, mostra o status normal.
             holder.chipStatus.setText(classModel.getStatus());
             holder.chipStatus.setClickable(false);
 
@@ -118,7 +117,6 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
                         chipColorRes = R.color.vermelho_claro;
                         textColorRes = R.color.vermelho_escuro;
                         break;
-                    // O status "agendada" usa a cor padrão (azul)
                 }
             }
             holder.chipStatus.setChipBackgroundColor(ColorStateList.valueOf(ContextCompat.getColor(context, chipColorRes)));
@@ -136,10 +134,6 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
         notifyDataSetChanged();
     }
 
-    /**
-     * Combina a data da aula (dia/mês/ano) com o horário de término (hora:minuto)
-     * para criar um objeto Date completo para comparação.
-     */
     private Date getClassEndDateTime(Date classDate, String endTimeString) {
         if (classDate == null || endTimeString == null || endTimeString.isEmpty()) {
             return null;
@@ -161,16 +155,13 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
         }
     }
 
-
-    /**
-     * ViewHolder que armazena as referências para as views de cada card.
-     */
     public static class ClassViewHolder extends RecyclerView.ViewHolder {
-        TextView tvStartTime, tvEndTime, tvTeacher, tvClassName, tvEmojiModalidade, tvModalidade;
+        TextView tvDate, tvStartTime, tvEndTime, tvTeacher, tvClassName, tvEmojiModalidade, tvModalidade;
         Chip chipStatus;
 
         public ClassViewHolder(@NonNull View itemView) {
             super(itemView);
+            tvDate = itemView.findViewById(R.id.tvDate);
             tvStartTime = itemView.findViewById(R.id.tvStartTime);
             tvEndTime = itemView.findViewById(R.id.tvEndTime);
             tvTeacher = itemView.findViewById(R.id.tvTeacher);
