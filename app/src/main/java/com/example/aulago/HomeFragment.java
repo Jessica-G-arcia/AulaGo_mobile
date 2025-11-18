@@ -351,7 +351,6 @@ public class HomeFragment extends Fragment {
                         // --- CORREÇÃO AQUI ---
                         // Salva o tipo de usuário na variável de nível de classe
                         this.currentUserType = userType;
-                        // --- FIM DA CORREÇÃO ---
 
                         saveUserToPrefs(documentSnapshot);
 

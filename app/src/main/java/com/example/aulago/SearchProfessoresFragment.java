@@ -7,9 +7,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.EditText;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -45,15 +51,19 @@ public class SearchProfessoresFragment extends Fragment implements ProfessorAdap
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // IDs do seu fragment_search.xml (assumindo etSearch e rvAlunos/rvProfessores)
+        if (getActivity() != null) {
+            getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        }
+
         etSearch = view.findViewById(R.id.etSearch);
-        rvProfessores = view.findViewById(R.id.rvAlunos);
+        rvProfessores = view.findViewById(R.id.rvProfessores);
 
         setupRecyclerView();
         setupSearchFilter();
 
         // Busca os professores
         fetchProfessoresFromFirestore();
+
     }
 
     private void setupRecyclerView() {
@@ -92,7 +102,8 @@ public class SearchProfessoresFragment extends Fragment implements ProfessorAdap
     private void setupSearchFilter() {
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -100,8 +111,10 @@ public class SearchProfessoresFragment extends Fragment implements ProfessorAdap
                     adapter.filter(s.toString());
                 }
             }
+
             @Override
-            public void afterTextChanged(Editable s) {}
+            public void afterTextChanged(Editable s) {
+            }
         });
     }
 
@@ -126,4 +139,5 @@ public class SearchProfessoresFragment extends Fragment implements ProfessorAdap
                     .commit();
         }
     }
+
 }

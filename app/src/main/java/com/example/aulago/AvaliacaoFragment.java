@@ -84,12 +84,12 @@ public class AvaliacaoFragment extends Fragment {
                     if (binding == null) return; // Fragmento foi destruído
                     if (documentSnapshot.exists()) {
                         String nome = documentSnapshot.getString("nome");
-                        String avatarUrl = documentSnapshot.getString("avatarUrl");
+                        String urlFotoPerfil = documentSnapshot.getString("urlFotoPerfil");
 
                         binding.tvAvaliacaoTitulo.setText("Avalie " + nome);
 
                         Glide.with(requireContext())
-                                .load(avatarUrl)
+                                .load(urlFotoPerfil)
                                 .placeholder(R.drawable.ic_person_placeholder)
                                 .error(R.drawable.ic_perfil)
                                 .into(binding.ivAvaliacaoProfile);

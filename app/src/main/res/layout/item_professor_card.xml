@@ -106,10 +106,13 @@
             android:id="@+id/btnContact"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            app:backgroundTint="@color/azul"
+            android:elevation="2dp"
             android:text="Conferir Perfil"
-            android:textStyle="bold"
             android:textAllCaps="false"
-            app:cornerRadius="8dp" />
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:textStyle="bold" />
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

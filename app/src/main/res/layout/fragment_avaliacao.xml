@@ -4,80 +4,82 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
     android:background="?android:attr/colorBackground"
+    android:clipToPadding="false"
+    android:fillViewport="true"
+    android:fitsSystemWindows="true"
     tools:context=".AvaliacaoFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
         android:orientation="vertical"
-        android:padding="24dp"
-        android:gravity="center_horizontal">
+        android:padding="24dp">
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="90dp"
             android:layout_height="90dp"
+            android:layout_marginTop="24dp"
             app:cardCornerRadius="45dp"
             app:cardElevation="4dp"
-            android:layout_marginTop="24dp"
             app:strokeWidth="0dp">
 
             <ImageView
                 android:id="@+id/iv_avaliacao_profile"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:src="@drawable/placeholder_avatar"
+                android:contentDescription="Foto de perfil"
                 android:scaleType="centerCrop"
-                android:contentDescription="Foto de perfil" />
+                android:src="@drawable/placeholder_avatar" />
         </com.google.android.material.card.MaterialCardView>
 
         <TextView
             android:id="@+id/tv_avaliacao_titulo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Avalie a aula"
-            android:textSize="22sp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:fontFamily="@font/montserrat_bold"
             android:layout_marginTop="16dp"
-            android:layout_marginBottom="32dp"/>
+            android:layout_marginBottom="32dp"
+            android:fontFamily="@font/montserrat_bold"
+            android:text="Avalie a aula"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="22sp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sua nota"
+            android:layout_marginBottom="8dp"
             android:fontFamily="@font/montserrat"
+            android:text="Sua nota"
             android:textColor="?android:attr/textColorSecondary"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp"/>
+            android:textSize="16sp" />
 
         <RatingBar
             android:id="@+id/rating_bar_nota"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
             android:numStars="5"
-            android:stepSize="0.5"
-            app:layout_constraintTop_toBottomOf="@id/textView"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             android:progressBackgroundTint="#32FFB703"
+            android:stepSize="0.5"
             android:theme="@style/RatingBarTheme"
-            android:layout_marginBottom="32dp"/>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/textView" />
 
         <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            android:layout_marginBottom="16dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/et_comentario"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="top"
                 android:hint="Deixe um comentário (opcional)"
-                android:minLines="3"
-                android:gravity="top"/>
+                android:minLines="3" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -90,9 +92,9 @@
             android:id="@+id/btn_enviar_avaliacao"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Enviar Avaliação"
             android:layout_gravity="bottom"
-            android:paddingVertical="14dp"/>
+            android:paddingVertical="14dp"
+            android:text="Enviar Avaliação" />
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

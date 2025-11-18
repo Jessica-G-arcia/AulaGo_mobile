@@ -124,6 +124,7 @@ public class EditarPerfilAlunoFragment extends Fragment { // MUDOU
                         binding.etNivelAluno.setText(document.getString("nivel"));
                         binding.etModalidadePreferida.setText(document.getString("preferenciaModalidade"));
                         binding.etObjetivosAluno.setText(document.getString("objetivos"));
+                        binding.etIdiomaAluno.setText(document.getString("idioma"));
 
                         // Exibir foto de perfil, se tiver
                         String urlFotoPerfil = document.getString("urlFotoPerfil");
@@ -186,6 +187,7 @@ public class EditarPerfilAlunoFragment extends Fragment { // MUDOU
         perfilPublico.put("nivel", binding.etNivelAluno.getText().toString().trim());
         perfilPublico.put("preferenciaModalidade", binding.etModalidadePreferida.getText().toString().trim());
         perfilPublico.put("objetivos", binding.etObjetivosAluno.getText().toString().trim());
+        perfilPublico.put("idioma", binding.etIdiomaAluno.getText().toString().trim());
 
         db.collection("users").document(uid)
                 .update(perfilPublico)

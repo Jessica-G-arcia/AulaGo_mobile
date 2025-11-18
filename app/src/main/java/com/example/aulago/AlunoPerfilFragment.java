@@ -41,6 +41,7 @@ public class AlunoPerfilFragment extends Fragment {
     private TabLayout tabLayoutAluno;
     private LinearLayout groupBioAluno, groupAvaliacoesAluno;
     private TextView tvBioAluno;
+    private TextView tvIdiomaAluno;
 
     // --- VARIÁVEIS QUE FALTAVAM ---
     private LinearLayout groupRating;
@@ -107,6 +108,7 @@ public class AlunoPerfilFragment extends Fragment {
         rbAlunoRating = view.findViewById(R.id.rbAlunoRating);
 
         // --- SEÇÃO DE INFORMAÇÕES ---
+        tvIdiomaAluno = view.findViewById(R.id.tvIdiomaAluno);
         tvNivelAluno = view.findViewById(R.id.tvNivelAluno);
         tvModalidadeAluno = view.findViewById(R.id.tvModalidadeAluno);
         tvObjetivosAluno = view.findViewById(R.id.tvObjetivosAluno);
@@ -184,6 +186,14 @@ public class AlunoPerfilFragment extends Fragment {
                         String bio = documentSnapshot.getString("bio");
                         tvBioAluno.setText((bio != null && !bio.isEmpty()) ? bio : "Nenhuma bio disponível.");
 
+                        String idioma = documentSnapshot.getString("idioma");
+                        if (idioma != null && !idioma.isEmpty()) {
+                            tvIdiomaAluno.setText("Idioma: " + idioma);
+                            tvIdiomaAluno.setVisibility(View.VISIBLE);
+                        } else {
+                            tvIdiomaAluno.setVisibility(View.GONE);
+                        }
+
                         String nivel = documentSnapshot.getString("nivel");
                         if (nivel != null && !nivel.isEmpty()) {
                             tvNivelAluno.setText("Nível: " + nivel);
@@ -211,7 +221,7 @@ public class AlunoPerfilFragment extends Fragment {
                         String status = documentSnapshot.getString("statusSolicitacao");
                         controlarStatusSolicitacao(status);
 
-                        // --- LÓGICA DE RATING (FALTAVA) ---
+
                         if (documentSnapshot.contains("ratingMedia") && documentSnapshot.contains("ratingCount")) {
                             double media = documentSnapshot.getDouble("ratingMedia");
                             long contagem = documentSnapshot.getLong("ratingCount");

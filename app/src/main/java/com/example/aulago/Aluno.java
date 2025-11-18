@@ -2,8 +2,10 @@ package com.example.aulago;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import com.google.firebase.firestore.DocumentId;
 import com.google.firebase.firestore.Exclude;
+import com.google.firebase.firestore.GeoPoint;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -23,10 +25,20 @@ public class Aluno implements Parcelable {
     private String dataNascimento;
     private double ratingMedia;
     private long ratingCount;
+    private String objetivos;
+    private String preferenciaModalidade;
+    private String idioma;
+    private String nivel;
+    @Exclude
+    private float distanciaCalculada;
+    private GeoPoint localizacao;
 
+    @Exclude
+    private boolean expanded = false;
 
     // 2. Construtor vazio (OBRIGATÓRIO para o Firebase)
-    public Aluno() {}
+    public Aluno() {
+    }
 
     // 3. Getters (Usados pelo Adapter e Fragment)
     public String getId() {
@@ -52,9 +64,6 @@ public class Aluno implements Parcelable {
     public String getUserType() {
         return userType;
     }
-
-
-
 
 
     /**
@@ -172,5 +181,66 @@ public class Aluno implements Parcelable {
 
     public void setDataNascimento(String dataNascimento) {
         this.dataNascimento = dataNascimento;
+    }
+
+    public String getObjetivos() {
+        return objetivos;
+    }
+
+    public void setObjetivos(String objetivos) {
+        this.objetivos = objetivos;
+    }
+
+
+    public String getIdioma() {
+        return idioma;
+    }
+
+    public void setIdioma(String idioma) {
+        this.idioma = idioma;
+    }
+
+    public String getNivel() {
+        return nivel;
+    }
+
+    public void setNivel(String nivel) {
+        this.nivel = nivel;
+    }
+
+    public float getDistanciaCalculada() {
+        return distanciaCalculada;
+    }
+
+    @Exclude
+    public void setDistanciaCalculada(float distanciaCalculada) {
+        this.distanciaCalculada = distanciaCalculada;
+    }
+
+    @Exclude
+    public GeoPoint getLocalizacao() {
+        return localizacao;
+    }
+
+    public void setLocalizacao(GeoPoint localizacao) {
+        this.localizacao = localizacao;
+    }
+
+    public String getPreferenciaModalidade() {
+        return preferenciaModalidade;
+    }
+
+    public void setPreferenciaModalidade(String preferenciaModalidade) {
+        this.preferenciaModalidade = preferenciaModalidade;
+    }
+
+    @Exclude
+    public boolean isExpanded() {
+        return expanded;
+    }
+
+    @Exclude
+    public void setExpanded(boolean expanded) {
+        this.expanded = expanded;
     }
 }
