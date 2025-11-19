@@ -36,7 +36,7 @@ public class AlunoPerfilPublicoFragment extends Fragment {
     private String alunoId;
 
     // Views do XML
-    private TextView tvNomeAluno, tvNivelAluno, tvModalidadeAluno, tvObjetivosAluno, tvBioAluno;
+    private TextView tvNomeAluno, tvNivelAluno, tvModalidadeAluno, tvObjetivosAluno, tvBioAluno, tvIdioma;
     private TextView tvAlunoRatingMedia, tvEmptyReviews;
     private RatingBar rbAlunoRating;
     private ImageView ivAvatar;
@@ -119,6 +119,8 @@ public class AlunoPerfilPublicoFragment extends Fragment {
         tvNivelAluno = view.findViewById(R.id.tvNivelAluno);
         tvModalidadeAluno = view.findViewById(R.id.tvModalidadeAluno);
         tvObjetivosAluno = view.findViewById(R.id.tvObjetivosAluno);
+        tvIdioma = view.findViewById(R.id.tvIdioma);
+
 
         // Tabs
         tabLayout = view.findViewById(R.id.tabLayout);
@@ -168,6 +170,15 @@ public class AlunoPerfilPublicoFragment extends Fragment {
 
                     // Nome
                     tvNomeAluno.setText(documentSnapshot.getString("nome"));
+
+                    String idioma = documentSnapshot.getString("idioma");
+
+                    if (idioma != null && !idioma.isEmpty()) {
+                        tvIdioma.setText("Idioma: " + idioma);
+                        tvIdioma.setVisibility(View.VISIBLE);
+                    } else {
+                        tvIdioma.setVisibility(View.GONE);
+                    }
 
                     // Avatar
                     String urlFotoPerfil = documentSnapshot.getString("urlFotoPerfil");

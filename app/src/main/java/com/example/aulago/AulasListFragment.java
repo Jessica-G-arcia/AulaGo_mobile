@@ -5,6 +5,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -36,6 +39,11 @@ public class AulasListFragment extends Fragment {
     private String currentUserType;
     private String currentUserId;
     private boolean isConcluidaTab; // Variável global que vamos usar
+
+    private LinearLayout layoutEmptyState;
+    private TextView tvEmptyTitle;
+    private ProgressBar progressBar;
+    private RecyclerView recyclerView;
 
     public static AulasListFragment newInstance(boolean isConcluida, String userType) {
         AulasListFragment fragment = new AulasListFragment();
@@ -69,6 +77,17 @@ public class AulasListFragment extends Fragment {
             return;
         }
 
+        recyclerView = view.findViewById(R.id.recyclerViewAulasFragment);
+        layoutEmptyState = view.findViewById(R.id.layout_empty_state);
+        tvEmptyTitle = view.findViewById(R.id.tv_empty_title);
+        progressBar = view.findViewById(R.id.progressBarAulas);
+
+        if (isConcluidaTab) {
+            tvEmptyTitle.setText("Nenhuma aula concluída");
+        } else {
+            tvEmptyTitle.setText("Nenhuma aula agendada");
+        }
+
         RecyclerView recyclerView = view.findViewById(R.id.recyclerViewAulasFragment);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
@@ -87,6 +106,10 @@ public class AulasListFragment extends Fragment {
     private void carregarDadosDoFirebase() {
         listaDeAulas.clear();
 
+        progressBar.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.GONE);
+        layoutEmptyState.setVisibility(View.GONE);
+
         String field = currentUserType.equals("aluno") ? "alunoId" : "professorId";
 
         Log.d("DEBUG_AULAS", "Buscando aulas onde " + field + " == " + currentUserId);
@@ -100,6 +123,9 @@ public class AulasListFragment extends Fragment {
                 .orderBy("dataTimestamp", direcao)
                 .get()
                 .addOnCompleteListener(task -> {
+
+                    if (progressBar != null) progressBar.setVisibility(View.GONE);
+
                     if (task.isSuccessful()) {
                         List<ClassModel> tempBatch = new ArrayList<>();
                         Log.d("DEBUG_AULAS", "Firebase retornou " + task.getResult().size() + " documentos.");
@@ -142,6 +168,14 @@ public class AulasListFragment extends Fragment {
 
                         listaDeAulas.addAll(tempBatch);
                         adapter.updateList(listaDeAulas);
+
+                        if (listaDeAulas.isEmpty()) {
+                            recyclerView.setVisibility(View.GONE);
+                            layoutEmptyState.setVisibility(View.VISIBLE);
+                        } else {
+                            recyclerView.setVisibility(View.VISIBLE);
+                            layoutEmptyState.setVisibility(View.GONE);
+                        }
 
                     } else {
                         Log.e("FirebaseError", "Erro fatal no Firebase: ", task.getException());

@@ -187,11 +187,13 @@ public class ProfessorPerfilPublicoFragment extends Fragment {
                     tvIdioma.setText("Idioma: " + documentSnapshot.getString("idioma"));
                     tvEspecialidade.setText("Especialidade: " + documentSnapshot.getString("especialidade"));
                     tvModalidade.setText("Modalidade: " + documentSnapshot.getString("modalidade"));
-                    tvBio.setText(documentSnapshot.getString("bio")); // Assume que o resto do código trata null/empty
+                    tvBio.setText(documentSnapshot.getString("bio"));// Assume que o resto do código trata null/empty
 
                     // Avatar
                     String urlFotoPerfil = documentSnapshot.getString("urlFotoPerfil");
                     Glide.with(requireContext()).load(urlFotoPerfil).placeholder(R.drawable.img_avatar_circle).error(R.drawable.img_avatar_circle).into(ivAvatar);
+
+
 
                     // --- 2. CARREGAMENTO ULTRA-SEGURO DE VALORES (Price) ---
                     String valorPresencialDisplay = formatPriceSafely(documentSnapshot, "valorPresencial");
