@@ -1,18 +1,30 @@
 package com.example.aulago;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
+
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class AulasFragment extends Fragment {
+
+    private ProgressBar progressBar;
+    private TabLayout tabLayout;
+    private ViewPager2 viewPager;
 
     @Nullable
     @Override
@@ -28,17 +40,59 @@ public class AulasFragment extends Fragment {
             ((AppCompatActivity) requireActivity()).getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
-        TabLayout tabLayout = view.findViewById(R.id.tab_layout);
-        ViewPager2 viewPager = view.findViewById(R.id.view_pager);
+        tabLayout = view.findViewById(R.id.tab_layout);
+        viewPager = view.findViewById(R.id.view_pager);
 
-        // PEGUE O TIPO DO USUÁRIO (aluno ou professor)
-        String tipoUsuario = getTipoUsuario(); // Implemente este método ou pegue de prefs/firestore
+        // Tente achar uma ProgressBar no seu layout, ou crie uma.
+        // Se não tiver no XML, o app só vai demorar 1seg pra carregar sem aviso.
+        progressBar = view.findViewById(R.id.progressBar); // Adicione um ID se tiver
 
-        // INICIALIZE O ADAPTER COM O TIPO
+        identificarUsuarioEConfigurarAbas();
+    }
+
+    private void identificarUsuarioEConfigurarAbas() {
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // Mostra loading se possível
+        if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
+
+        // ATENÇÃO: Verifique se a coleção de usuários no seu banco chama "usuarios" ou "users"
+        db.collection("users").document(uid).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (progressBar != null) progressBar.setVisibility(View.GONE);
+
+                    if (documentSnapshot.exists()) {
+                        // Tenta pegar o campo "tipo" (ex: "professor" ou "aluno")
+                        String tipo = documentSnapshot.getString("userType");
+
+                        // Se não tiver campo 'tipo', tenta adivinhar ou define padrão
+                        if (tipo == null) {
+                            // Lógica alternativa: Se tiver CREF é professor, etc.
+                            // Por segurança, vamos assumir aluno se falhar
+                            tipo = "aluno";
+                        }
+
+                        Log.d("AulasFragment", "Usuário identificado como: " + tipo);
+                        configurarViewPager(tipo);
+
+                    } else {
+                        // Documento não achado? Assume aluno por padrão
+                        configurarViewPager("aluno");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("AulasFragment", "Erro ao buscar usuário", e);
+                    if (progressBar != null) progressBar.setVisibility(View.GONE);
+                    configurarViewPager("aluno"); // Fallback
+                });
+    }
+
+    private void configurarViewPager(String tipoUsuario) {
+        // Agora passamos o tipo correto (vindo do banco) para o Adapter
         AulasPagerAdapter pagerAdapter = new AulasPagerAdapter(requireActivity(), tipoUsuario);
         viewPager.setAdapter(pagerAdapter);
 
-        // CONFIGURE AS ABAS
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             if (position == 0) {
                 tab.setText("AGENDADAS");
@@ -46,13 +100,5 @@ public class AulasFragment extends Fragment {
                 tab.setText("CONCLUÍDAS");
             }
         }).attach();
-    }
-
-    // Exemplo de como pegar o tipo de usuário (pode ser de prefs, Firebase, etc.)
-    private String getTipoUsuario() {
-        // Aqui um exemplo usando SharedPreferences (troque conforme sua lógica)
-        // SharedPreferences prefs = requireActivity().getSharedPreferences("AulaGoPrefs", Context.MODE_PRIVATE);
-        // return prefs.getString("USER_TYPE", "aluno");
-        return "professor"; // Troque pela lógica real para obter o tipo
     }
 }
