@@ -7,13 +7,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.google.android.material.chip.Chip;
-
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -24,19 +21,13 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
 
     private final Context context;
     private List<ClassModel> classList;
-    private OnAvaliarClickListener onAvaliarClickListener;
+    private String userType; // ADICIONADO
 
-    public interface OnAvaliarClickListener {
-        void onAvaliarClick(ClassModel classModel);
-    }
-
-    public void setOnAvaliarClickListener(OnAvaliarClickListener listener) {
-        this.onAvaliarClickListener = listener;
-    }
-
-    public ClassAdapter(Context context, List<ClassModel> classList) {
+    // Use este construtor no calendário e em todas telas
+    public ClassAdapter(Context context, List<ClassModel> classList, String userType) {
         this.context = context;
         this.classList = classList;
+        this.userType = userType;
     }
 
     @NonNull
@@ -50,7 +41,7 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
     public void onBindViewHolder(@NonNull ClassViewHolder holder, int position) {
         ClassModel classModel = classList.get(position);
 
-        // DATA DA AULA
+        // Data da aula
         if (classModel.getDataTimestamp() != null) {
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
             String dataFormatada = sdf.format(classModel.getDataTimestamp().toDate());
@@ -59,11 +50,16 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
             holder.tvDate.setText("--/--/----");
         }
 
-        // Demais dados
         holder.tvStartTime.setText(classModel.getHorarioInicio());
         holder.tvEndTime.setText(classModel.getHorarioFim());
-        holder.tvTeacher.setText(classModel.getAlunoNome());
         holder.tvClassName.setText(classModel.getIdioma());
+
+        // Se for aluno, mostra professor. Se for professor, mostra aluno.
+        if ("aluno".equalsIgnoreCase(userType)) {
+            holder.tvTeacher.setText(classModel.getProfessorNome());
+        } else {
+            holder.tvTeacher.setText(classModel.getAlunoNome());
+        }
 
         // Modalidade e emoji
         if (classModel.getLocal() != null) {
@@ -82,7 +78,7 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
             holder.tvModalidade.setVisibility(View.GONE);
         }
 
-        // Status/Avaliar
+        // Status/Avaliar (igual antes)
         Date classEndDateTime = getClassEndDateTime(classModel.getDataTimestamp().toDate(), classModel.getHorarioFim());
         boolean hasPassed = classEndDateTime != null && new Date().after(classEndDateTime);
         boolean isCancelled = classModel.getStatus() != null && classModel.getStatus().equalsIgnoreCase("cancelada");
@@ -92,11 +88,7 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
             holder.chipStatus.setClickable(true);
             holder.chipStatus.setChipBackgroundColor(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.verde_claro)));
             holder.chipStatus.setTextColor(ContextCompat.getColor(context, R.color.verde_escuro));
-            holder.chipStatus.setOnClickListener(v -> {
-                if (onAvaliarClickListener != null) {
-                    onAvaliarClickListener.onAvaliarClick(classModel);
-                }
-            });
+            // Adicione listener aqui se desejar
         } else {
             holder.chipStatus.setText(classModel.getStatus());
             holder.chipStatus.setClickable(false);

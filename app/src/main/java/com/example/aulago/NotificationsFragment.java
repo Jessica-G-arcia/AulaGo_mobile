@@ -18,6 +18,7 @@ import java.util.List;
 import android.util.Log;
 
 // imports do firebase
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query; // Import
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -107,28 +108,64 @@ public class NotificationsFragment extends Fragment {
         adapter.updateList(filteredList);
     }
 
-    // --- CONSULTA AO FIREBASE CORRIGIDA ---
+//    private void loadNotificationsFromFirebase() {
+//        allNotificationsList.clear();
+//
+//        String meuUid = FirebaseAuth.getInstance().getCurrentUser().getUid(); // UID do usuário logado
+//
+//        db.collection("notificacoes")
+//                .whereEqualTo("userId", meuUid) // <-- filtro por usuário
+//                .orderBy("dataCriacao", Query.Direction.DESCENDING)
+//                .get()
+//                .addOnCompleteListener(task -> {
+//                    if (task.isSuccessful()) {
+//                        for (QueryDocumentSnapshot document : task.getResult()) {
+//                            Notification notification = document.toObject(Notification.class);
+//                            allNotificationsList.add(notification);
+//                        }
+//                        filterNotifications();
+//                    } else {
+//                        Log.e("FirebaseError", "Erro ao buscar notificações: ", task.getException());
+//                    }
+//                });
+//    }
+
     private void loadNotificationsFromFirebase() {
         allNotificationsList.clear();
 
-        db.collection("notificacoes")
-                // Ordena pela data de criação, da mais nova para a mais antiga
-                .orderBy("dataCriacao", Query.Direction.DESCENDING)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            Notification notification = document.toObject(Notification.class);
-                            allNotificationsList.add(notification);
+        // 1. Pega o objeto usuário primeiro
+        var user = FirebaseAuth.getInstance().getCurrentUser();
+
+        // 2. Verifica se ele existe antes de tentar pegar o UID
+        if (user != null) {
+            String meuUid = user.getUid();
+            Log.d("DEBUG_UID", "Usuário logado: " + meuUid); // Isso vai aparecer no Logcat
+
+            // 3. Faz a busca segura
+            db.collection("notificacoes")
+                    .whereEqualTo("userId", meuUid) // O filtro que você queria
+                    .orderBy("dataCriacao", Query.Direction.DESCENDING)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            if (task.getResult().isEmpty()) {
+                                Log.d("DEBUG_FIRESTORE", "Nenhuma notificação encontrada para este usuário.");
+                            }
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Notification notification = document.toObject(Notification.class);
+                                allNotificationsList.add(notification);
+                            }
+                            filterNotifications();
+                        } else {
+                            Log.e("FirebaseError", "Erro ao buscar notificações: ", task.getException());
                         }
+                    });
 
-                        // Após carregar TUDO, aplica o filtro (que por padrão é "Não lidas")
-                        filterNotifications();
-
-                    } else {
-                        Log.e("FirebaseError", "Erro ao buscar notificações: ", task.getException());
-                    }
-                });
+        } else {
+            // Caso o usuário não esteja logado (ex: sessão expirou)
+            Log.e("AUTH_ERROR", "Nenhum usuário logado no momento.");
+            // Aqui você poderia redirecionar para a tela de Login, por exemplo
+        }
     }
 
     // --- NOVO MÉTODO HELPER ---
