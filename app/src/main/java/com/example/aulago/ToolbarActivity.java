@@ -1,13 +1,23 @@
 package com.example.aulago;
 
+import android.Manifest;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-// import android.widget.TextView; // Import não é mais necessário
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
@@ -20,7 +30,9 @@ import com.example.aulago.databinding.ActivityToolbarBinding;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -42,6 +54,11 @@ public class ToolbarActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private String userStatus = "aluno";
 
+    // --- VARIÁVEIS DE NOTIFICAÇÃO ---
+    private static final String CHANNEL_ID = "notificacoes_aulago";
+    private ListenerRegistration notificationListener;
+    private boolean isFirstLoad = true; // Evita spam ao abrir o app
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,7 +68,7 @@ public class ToolbarActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        // Configura o layout edge-to-edge (para o teclado funcionar)
+        // Configura o layout edge-to-edge
         ajustarLayout();
 
         setSupportActionBar(binding.toolbarLayout.toolbar);
@@ -60,12 +77,124 @@ public class ToolbarActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("");
         }
 
-        binding.toolbarLayout.ivChatbot.setOnClickListener(v -> {
-            replaceFragment(new ChatFragment());
-        });
-
         loadUserDataAndSetupUI();
+
+        // --- INICIALIZAÇÃO DAS NOTIFICAÇÕES ---
+        createNotificationChannel();
+        pedirPermissaoNotificacao();
+        iniciarOuvinteDeNotificacoes();
     }
+
+    // ========================================================================================
+    // --- LÓGICA DE NOTIFICAÇÕES (ADICIONADO) ---
+    // ========================================================================================
+
+    private void iniciarOuvinteDeNotificacoes() {
+        FirebaseUser user = auth.getCurrentUser();
+        if (user == null) return;
+
+        String meuUid = user.getUid();
+
+        // Ouve a coleção "notificacoes" filtrando pelo ID do usuário
+        notificationListener = db.collection("notificacoes")
+                .whereEqualTo("userId", meuUid)
+                .addSnapshotListener((snapshots, e) -> {
+                    if (e != null) {
+                        Log.w("Notif", "Erro ao ouvir notificações", e);
+                        return;
+                    }
+
+                    if (snapshots != null) {
+                        // Se for a primeira carga (ao abrir o app), marcamos como feito e ignoramos
+                        // para não notificar mensagens antigas que já estão no banco.
+                        if (isFirstLoad) {
+                            isFirstLoad = false;
+                            return;
+                        }
+
+                        for (DocumentChange dc : snapshots.getDocumentChanges()) {
+                            // Só queremos saber de documentos NOVOS (Type.ADDED)
+                            if (dc.getType() == DocumentChange.Type.ADDED) {
+                                try {
+                                    Notification model = dc.getDocument().toObject(Notification.class);
+                                    // Se a notificação ainda não foi lida, mostramos no topo
+                                    if (!model.getIsRead()) {
+                                        mostrarNotificacaoNoCelular(model.getTitle(), model.getMessage());
+                                    }
+                                } catch (Exception ex) {
+                                    Log.e("Notif", "Erro ao converter notificação", ex);
+                                }
+                            }
+                        }
+                    }
+                });
+    }
+
+    private void mostrarNotificacaoNoCelular(String titulo, String mensagem) {
+        // Verifica permissão no Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+        }
+
+        // Configura o clique na notificação para abrir esta Activity
+        Intent intent = new Intent(this, ToolbarActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+
+        // Cria a notificação visual
+        // DICA: Troque 'android.R.drawable.ic_dialog_info' pelo seu ícone (ex: R.drawable.ic_notification)
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setContentTitle(titulo)
+                .setContentText(mensagem)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        // Usa o tempo atual como ID para permitir múltiplas notificações
+        notificationManager.notify((int) System.currentTimeMillis(), builder.build());
+    }
+
+    private void createNotificationChannel() {
+        // O Canal é obrigatório no Android 8.0+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "Notificações AulaGo";
+            String description = "Avisos sobre aulas e mensagens";
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            if (notificationManager != null) {
+                notificationManager.createNotificationChannel(channel);
+            }
+        }
+    }
+
+    private void pedirPermissaoNotificacao() {
+        // Pede permissão no Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 101);
+            }
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Remove o ouvinte para economizar bateria quando fechar o app
+        if (notificationListener != null) {
+            notificationListener.remove();
+        }
+    }
+
+    // ========================================================================================
+    // --- FIM DA LÓGICA DE NOTIFICAÇÕES ---
+    // ========================================================================================
 
     private void loadUserDataAndSetupUI() {
         FirebaseUser user = auth.getCurrentUser();
@@ -99,7 +228,6 @@ public class ToolbarActivity extends AppCompatActivity {
                     setupUIWithRole(ROLE_ALUNO);
                 });
     }
-
 
     private void setupUIWithRole(String userRole) {
         BottomNavigationView bottomNav = binding.bottomNavigation;

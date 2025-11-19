@@ -33,6 +33,8 @@ public class ChatFragment extends Fragment {
         );
         WebView.setWebContentsDebuggingEnabled(true);
         webView.loadUrl(CHATBOT_URL);
+        webView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
+        webView.clearCache(true);
         return webView;
     }
 }
