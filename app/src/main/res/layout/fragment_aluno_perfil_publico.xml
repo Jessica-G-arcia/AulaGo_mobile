@@ -73,6 +73,7 @@
                 android:layout_gravity="end|bottom"
                 android:paddingEnd="16dp"
                 android:text="solicitar contato"
+                app:rippleColor="@color/azul50"
                 android:textColor="@color/azul"
                 android:textSize="11sp"
                 android:textStyle="bold"
