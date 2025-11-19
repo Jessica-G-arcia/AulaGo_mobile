@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -16,10 +17,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.text.SimpleDateFormat; // Importe para formatar data
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale; // Importe para o idioma da data
 
 public class AulasListFragment extends Fragment {
 
@@ -27,6 +30,7 @@ public class AulasListFragment extends Fragment {
     private static final String ARG_USER_TYPE = "user_type";
 
     private FirebaseFirestore db;
+    private FirebaseAuth auth; // Adicionei o Auth
     private ClassAdapter adapter;
     private List<ClassModel> listaDeAulas;
     private String currentUserType;
@@ -46,6 +50,8 @@ public class AulasListFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_aulas_list, container, false);
+
+
     }
 
     @Override
@@ -137,6 +143,15 @@ public class AulasListFragment extends Fragment {
                         Log.e("FirebaseError", "Erro fatal no Firebase: ", task.getException());
                     }
                 });
+    }
+
+    private void abrirFragmentAvaliacao(ClassModel aula) {
+        AvaliacaoFragment fragment = AvaliacaoFragment.newInstance(aula.getAlunoNome());
+        requireActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .addToBackStack(null)
+                .commit();
     }
 
 

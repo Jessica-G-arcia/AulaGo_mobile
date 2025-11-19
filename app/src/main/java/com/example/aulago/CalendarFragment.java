@@ -13,7 +13,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment; // MUDOU
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -102,7 +102,6 @@ public class CalendarFragment extends Fragment {
     }
 
 
-
     private void setupRecyclerView() {
         // Verificação de segurança
         if (binding == null) return;
@@ -172,20 +171,6 @@ public class CalendarFragment extends Fragment {
                 });
     }
 
-
-    private void setupCalendar() {
-        try {
-            // MUDOU: Usa binding e requireContext()
-            binding.calendarView.setBackgroundColor(requireContext().getResources().getColor(android.R.color.transparent));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        binding.calendarView.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
-            selectedCalendar.set(year, month, dayOfMonth);
-            updateClassList();
-        });
-    }
 
     private void updateClassList() {
         // 2. CORREÇÃO CRUCIAL: Verifica se binding existe antes de tocar na tela
