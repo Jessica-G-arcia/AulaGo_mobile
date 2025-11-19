@@ -14,6 +14,7 @@ public class ClassModel {
     private String professorAvatarUrl;
 
     // Detalhes da Aula
+    private String aulaId;
     private String idioma;
     private String local;
 
@@ -154,5 +155,13 @@ public class ClassModel {
 
     public void setProfessorAvatarUrl(String professorAvatarUrl) {
         this.professorAvatarUrl = professorAvatarUrl;
+    }
+
+    public String getAulaId() {
+        return aulaId;
+    }
+
+    public void setAulaId(String aulaId) {
+        this.aulaId = aulaId;
     }
 }

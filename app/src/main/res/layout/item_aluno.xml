@@ -106,7 +106,7 @@
             android:alpha="0.85"
             android:fontFamily="@font/montserrat"
             android:gravity="end"
-            android:textColor="?attr/colorOnPrimary"
+            android:textColor="@color/amarelo"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="@id/tvUserName"
             app:layout_constraintHorizontal_bias="0.0"

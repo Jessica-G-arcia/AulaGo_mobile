@@ -25,20 +25,31 @@ public class AvaliacaoFragment extends Fragment {
 
     // --- ARGUMENTO SIMPLIFICADO ---
     private static final String ARG_AVALIADO_ID = "avaliado_id";
+    private static final String ARG_DATA_HORA = "data_hora";
+    private static final String ARG_MODALIDADE = "modalidade";
+    private static final String ARG_AULA_ID = "aula_id";
 
     private FragmentAvaliacaoBinding binding;
     private RatingManager ratingManager;
     private FirebaseFirestore db;
     private FirebaseAuth auth;
+
+    // Variáveis locais para armazenar os dados recebidos
     private String idDoUsuarioAvaliado;
+    private String textoDataHora;
+    private String textoModalidade;
+    private String idDaAula;
 
     /**
      * MÉTODO newInstance ATUALIZADO (Agora só precisa do ID)
      */
-    public static AvaliacaoFragment newInstance(String avaliadoId) {
+    public static AvaliacaoFragment newInstance(String avaliadoId, String dataHora, String modalidade, String aulaId) {
         AvaliacaoFragment fragment = new AvaliacaoFragment();
         Bundle args = new Bundle();
         args.putString(ARG_AVALIADO_ID, avaliadoId);
+        args.putString(ARG_DATA_HORA, dataHora);
+        args.putString(ARG_MODALIDADE, modalidade);
+        args.putString(ARG_AULA_ID, aulaId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -46,9 +57,14 @@ public class AvaliacaoFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         if (getArguments() != null) {
             idDoUsuarioAvaliado = getArguments().getString(ARG_AVALIADO_ID);
+            textoDataHora = getArguments().getString(ARG_DATA_HORA);
+            textoModalidade = getArguments().getString(ARG_MODALIDADE);
+            idDaAula = getArguments().getString(ARG_AULA_ID);
         }
+
         ratingManager = new RatingManager();
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
@@ -65,12 +81,31 @@ public class AvaliacaoFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Busca os dados do usuário a ser avaliado para mostrar na UI
+        if (textoDataHora != null) {
+            binding.tvDetalhesData.setText(textoDataHora);
+        } else {
+            binding.tvDetalhesData.setText("--/--");
+        }
+
+        if (textoModalidade != null) {
+            binding.tvDetalhesModalidade.setText(textoModalidade);
+
+            // Lógica visual para o ícone da modalidade
+            if (textoModalidade.toLowerCase().contains("presencial")) {
+                binding.ivModalidadeIcon.setImageResource(R.drawable.ic_loc); // Ícone de Localização
+            } else {
+                binding.ivModalidadeIcon.setImageResource(R.drawable.ic_camera); // Ícone de Câmera
+            }
+        }
+
+        // Configura Botão Voltar
+        binding.btnVoltar.setOnClickListener(v -> getParentFragmentManager().popBackStack());
+
+        // Busca os dados do perfil (Nome, Foto e Tipo)
         loadAvaliadoData();
 
-        binding.btnEnviarAvaliacao.setOnClickListener(v -> {
-            submeterAvaliacao();
-        });
+        // Botão Enviar
+        binding.btnEnviarAvaliacao.setOnClickListener(v -> submeterAvaliacao());
     }
 
     /**
@@ -85,8 +120,20 @@ public class AvaliacaoFragment extends Fragment {
                     if (documentSnapshot.exists()) {
                         String nome = documentSnapshot.getString("nome");
                         String urlFotoPerfil = documentSnapshot.getString("urlFotoPerfil");
+                        String userType = documentSnapshot.getString("userType");
+
+
+                        // Atualiza a UI com os dados do usuário
 
                         binding.tvAvaliacaoTitulo.setText("Avalie " + nome);
+
+                        if ("professor".equalsIgnoreCase(userType)) {
+                            binding.tvUserBadge.setText("Professor");
+                        } else if ("aluno".equalsIgnoreCase(userType)) {
+                            binding.tvUserBadge.setText("Aluno");
+                        } else {
+                            binding.tvUserBadge.setText("Usuário");
+                        }
 
                         Glide.with(requireContext())
                                 .load(urlFotoPerfil)
@@ -158,6 +205,7 @@ public class AvaliacaoFragment extends Fragment {
                 review.setComentario(comentario);
                 review.setDataAvaliacao(new Date()); // @ServerTimestamp vai sobrescrever
                 review.setEscritoPor(tipoAvaliador);
+                review.setAulaId(idDaAula);
 
                 if ("aluno".equals(tipoAvaliador)) {
                     // Aluno (avaliador) avaliando Professor (avaliado)

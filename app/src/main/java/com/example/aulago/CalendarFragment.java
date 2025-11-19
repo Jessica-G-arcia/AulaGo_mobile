@@ -110,6 +110,8 @@ public class CalendarFragment extends Fragment {
         // Tipo "professor" sempre nesse fragment!
         adapter = new ClassAdapter(requireContext(), listaDeAulas, "professor");
         binding.recyclerViewClasses.setAdapter(adapter);
+
+        adapter.setOnAvaliarClickListener(classModel -> abrirFragmentAvaliacao(classModel));
     }
 
     private void setupCalendar() {
@@ -220,13 +222,48 @@ public class CalendarFragment extends Fragment {
                 cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
     }
 
-    private Date parseDate(String dateString) {
-        if (dateString == null) return null;
-        try {
-            return firebaseDataFormat.parse(dateString);
-        } catch (ParseException e) {
-            Log.e("ParseDate", "Erro ao formatar data: " + dateString, e);
-            return null;
+
+    private void abrirFragmentAvaliacao(ClassModel aula) {
+
+        // A. Formata Data e Hora
+        String textoDataHora = "--/--";
+        if (aula.getDataTimestamp() != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM", new Locale("pt", "BR"));
+            String dataStr = sdf.format(aula.getDataTimestamp().toDate());
+            String inicio = aula.getHorarioInicio() != null ? aula.getHorarioInicio() : "--:--";
+            String fim = aula.getHorarioFim() != null ? aula.getHorarioFim() : "--:--";
+            textoDataHora = dataStr + " • " + inicio + " - " + fim;
         }
+
+        // B. Pega a Modalidade (Tenta campo modalidade, senão usa local, senão Presencial)
+        String textoModalidade = "Presencial";
+        if (aula.getModalidade() != null && !aula.getModalidade().isEmpty()) {
+            textoModalidade = aula.getModalidade();
+            // Capitaliza a primeira letra (opcional)
+            textoModalidade = textoModalidade.substring(0, 1).toUpperCase() + textoModalidade.substring(1);
+        } else if (aula.getLocal() != null) {
+            textoModalidade = aula.getLocal();
+        }
+
+        // C. Define QUEM será avaliado (Professor avalia Aluno)
+        String idParaAvaliar = aula.getAlunoId();
+
+        // D. Pega o ID da Aula
+        String idDaAula = aula.getAulaId();
+
+        // E. Abre o Fragmento
+        AvaliacaoFragment fragment = AvaliacaoFragment.newInstance(
+                idParaAvaliar,
+                textoDataHora,
+                textoModalidade,
+                idDaAula
+        );
+
+        requireActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, fragment) // Verifique se o ID do container é esse mesmo
+                .addToBackStack(null)
+                .commit();
     }
+
 }
