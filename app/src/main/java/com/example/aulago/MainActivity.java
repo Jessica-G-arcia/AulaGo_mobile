@@ -4,10 +4,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
+import android.view.ViewGroup; // Import necessário para o layout do Dialog
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout; // Import necessário para o layout do Dialog
 import android.widget.Switch;
+import android.widget.TextView; // Import do TextView
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -48,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText inputEmail, inputSenha;
     private Button btnEntrar, btnCriarConta, btnGoogleLogin;
     private Switch switchLembrarSenha;
+    private TextView txtEsqueciSenha; // Nova variável
 
     private FirebaseAuth auth;
     private GoogleSignInClient mGoogleSignInClient;
@@ -90,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
         inicializarViews();
         configurarGoogleSignIn();
         configurarBiometria();
-        configurarListeners(); // <-- Agora inclui o OnFocusChangeListener
+        configurarListeners();
 
         // Tenta logar o usuário automaticamente (Sessão Firebase ou Biometria)
         boolean justLoggedOut = getIntent().getBooleanExtra("JUST_LOGGED_OUT", false);
@@ -219,6 +222,9 @@ public class MainActivity extends AppCompatActivity {
         btnCriarConta = findViewById(R.id.btnCriarConta);
         btnGoogleLogin = findViewById(R.id.btnGoogleLogin);
 
+        // --- INICIALIZAÇÃO NOVA ---
+        txtEsqueciSenha = findViewById(R.id.txtEsqueciSenha);
+
         switchLembrarSenha = findViewById(R.id.switchLembrarSenha);
 
         SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
@@ -226,20 +232,20 @@ public class MainActivity extends AppCompatActivity {
         switchLembrarSenha.setChecked(rememberMe);
     }
 
-    // --- MÉTODO ATUALIZADO ---
     private void configurarListeners() {
         btnEntrar.setOnClickListener(v -> loginComEmailESenha());
         btnCriarConta.setOnClickListener(v -> redirecionarParaCadastro());
         btnGoogleLogin.setOnClickListener(v -> loginComGoogle());
 
-        // --- LÓGICA DE FOCO RESTAURADA ---
+        // --- LISTENER NOVO PARA ESQUECI SENHA ---
+        txtEsqueciSenha.setOnClickListener(v -> mostrarDialogoRecuperacao());
+
         // Aciona a biometria assim que o usuário para de digitar o e-mail
         inputEmail.setOnFocusChangeListener((v, hasFocus) -> {
             if (!hasFocus && !isBiometricPromptShowing) {
                 // Usuário terminou de digitar o e-mail
                 String emailDigitado = inputEmail.getText().toString().trim();
                 if (emailCorrespondeAoSalvo(emailDigitado)) {
-                    // E-mail bate com o alias salvo! Dispara a biometria.
                     Log.d("Login", "E-mail com biometria detectado (via Foco). Acionando prompt.");
                     isBiometricPromptShowing = true;
                     biometricPrompt.authenticate(promptInfo);
@@ -340,11 +346,6 @@ public class MainActivity extends AppCompatActivity {
         apagarCredenciaisSeguras(); // Login Google não usa senha, então limpa biometria local
     }
 
-    // --- MÉTODO ATUALIZADO ---
-    /**
-     * Lógica de login com E-mail/Senha.
-     * Checa a biometria se a senha estiver vazia (lógica de fallback).
-     */
     private void loginComEmailESenha() {
         String email = inputEmail.getText().toString().trim();
         String senha = inputSenha.getText().toString().trim();
@@ -362,18 +363,13 @@ public class MainActivity extends AppCompatActivity {
 
         // LÓGICA DE FALLBACK (Botão "Entrar")
         if (senha.isEmpty() && emailCorrespondeAoSalvo(email)) {
-            // Se a senha está VAZIA e o E-MAIL BATE,
-            // aciona o prompt (caso o listener de foco tenha falhado).
             Log.d("Login", "E-mail com biometria detectado (via Botão). Acionando prompt.");
             isBiometricPromptShowing = true;
             biometricPrompt.authenticate(promptInfo);
-            return; // Para a execução aqui e espera a biometria
+            return;
         }
 
-        // Se a senha NÃO está vazia, ou o e-mail não bate, continua o login normal
         if (senha.isEmpty()) {
-            // Se chegou aqui, a senha está vazia MAS a biometria não se aplica.
-            // Portanto, a senha é obrigatória.
             inputSenha.setError("A senha é obrigatória.");
             inputSenha.requestFocus();
             return;
@@ -490,20 +486,14 @@ public class MainActivity extends AppCompatActivity {
         return securePreferences.contains(KEY_USER_EMAIL) && securePreferences.contains(KEY_USER_PASS);
     }
 
-    /**
-     * Salva e-mail e senha no EncryptedSharedPreferences.
-     * ATUALIZADO: Agora também salva o "alias" do e-mail.
-     */
     private void salvarCredenciaisSeguras(String email, String senha) {
         if (securePreferences == null) return;
         try {
-            // Salva criptografado
             securePreferences.edit()
                     .putString(KEY_USER_EMAIL, email)
                     .putString(KEY_USER_PASS, senha)
                     .apply();
 
-            // Salva o "alias" (não criptografado)
             SharedPreferences.Editor editor = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
             editor.putString(KEY_BIOMETRIC_EMAIL_ALIAS, email);
             editor.apply();
@@ -514,20 +504,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Apaga e-mail e senha do EncryptedSharedPreferences.
-     * ATUALIZADO: Agora também apaga o "alias" do e-mail.
-     */
     private void apagarCredenciaisSeguras() {
         if (securePreferences == null) return;
         try {
-            // Apaga criptografado
             securePreferences.edit()
                     .remove(KEY_USER_EMAIL)
                     .remove(KEY_USER_PASS)
                     .apply();
 
-            // Apaga o "alias" (não criptografado)
             SharedPreferences.Editor editor = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
             editor.remove(KEY_BIOMETRIC_EMAIL_ALIAS);
             editor.apply();
@@ -536,5 +520,67 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e("SecurePrefs", "Erro ao apagar credenciais seguras", e);
         }
+    }
+
+    // --- NOVO MÉTODO: EXIBE O DIALOG DE RECUPERAÇÃO DE SENHA ---
+    private void mostrarDialogoRecuperacao() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Redefinir Senha");
+        builder.setMessage("Digite seu e-mail para receber o link de redefinição:");
+
+        // Cria o campo de input programaticamente
+        final EditText inputDialog = new EditText(this);
+        inputDialog.setInputType(android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+
+        // Tenta preencher automaticamente se o usuário já digitou no campo principal
+        String emailAtual = inputEmail.getText().toString().trim();
+        if (!emailAtual.isEmpty()) {
+            inputDialog.setText(emailAtual);
+        }
+
+        // Adiciona margens ao EditText para ficar visualmente agradável
+        FrameLayout container = new FrameLayout(this);
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        params.leftMargin = 60;
+        params.rightMargin = 60;
+        inputDialog.setLayoutParams(params);
+        container.addView(inputDialog);
+        builder.setView(container);
+
+        // Botão Enviar
+        builder.setPositiveButton("Enviar", (dialog, which) -> {
+            String email = inputDialog.getText().toString().trim();
+            if (email.isEmpty()) {
+                Toast.makeText(MainActivity.this, "Por favor, digite um e-mail.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            auth.sendPasswordResetEmail(email)
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(MainActivity.this,
+                                    "E-mail enviado! Verifique sua caixa de entrada.",
+                                    Toast.LENGTH_LONG).show();
+                        } else {
+                            String erro = "Erro ao enviar e-mail.";
+                            try {
+                                throw task.getException();
+                            } catch (FirebaseAuthInvalidUserException e) {
+                                erro = "Este e-mail não está cadastrado.";
+                            } catch (Exception e) {
+                                erro = "Erro: " + e.getMessage();
+                            }
+                            Toast.makeText(MainActivity.this, erro, Toast.LENGTH_LONG).show();
+                        }
+                    });
+        });
+
+        // Botão Cancelar
+        builder.setNegativeButton("Cancelar", (dialog, which) -> dialog.cancel());
+
+        builder.show();
     }
 }
