@@ -288,7 +288,7 @@ public class MainActivity extends AppCompatActivity {
                         } catch (FirebaseAuthInvalidUserException e) {
                             mensagemErro = "O e-mail digitado não está cadastrado no sistema.";
                         } catch (FirebaseAuthInvalidCredentialsException e) {
-                            mensagemErro = "A senha está incorreta ou o usuário não está cadastrado.";
+                            mensagemErro = "Usuário ou senha incorretos.";
                         } catch (Exception e) {
                             mensagemErro = "Erro desconhecido: " + e.getLocalizedMessage();
                         }
