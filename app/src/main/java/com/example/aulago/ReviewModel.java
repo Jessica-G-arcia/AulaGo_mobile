@@ -20,6 +20,8 @@ public class ReviewModel {
 
     private String professorNome;
     private String professorAvatarUrl;
+    private String aulaId;
+
 
     private String escritoPor; // "aluno" ou "professor"
 
@@ -109,5 +111,13 @@ public class ReviewModel {
 
     public void setEscritoPor(String escritoPor) {
         this.escritoPor = escritoPor;
+    }
+
+    public String getAulaId() {
+        return aulaId;
+    }
+
+    public void setAulaId(String aulaId) {
+        this.aulaId = aulaId;
     }
 }

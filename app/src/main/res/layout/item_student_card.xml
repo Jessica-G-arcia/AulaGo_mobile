@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="20dp"
@@ -11,8 +12,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:padding="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -46,19 +48,19 @@
                     android:id="@+id/tvStudentName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Nome do Aluno"
                     android:textColor="#2C3E50"
                     android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    tools:text="João Martins" />
 
                 <TextView
                     android:id="@+id/tvStudentAge"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:text="Idade"
                     android:textColor="#7F8C8D"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"
+                    tools:text="24 anos" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -67,23 +69,32 @@
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
+                    <ImageView
+                        android:id="@+id/ivRatingIcon"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginEnd="4dp"
+                        android:src="@drawable/ic_star"
+                        app:tint="#F39C12" />
+
                     <TextView
                         android:id="@+id/tvStudentRating"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="⭐ 0.0"
+                        android:gravity="center_vertical"
                         android:textColor="#F39C12"
                         android:textSize="14sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        tools:text="4.5" />
 
                     <TextView
                         android:id="@+id/tvStudentReviews"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="6dp"
-                        android:text="(0 avaliações)"
                         android:textColor="#95A5A6"
-                        android:textSize="12sp" />
+                        android:textSize="12sp"
+                        tools:text="(23 avaliações)" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
@@ -93,19 +104,107 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            android:orientation="horizontal"></LinearLayout>
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/layoutTagLanguage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/rounded_tag_bg"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="7dp"
+                android:paddingVertical="5dp">
+
+                <ImageView
+                    android:id="@+id/ivLanguageIcon"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_marginEnd="6dp"
+                    android:src="@drawable/ic_mundo"
+                    app:tint="#546E7A" />
+
+                <TextView
+                    android:id="@+id/tvStudentLanguage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#546E7A"
+                    android:textSize="12sp"
+                    tools:text="Inglês" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layoutTagModality"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/rounded_tag_bg"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="7dp"
+                android:paddingVertical="5dp">
+
+                <ImageView
+                    android:id="@+id/ivStudentModalityIcon"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_marginEnd="6dp"
+                    android:src="@drawable/ic_perfil"
+                    app:tint="#546E7A" />
+
+                <TextView
+                    android:id="@+id/tvStudentModality"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#546E7A"
+                    android:textSize="12sp"
+                    tools:text="Online" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layoutTagLevel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rounded_tag_bg"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="7dp"
+                android:paddingVertical="5dp">
+
+                <ImageView
+                    android:id="@+id/ivLevelIcon"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_marginEnd="6dp"
+                    android:src="@drawable/ic_nivel"
+                    app:tint="#546E7A" />
+
+                <TextView
+                    android:id="@+id/tvStudentLevel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#546E7A"
+                    android:textSize="12sp"
+                    tools:text="Intermediário" />
+            </LinearLayout>
+        </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/layoutDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
+            android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="📚 "
-                android:textSize="16sp" />
+            <ImageView
+                android:id="@+id/ivDescriptionIcon"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/ic_foco"
+                app:tint="@color/azul" />
 
             <TextView
                 android:id="@+id/tvStudentDescription"
@@ -113,45 +212,60 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:ellipsize="end"
-                android:maxLines="2"
-                android:text="Descrição do foco do aluno..."
+                android:maxLines="1"
                 android:textColor="#34495E"
-                android:textSize="13sp" />
+                android:textSize="13sp"
+                tools:text="Conversação e foco para viagens" />
+
+            <TextView
+                android:id="@+id/tvShowMore"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="26dp"
+                android:layout_gravity="center"
+                android:text="Ver mais"
+                android:textColor="@color/azul"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                tools:visibility="visible" />
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/layoutDistance"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="📍 "
-                android:textSize="16sp" />
+            <ImageView
+                android:id="@+id/ivDistanceIcon"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/ic_loc"
+                app:tint="@color/azul" />
 
             <TextView
                 android:id="@+id/tvStudentDistance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Distância..."
                 android:textColor="#7F8C8D"
-                android:textSize="13sp" />
+                android:textSize="13sp"
+                tools:text="9 km de você" />
         </LinearLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnContact"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/rounded_blue_button_bg"
             android:elevation="2dp"
             android:text="Conferir Perfil"
             android:textAllCaps="false"
             android:textColor="#FFFFFF"
-            android:textColorLink="@color/azul"
             android:textSize="15sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            app:backgroundTint="@color/azul" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>

@@ -34,7 +34,7 @@ import java.util.Locale;
 public class ProfessorPerfilFragment extends Fragment {
 
     // Views da UI
-    private TextView inputNome, inputEspecialidade, inputModalidade, inputValorPresencial, inputValorOnline, tvBio;
+    private TextView inputNome, inputIdioma, inputEspecialidade, inputModalidade, inputValorPresencial, inputValorOnline, tvBio;
     private ImageView ivAvatar;
     private Button btnEditar;
     private Chip statusProfessor, chipPlanoPro, chipPlanoPremium;
@@ -118,6 +118,7 @@ public class ProfessorPerfilFragment extends Fragment {
         chipPlanoPremium = view.findViewById(R.id.chipPlanoPremium);
 
         // Bloco de Detalhes
+        inputIdioma = view.findViewById(R.id.inputIdioma);
         inputEspecialidade = view.findViewById(R.id.inputEspecialidade);
         inputModalidade = view.findViewById(R.id.inputModalidade);
         inputValorPresencial = view.findViewById(R.id.inputValorPresencial);
@@ -221,8 +222,15 @@ public class ProfessorPerfilFragment extends Fragment {
 
 
                         String especialidade = document.getString("especialidade");
-                        String modalidade = document.getString("preferenciaAula");
+                        String modalidade = document.getString("preferenciaModalidade");
                         String bio = document.getString("bio");
+                        String idioma = document.getString("idioma");
+
+                        if (idioma != null && !idioma.isEmpty()) {
+                            inputIdioma.setText(idioma);
+                        } else {
+                            inputIdioma.setText("Idioma não definido");
+                        }
 
                         if (especialidade != null && !especialidade.isEmpty()) {
                             inputEspecialidade.setText(especialidade);
@@ -263,11 +271,11 @@ public class ProfessorPerfilFragment extends Fragment {
                         }
 
                         // Carregar foto do avatar
-                        String fotoUrl = document.getString("urlFotoPerfil");
-                        if (fotoUrl != null && !fotoUrl.isEmpty()) {
+                        String urlFotoPerfil = document.getString("urlFotoPerfil");
+                        if (urlFotoPerfil != null && !urlFotoPerfil.isEmpty()) {
                             // MUDOU: 'this' para 'requireContext()'
                             Glide.with(requireContext())
-                                    .load(fotoUrl)
+                                    .load(urlFotoPerfil)
                                     .placeholder(R.drawable.img_avatar_circle)
                                     .error(R.drawable.img_avatar_circle)
                                     .into(ivAvatar);

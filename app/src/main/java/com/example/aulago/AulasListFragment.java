@@ -5,6 +5,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -16,10 +20,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.text.SimpleDateFormat; // Importe para formatar data
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale; // Importe para o idioma da data
 
 public class AulasListFragment extends Fragment {
 
@@ -27,11 +33,17 @@ public class AulasListFragment extends Fragment {
     private static final String ARG_USER_TYPE = "user_type";
 
     private FirebaseFirestore db;
+    private FirebaseAuth auth; // Adicionei o Auth
     private ClassAdapter adapter;
     private List<ClassModel> listaDeAulas;
     private String currentUserType;
     private String currentUserId;
     private boolean isConcluidaTab; // Variável global que vamos usar
+
+    private LinearLayout layoutEmptyState;
+    private TextView tvEmptyTitle;
+    private ProgressBar progressBar;
+    private RecyclerView recyclerView;
 
     public static AulasListFragment newInstance(boolean isConcluida, String userType) {
         AulasListFragment fragment = new AulasListFragment();
@@ -46,6 +58,8 @@ public class AulasListFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_aulas_list, container, false);
+
+
     }
 
     @Override
@@ -63,12 +77,25 @@ public class AulasListFragment extends Fragment {
             return;
         }
 
+        recyclerView = view.findViewById(R.id.recyclerViewAulasFragment);
+        layoutEmptyState = view.findViewById(R.id.layout_empty_state);
+        tvEmptyTitle = view.findViewById(R.id.tv_empty_title);
+        progressBar = view.findViewById(R.id.progressBarAulas);
+
+        if (isConcluidaTab) {
+            tvEmptyTitle.setText("Nenhuma aula concluída");
+        } else {
+            tvEmptyTitle.setText("Nenhuma aula agendada");
+        }
+
         RecyclerView recyclerView = view.findViewById(R.id.recyclerViewAulasFragment);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         listaDeAulas = new ArrayList<>();
         adapter = new ClassAdapter(getContext(), listaDeAulas, currentUserType);
         recyclerView.setAdapter(adapter);
+
+        adapter.setOnAvaliarClickListener(classModel -> abrirFragmentAvaliacao(classModel));
 
         db = FirebaseFirestore.getInstance();
 
@@ -78,6 +105,10 @@ public class AulasListFragment extends Fragment {
 
     private void carregarDadosDoFirebase() {
         listaDeAulas.clear();
+
+        progressBar.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.GONE);
+        layoutEmptyState.setVisibility(View.GONE);
 
         String field = currentUserType.equals("aluno") ? "alunoId" : "professorId";
 
@@ -92,6 +123,9 @@ public class AulasListFragment extends Fragment {
                 .orderBy("dataTimestamp", direcao)
                 .get()
                 .addOnCompleteListener(task -> {
+
+                    if (progressBar != null) progressBar.setVisibility(View.GONE);
+
                     if (task.isSuccessful()) {
                         List<ClassModel> tempBatch = new ArrayList<>();
                         Log.d("DEBUG_AULAS", "Firebase retornou " + task.getResult().size() + " documentos.");
@@ -101,6 +135,8 @@ public class AulasListFragment extends Fragment {
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             try {
                                 ClassModel aula = document.toObject(ClassModel.class);
+
+                                aula.setAulaId(document.getId());
 
                                 if (aula.getDataTimestamp() == null || aula.getHorarioFim() == null) {
                                     continue;
@@ -133,10 +169,61 @@ public class AulasListFragment extends Fragment {
                         listaDeAulas.addAll(tempBatch);
                         adapter.updateList(listaDeAulas);
 
+                        if (listaDeAulas.isEmpty()) {
+                            recyclerView.setVisibility(View.GONE);
+                            layoutEmptyState.setVisibility(View.VISIBLE);
+                        } else {
+                            recyclerView.setVisibility(View.VISIBLE);
+                            layoutEmptyState.setVisibility(View.GONE);
+                        }
+
                     } else {
                         Log.e("FirebaseError", "Erro fatal no Firebase: ", task.getException());
                     }
                 });
+    }
+
+    private void abrirFragmentAvaliacao(ClassModel aula) {
+
+        // A. Formata Data e Hora
+        String textoDataHora = "--/--";
+        if (aula.getDataTimestamp() != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM", new Locale("pt", "BR"));
+            String dataStr = sdf.format(aula.getDataTimestamp().toDate());
+            String inicio = aula.getHorarioInicio() != null ? aula.getHorarioInicio() : "--:--";
+            String fim = aula.getHorarioFim() != null ? aula.getHorarioFim() : "--:--";
+            textoDataHora = dataStr + " • " + inicio + " - " + fim;
+        }
+
+        // B. Pega a Modalidade (Tenta campo modalidade, senão usa local, senão Presencial)
+        String textoModalidade = "Presencial";
+        if (aula.getModalidade() != null && !aula.getModalidade().isEmpty()) {
+            textoModalidade = aula.getModalidade();
+            // Capitaliza a primeira letra (opcional)
+            textoModalidade = textoModalidade.substring(0, 1).toUpperCase() + textoModalidade.substring(1);
+        } else if (aula.getLocal() != null) {
+            textoModalidade = aula.getLocal();
+        }
+
+        // C. Define QUEM será avaliado (Professor avalia Aluno)
+        String idParaAvaliar = aula.getAlunoId();
+
+        // D. Pega o ID da Aula
+        String idDaAula = aula.getAulaId();
+
+        // E. Abre o Fragmento
+        AvaliacaoFragment fragment = AvaliacaoFragment.newInstance(
+                idParaAvaliar,
+                textoDataHora,
+                textoModalidade,
+                idDaAula
+        );
+
+        requireActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, fragment) // Verifique se o ID do container é esse mesmo
+                .addToBackStack(null)
+                .commit();
     }
 
 

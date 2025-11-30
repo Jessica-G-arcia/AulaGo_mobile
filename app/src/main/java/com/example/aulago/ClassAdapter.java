@@ -22,6 +22,17 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
     private final Context context;
     private List<ClassModel> classList;
     private String userType; // ADICIONADO
+    private OnAvaliarClickListener onAvaliarClickListener;
+
+    public interface OnAvaliarClickListener {
+        // Esse metodo precisa receber um ClassModel
+        void onAvaliarClick(ClassModel classModel);
+    }
+
+    // metodo para configurar o click
+    public void setOnAvaliarClickListener(OnAvaliarClickListener listener) {
+        this.onAvaliarClickListener = listener;
+    }
 
     // Use este construtor no calendário e em todas telas
     public ClassAdapter(Context context, List<ClassModel> classList, String userType) {
@@ -72,9 +83,6 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
             } else if (local.contains("presencial")) {
                 holder.tvEmojiModalidade.setText("📍");
                 holder.tvModalidade.setText("Aula Presencial");
-            } else {
-                holder.tvEmojiModalidade.setText("•");
-                holder.tvModalidade.setText(classModel.getLocal());
             }
         } else {
             holder.tvEmojiModalidade.setVisibility(View.GONE);
@@ -91,7 +99,13 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
             holder.chipStatus.setClickable(true);
             holder.chipStatus.setChipBackgroundColor(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.verde_claro)));
             holder.chipStatus.setTextColor(ContextCompat.getColor(context, R.color.verde_escuro));
-            // Adicione listener aqui se desejar
+
+            holder.chipStatus.setOnClickListener(v -> {
+                if (onAvaliarClickListener != null) {
+                    onAvaliarClickListener.onAvaliarClick(classModel);
+                }
+            });
+
         } else {
             holder.chipStatus.setText(classModel.getStatus());
             holder.chipStatus.setClickable(false);

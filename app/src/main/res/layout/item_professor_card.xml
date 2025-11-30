@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
     android:layout_marginHorizontal="8dp"
+    android:layout_marginBottom="12dp"
     app:cardBackgroundColor="#FFFFFF"
     app:cardCornerRadius="12dp"
     app:cardElevation="3dp">
@@ -36,7 +36,7 @@
                     android:clipToOutline="true"
                     android:contentDescription="Avatar do Professor"
                     android:scaleType="centerCrop"
-                    tools:src="@drawable/img_avatar_circle"/>
+                    tools:src="@drawable/img_avatar_circle" />
             </FrameLayout>
 
             <LinearLayout
@@ -55,13 +55,13 @@
                     tools:text="Carregando..." />
 
                 <TextView
-                    android:id="@+id/tvProfessorSpecialty"
+                    android:id="@+id/tvProfessorAge"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:textColor="#7F8C8D"
                     android:textSize="14sp"
-                    tools:text="Especialidade: Conversação" />
+                    tools:text="24 anos" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -84,32 +84,153 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="6dp"
-                        android:textColor="#95A5A6"
+                        android:textColor="@color/cinza_escuro"
                         android:textSize="12sp"
                         tools:text="(12 avaliações)" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/tvProfessorBio"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:id="@+id/layoutTagLanguage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/rounded_tag_bg"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="7dp"
+                android:paddingVertical="5dp">
+
+                <ImageView
+                    android:id="@+id/ivLanguageIcon"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_marginEnd="6dp"
+                    android:src="@drawable/ic_mundo"
+                    app:tint="#546E7A" />
+
+                <TextView
+                    android:id="@+id/tvProfessorLanguage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#546E7A"
+                    android:textSize="12sp"
+                    tools:text="Inglês" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layoutTagModality"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/rounded_tag_bg"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="7dp"
+                android:paddingVertical="5dp">
+
+                <ImageView
+                    android:id="@+id/ivProfessorModalityIcon"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_marginEnd="6dp"
+                    android:src="@drawable/ic_perfil"
+                    app:tint="#546E7A" />
+
+                <TextView
+                    android:id="@+id/tvProfessorModality"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#546E7A"
+                    android:textSize="12sp"
+                    tools:text="Online" />
+            </LinearLayout>
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/tvProfessorSpecialty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/ivDescriptionIcon"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/ic_foco"
+                app:tint="@color/azul" />
+
+            <TextView
+                android:id="@+id/tvProfessorDescription"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="#34495E"
+                android:textSize="13sp"
+                tools:text="Conversação e foco para viagens" />
+
+            <TextView
+                android:id="@+id/tvShowMore"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="26dp"
+                android:layout_gravity="center"
+                android:text="Ver mais"
+                android:textColor="@color/azul"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                tools:visibility="visible" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/layoutDistance"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:ellipsize="end"
-            android:maxLines="2"
-            android:textColor="#34495E"
-            android:textSize="14sp"
-            tools:text="Professor certificado com 10 anos de experiência, foco em inglês para negócios e viagens." />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/ivDistanceIcon"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/ic_loc"
+                app:tint="@color/azul" />
+
+            <TextView
+                android:id="@+id/tvProfessorDistance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#7F8C8D"
+                android:textSize="13sp"
+                tools:text="9 km de você" />
+        </LinearLayout>
+
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnContact"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:elevation="2dp"
             android:text="Conferir Perfil"
-            android:textStyle="bold"
             android:textAllCaps="false"
-            app:cornerRadius="8dp" />
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            app:backgroundTint="@color/azul" />
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

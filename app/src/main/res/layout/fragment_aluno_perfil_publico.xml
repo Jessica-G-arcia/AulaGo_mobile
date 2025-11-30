@@ -38,10 +38,10 @@
                 android:id="@+id/groupRating"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical|end"
-                android:orientation="horizontal"
                 android:layout_gravity="center|end"
-                android:layout_marginEnd="20dp">
+                android:layout_marginEnd="20dp"
+                android:gravity="center_vertical|end"
+                android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/tvAlunoRatingMedia"
@@ -60,8 +60,8 @@
                     android:layout_marginStart="4dp"
                     android:isIndicator="true"
                     android:numStars="5"
-                    android:stepSize="0.1"
                     android:progressTint="@color/amarelo"
+                    android:stepSize="0.1"
                     tools:rating="4.8" />
             </LinearLayout>
 
@@ -70,10 +70,10 @@
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="solicitar contato"
                 android:layout_gravity="end|bottom"
-                android:textColor="@color/azul"
                 android:paddingEnd="16dp"
+                android:text="solicitar contato"
+                android:textColor="@color/azul"
                 android:textSize="11sp"
                 android:textStyle="bold"
                 app:cornerRadius="20dp"
@@ -120,12 +120,12 @@
                         android:layout_marginStart="8dp"
                         android:text="✓"
                         android:textColor="@android:color/white"
-                        android:textSize="16sp"
+                        android:textSize="12sp"
                         android:textStyle="bold"
                         android:visibility="gone"
                         app:chipBackgroundColor="#4CAF50"
                         app:chipEndPadding="8dp"
-                        app:chipMinHeight="28dp"
+                        app:chipMinHeight="20dp"
                         app:chipStartPadding="8dp"
                         app:chipStrokeWidth="0dp"
                         tools:visibility="visible" />
@@ -137,11 +137,11 @@
                         android:layout_marginStart="6dp"
                         android:text="★"
                         android:textColor="@color/black"
-                        android:textSize="16sp"
+                        android:textSize="12sp"
                         android:visibility="gone"
                         app:chipBackgroundColor="@color/amarelo"
                         app:chipEndPadding="8dp"
-                        app:chipMinHeight="28dp"
+                        app:chipMinHeight="20dp"
                         app:chipStartPadding="8dp"
                         app:chipStrokeWidth="0dp"
                         tools:visibility="visible" />
@@ -153,11 +153,11 @@
                         android:layout_marginStart="6dp"
                         android:text="👑"
                         android:textColor="@android:color/white"
-                        android:textSize="14sp"
+                        android:textSize="12sp"
                         android:visibility="gone"
                         app:chipBackgroundColor="@color/marinho"
                         app:chipEndPadding="6dp"
-                        app:chipMinHeight="28dp"
+                        app:chipMinHeight="20dp"
                         app:chipStartPadding="6dp"
                         app:chipStrokeWidth="0dp"
                         tools:visibility="visible" />
@@ -170,7 +170,21 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="10dp">
+
+            <TextView
+                android:id="@+id/tvIdioma"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:drawableStart="@drawable/ic_flag"
+                android:drawablePadding="10dp"
+                android:fontFamily="@font/montserrat"
+                android:gravity="center_vertical"
+                android:textColor="?android:attr/textColorPrimary"
+                android:visibility="visible"
+                app:drawableTint="@color/azul"
+                tools:text="Idiomas: Inglês" />
 
             <TextView
                 android:id="@+id/tvNivelAluno"
@@ -178,9 +192,9 @@
                 android:layout_height="wrap_content"
                 android:drawableStart="@drawable/ic_star"
                 android:drawablePadding="12dp"
+                android:layout_marginTop="10dp"
                 android:gravity="center_vertical"
                 android:textColor="?android:attr/textColorPrimary"
-                android:textSize="16sp"
                 android:visibility="visible"
                 app:drawableTint="@color/azul"
                 tools:text="Nível: Intermediário" />
@@ -194,7 +208,6 @@
                 android:drawablePadding="12dp"
                 android:gravity="center_vertical"
                 android:textColor="?android:attr/textColorPrimary"
-                android:textSize="16sp"
                 android:visibility="visible"
                 app:drawableTint="@color/azul"
                 tools:text="Modalidade: Presencial" />
@@ -208,7 +221,6 @@
                 android:drawablePadding="12dp"
                 android:gravity="center_vertical"
                 android:textColor="?android:attr/textColorPrimary"
-                android:textSize="16sp"
                 android:visibility="visible"
                 app:drawableTint="@color/azul"
                 tools:text="Objetivos: Conversação" />

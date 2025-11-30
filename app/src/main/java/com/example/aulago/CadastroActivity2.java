@@ -322,7 +322,7 @@ public class CadastroActivity2 extends AppCompatActivity {
         userData.put("statusSolicitacao", statusSolicitacao);
         userData.put("statusVerificacao", "nenhum");
         userData.put("comprovanteUrl", "");
-        userData.put("fotoUrl", "");
+        userData.put("urlFotoPerfil", "");
         userData.put("dataCadastro", FieldValue.serverTimestamp());
 
 

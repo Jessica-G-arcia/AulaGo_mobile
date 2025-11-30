@@ -5,6 +5,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.firebase.firestore.DocumentId;
+import com.google.firebase.firestore.GeoPoint;
 
 public class Professor implements Parcelable {
 
@@ -17,11 +18,21 @@ public class Professor implements Parcelable {
     private String urlFotoPerfil;
     private String bio;
     private String userType;
+    private Integer idade;
     private String especialidade; // Exemplo de campo específico de Professor
     private double rating;
+    private String idioma;
     private long reviewCount;
     private double ratingMedia;
     private long ratingCount;
+    private String preferenciaModalidade;
+    private GeoPoint localizacao;
+    private double distanciaCalculada;
+    private boolean isExpanded;
+
+
+
+
 
 
     // 2. Construtor vazio (OBRIGATÓRIO para o Firebase)
@@ -128,4 +139,54 @@ public class Professor implements Parcelable {
             return new Professor[size];
         }
     };
+
+    public String getIdioma() {
+        return idioma;
+    }
+
+    public void setIdioma(String idioma) {
+        this.idioma = idioma;
+    }
+
+
+    public GeoPoint getLocalizacao() {
+        return localizacao;
+    }
+
+    public void setLocalizacao(GeoPoint localizacao) {
+        this.localizacao = localizacao;
+    }
+
+    public double getDistanciaCalculada() {
+        return distanciaCalculada;
+    }
+
+    public void setDistanciaCalculada(double distanciaCalculada) {
+        this.distanciaCalculada = distanciaCalculada;
+    }
+
+    public boolean isExpanded() {
+        return isExpanded;
+    }
+
+    public void setExpanded(boolean expanded) {
+        isExpanded = expanded;
+    }
+
+    public Integer getIdade() {
+        return idade;
+    }
+
+    public void setIdade(Integer idade) {
+        this.idade = idade;
+    }
+
+
+    public String getPreferenciaModalidade() {
+        return preferenciaModalidade;
+    }
+
+    public void setPreferenciaModalidade(String preferenciaModalidade) {
+        this.preferenciaModalidade = preferenciaModalidade;
+    }
 }

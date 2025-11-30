@@ -6,6 +6,7 @@ public class UserModel {
 
     // Os nomes dos campos devem ser IDÊNTICOS aos do seu Firestore
     private String nome;
+    private String uid;
     private String urlFotoPerfil;
     private String userType;
     private String nivel;
@@ -96,5 +97,13 @@ public class UserModel {
 
     public void setRatingMedia(double ratingMedia) {
         this.ratingMedia = ratingMedia;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 }

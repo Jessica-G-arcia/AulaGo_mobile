@@ -63,8 +63,8 @@
                     android:layout_marginStart="4dp"
                     android:isIndicator="true"
                     android:numStars="5"
-                    android:stepSize="0.1"
                     android:progressTint="@color/amarelo"
+                    android:stepSize="0.1"
                     tools:rating="4.8" />
             </LinearLayout>
 
@@ -122,14 +122,29 @@
             android:padding="16dp">
 
             <TextView
+                android:id="@+id/tvIdiomaAluno"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:drawableStart="@drawable/ic_flag"
+                android:drawablePadding="12dp"
+                android:fontFamily="@font/montserrat"
+                android:gravity="center_vertical"
+                android:paddingTop="5dp"
+                android:textColor="?android:attr/textColorPrimary"
+                android:visibility="visible"
+                app:drawableTint="?attr/colorPrimary"
+                tools:text="Idiomas: Inglês, Espanhol" />
+
+            <TextView
                 android:id="@+id/tvNivelAluno"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:drawableStart="@drawable/ic_star"
                 android:drawablePadding="12dp"
                 android:gravity="center_vertical"
+                android:paddingTop="10dp"
                 android:textColor="?android:attr/textColorPrimary"
-                android:textSize="16sp"
                 android:visibility="visible"
                 app:drawableTint="?attr/colorPrimary"
                 tools:text="Nível: Intermediário" />
@@ -143,7 +158,6 @@
                 android:drawablePadding="12dp"
                 android:gravity="center_vertical"
                 android:textColor="?android:attr/textColorPrimary"
-                android:textSize="16sp"
                 android:visibility="visible"
                 app:drawableTint="@color/laranja"
                 tools:text="Modalidade: Presencial" />
@@ -153,11 +167,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:drawableStart="@drawable/ic_flag"
+                android:drawableStart="@drawable/ic_trophy"
                 android:drawablePadding="12dp"
                 android:gravity="center_vertical"
                 android:textColor="?android:attr/textColorPrimary"
-                android:textSize="16sp"
                 android:visibility="visible"
                 app:drawableTint="@color/laranja"
                 tools:text="Objetivos: Conversação" />
@@ -185,7 +198,7 @@
             <com.google.android.material.tabs.TabItem
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Minhas Avaliações" />
+                android:text="Avaliações" />
         </com.google.android.material.tabs.TabLayout>
 
         <LinearLayout

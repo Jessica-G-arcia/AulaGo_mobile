@@ -34,16 +34,17 @@ public class EditarPerfilProfessorFragment extends Fragment { // <-- MUDOU
     private String uid;
 
     // Views
-    private EditText etEspecialidade, etModalidade, etValorPresencial, etValorOnline, etBio;
+    private EditText etEspecialidade, etIdioma, etModalidade, etValorPresencial, etValorOnline, etBio;
     private ImageView ivFotoPerfil;
     private Button btnEscolherFoto;
     private Button btnSalvarPerfil;
+    private Button btnSolicitarProfessor;
     private ProgressBar progressBar;
 
     // Lógica de Foto
     private ActivityResultLauncher<String> mGetContent;
     private Uri imageUri;
-    private String currentFotoUrl;
+    private String currentUrlFotoPerfil;
 
     // 'onCreate' do Fragmento: para inicializar dados não-visuais
     @Override
@@ -91,12 +92,19 @@ public class EditarPerfilProfessorFragment extends Fragment { // <-- MUDOU
             mGetContent.launch("image/*");
         });
 
+        btnSolicitarProfessor.setOnClickListener(v -> {
+            if (getActivity() instanceof ToolbarActivity) {
+                ((ToolbarActivity) getActivity()).replaceFragment(new EditarPerfilAlunoFragment());
+            }
+        });
+
         // Carregue os dados atuais do professor para preencher os campos
         carregarDadosAtuais();
     }
 
     // MUDOU: Este método agora precisa de 'view'
     private void initViews(View view) {
+        etIdioma = view.findViewById(R.id.etIdioma);
         etEspecialidade = view.findViewById(R.id.etEspecialidade);
         etModalidade = view.findViewById(R.id.etModalidade);
         etValorPresencial = view.findViewById(R.id.etValorPresencial);
@@ -106,6 +114,7 @@ public class EditarPerfilProfessorFragment extends Fragment { // <-- MUDOU
         progressBar = view.findViewById(R.id.progressBar);
         ivFotoPerfil = view.findViewById(R.id.ivFotoPerfil);
         btnEscolherFoto = view.findViewById(R.id.btnEscolherFoto);
+        btnSolicitarProfessor = view.findViewById(R.id.btnSolicitarProfessor);
     }
 
     private void carregarDadosAtuais() {
@@ -113,10 +122,11 @@ public class EditarPerfilProfessorFragment extends Fragment { // <-- MUDOU
                 .addOnSuccessListener(document -> {
                     if (document.exists()) {
                         // Preenche os campos de texto
+                        etIdioma.setText(document.getString("idioma"));
                         etBio.setText(document.getString("bio"));
                         etEspecialidade.setText(document.getString("especialidade"));
 
-                        etModalidade.setText(document.getString("preferenciaAula"));
+                        etModalidade.setText(document.getString("preferenciaModalidade"));
 
                         if (document.getDouble("valorPresencial") != null) {
                             etValorPresencial.setText(String.valueOf(document.getDouble("valorPresencial")));
@@ -125,15 +135,19 @@ public class EditarPerfilProfessorFragment extends Fragment { // <-- MUDOU
                             etValorOnline.setText(String.valueOf(document.getDouble("valorOnline")));
                         }
 
-                        currentFotoUrl = document.getString("urlFotoPerfil");
-                        if (currentFotoUrl != null && !currentFotoUrl.isEmpty()) {
+                        currentUrlFotoPerfil = document.getString("urlFotoPerfil");
+                        if (currentUrlFotoPerfil != null && !currentUrlFotoPerfil.isEmpty()) {
                             // MUDOU: 'this' para 'requireContext()'
                             Glide.with(requireContext())
-                                    .load(currentFotoUrl)
+                                    .load(currentUrlFotoPerfil)
                                     .placeholder(R.drawable.img_avatar_circle)
                                     .into(ivFotoPerfil);
                         }
+                        if (btnSolicitarProfessor != null) {
+                            btnSolicitarProfessor.setVisibility(View.VISIBLE);
+                        }
                     }
+
                 })
                 .addOnFailureListener(e -> {
                     // MUDOU: 'this' para 'requireContext()'
@@ -149,7 +163,7 @@ public class EditarPerfilProfessorFragment extends Fragment { // <-- MUDOU
         if (imageUri != null) {
             fazerUploadDaImagem();
         } else {
-            salvarDadosNoFirestore(currentFotoUrl);
+            salvarDadosNoFirestore(currentUrlFotoPerfil);
         }
     }
 
@@ -176,10 +190,12 @@ public class EditarPerfilProfessorFragment extends Fragment { // <-- MUDOU
     /**
      * Passo Final: Salva TODOS os dados (texto + URL da foto) no Firestore.
      */
-    private void salvarDadosNoFirestore(String fotoUrl) {
+    private void salvarDadosNoFirestore(String urlFotoPerfil) {
         String especialidade = etEspecialidade.getText().toString().trim();
-        String modalidade = etModalidade.getText().toString().trim();
+        String preferenciaModalidade = etModalidade.getText().toString().trim();
         String bio = etBio.getText().toString().trim();
+        String idioma = etIdioma.getText().toString().trim();
+
 
         double valorP = 0;
         double valorO = 0;
@@ -197,16 +213,17 @@ public class EditarPerfilProfessorFragment extends Fragment { // <-- MUDOU
 
         Map<String, Object> professorData = new HashMap<>();
         professorData.put("especialidade", especialidade);
+        professorData.put("idioma", idioma);
 
-        // CORREÇÃO: Salvando no campo "preferenciaAula"
-        professorData.put("preferenciaAula", modalidade);
+        // CORREÇÃO: Salvando no campo "preferenciaModalidade"
+        professorData.put("preferenciaModalidade", preferenciaModalidade);
 
         professorData.put("bio", bio);
         professorData.put("valorPresencial", valorP);
         professorData.put("valorOnline", valorO);
 
-        if (fotoUrl != null) {
-            professorData.put("urlFotoPerfil", fotoUrl);
+        if (urlFotoPerfil != null) {
+            professorData.put("urlFotoPerfil", urlFotoPerfil);
         }
 
         db.collection("users").document(uid)

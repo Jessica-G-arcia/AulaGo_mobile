@@ -6,16 +6,29 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CalendarView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.example.aulago.databinding.FragmentCalendarBinding;
+
+import com.bumptech.glide.Glide;
+import com.example.aulago.databinding.FragmentCalendarBinding; // IMPORTANTE: View Binding
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -26,16 +39,20 @@ import java.util.Locale;
 
 public class CalendarFragment extends Fragment {
 
+    // 1. View Binding (substitui todos os findViewById)
     private FragmentCalendarBinding binding;
-    private FirebaseFirestore db;
-    private FirebaseAuth mAuth;
-    private String currentUserId;
+
+    // 2. Variáveis de Lógica (as mesmas de antes)
     private ClassAdapter adapter;
     private List<ClassModel> listaDeAulas;
     private Calendar selectedCalendar;
     private SimpleDateFormat uiDateFormat;
     private SimpleDateFormat firebaseDataFormat;
+    private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
+    private String currentUserId;
 
+    // 3. onCreate (Para inicializar variáveis, não views)
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +65,7 @@ public class CalendarFragment extends Fragment {
         selectedCalendar = Calendar.getInstance();
     }
 
+    // 4. onCreateView (Para inflar o XML)
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -55,6 +73,7 @@ public class CalendarFragment extends Fragment {
         return binding.getRoot();
     }
 
+    // 5. onViewCreated (Para configurar as views e carregar dados)
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -66,22 +85,33 @@ public class CalendarFragment extends Fragment {
         }
         currentUserId = mAuth.getCurrentUser().getUid();
 
+
+        // Configura os componentes
         setupRecyclerView();
         setupCalendar();
+
+        // Carrega as aulas do PROFESSOR logado
         loadClassesFromFirebase();
     }
 
+    // 6. onDestroyView (Limpa o binding)
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        binding = null;
+        binding = null; // Previne memory leaks
     }
 
+
     private void setupRecyclerView() {
+        // Verificação de segurança
+        if (binding == null) return;
+
         binding.recyclerViewClasses.setLayoutManager(new LinearLayoutManager(requireContext()));
         // Tipo "professor" sempre nesse fragment!
         adapter = new ClassAdapter(requireContext(), listaDeAulas, "professor");
         binding.recyclerViewClasses.setAdapter(adapter);
+
+        adapter.setOnAvaliarClickListener(classModel -> abrirFragmentAvaliacao(classModel));
     }
 
     private void setupCalendar() {
@@ -105,14 +135,23 @@ public class CalendarFragment extends Fragment {
                 .whereEqualTo("professorId", currentUserId)
                 .get()
                 .addOnCompleteListener(task -> {
+                    // 1. CORREÇÃO CRUCIAL: Se o usuário saiu da tela, paramos aqui.
+                    if (binding == null) return;
+
                     if (task.isSuccessful()) {
                         listaDeAulas.clear();
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             try {
                                 ClassModel classModel = new ClassModel();
+
+
+                                // 1. Busque o campo "dataTimestamp" como um Timestamp
                                 Timestamp dataTimestamp = document.getTimestamp("dataTimestamp");
                                 if (dataTimestamp == null) continue;
                                 classModel.setDataTimestamp(dataTimestamp);
+
+
+                                // Preenche o resto
                                 classModel.setAlunoId(document.getString("alunoId"));
                                 classModel.setProfessorId(document.getString("professorId"));
                                 classModel.setAlunoNome(document.getString("alunoNome"));
@@ -129,12 +168,16 @@ public class CalendarFragment extends Fragment {
                         }
                         updateClassList();
                     } else {
-                        Log.w("Firestore", "Erro ao carregar aulas (Professor)", task.getException());
+                        Log.w("Firestore", "Erro ao carregar aulas", task.getException());
                     }
                 });
     }
 
+
     private void updateClassList() {
+        // 2. CORREÇÃO CRUCIAL: Verifica se binding existe antes de tocar na tela
+        if (binding == null) return;
+
         List<ClassModel> filteredClasses = getClassesForDate(selectedCalendar.getTime());
         String formattedDate = uiDateFormat.format(selectedCalendar.getTime());
 
@@ -178,4 +221,49 @@ public class CalendarFragment extends Fragment {
         return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
                 cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
     }
+
+
+    private void abrirFragmentAvaliacao(ClassModel aula) {
+
+        // A. Formata Data e Hora
+        String textoDataHora = "--/--";
+        if (aula.getDataTimestamp() != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM", new Locale("pt", "BR"));
+            String dataStr = sdf.format(aula.getDataTimestamp().toDate());
+            String inicio = aula.getHorarioInicio() != null ? aula.getHorarioInicio() : "--:--";
+            String fim = aula.getHorarioFim() != null ? aula.getHorarioFim() : "--:--";
+            textoDataHora = dataStr + " • " + inicio + " - " + fim;
+        }
+
+        // B. Pega a Modalidade (Tenta campo modalidade, senão usa local, senão Presencial)
+        String textoModalidade = "Presencial";
+        if (aula.getModalidade() != null && !aula.getModalidade().isEmpty()) {
+            textoModalidade = aula.getModalidade();
+            // Capitaliza a primeira letra (opcional)
+            textoModalidade = textoModalidade.substring(0, 1).toUpperCase() + textoModalidade.substring(1);
+        } else if (aula.getLocal() != null) {
+            textoModalidade = aula.getLocal();
+        }
+
+        // C. Define QUEM será avaliado (Professor avalia Aluno)
+        String idParaAvaliar = aula.getAlunoId();
+
+        // D. Pega o ID da Aula
+        String idDaAula = aula.getAulaId();
+
+        // E. Abre o Fragmento
+        AvaliacaoFragment fragment = AvaliacaoFragment.newInstance(
+                idParaAvaliar,
+                textoDataHora,
+                textoModalidade,
+                idDaAula
+        );
+
+        requireActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, fragment) // Verifique se o ID do container é esse mesmo
+                .addToBackStack(null)
+                .commit();
+    }
+
 }
