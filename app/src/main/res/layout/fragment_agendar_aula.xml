@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:layout_marginBottom="24dp">
+
+            <ImageButton
+                android:id="@+id/btn_voltar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_arrow_left"
+                app:tint="#000000" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Agendar Aula"
+                android:textColor="#000000"
+                android:textSize="20sp"
+                android:fontFamily="@font/montserrat_bold"
+                android:gravity="center" />
+
+            <View android:layout_width="24dp" android:layout_height="24dp"/>
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Selecione uma Data"
+            android:fontFamily="@font/montserrat_bold"
+            android:textColor="#000000"
+            android:textSize="18sp"
+            android:layout_marginBottom="12dp"/>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="@color/white"
+            android:layout_marginBottom="24dp">
+
+            <CalendarView
+                android:id="@+id/calendarView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:dateTextAppearance="@style/CalendarViewDateCustomText"
+                android:padding="8dp"
+                android:theme="@style/CustomCalendarViewTheme"
+                android:weekDayTextAppearance="@style/CalendarViewWeekCustomText" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Escolha um Horário"
+            android:fontFamily="@font/montserrat_bold"
+            android:textColor="#000000"
+            android:textSize="18sp"
+            android:layout_marginBottom="12dp"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvHorarios"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Selecione a Modalidade"
+            android:fontFamily="@font/montserrat_bold"
+            android:textColor="#000000"
+            android:textSize="18sp"
+            android:layout_marginBottom="12dp"/>
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/toggleModalidade"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:singleSelection="true"
+            app:selectionRequired="true"
+            app:checkedButton="@+id/btnOnline">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnOnline"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Online"
+                app:cornerRadius="16dp"
+                app:icon="@drawable/ic_camera"
+                android:textAllCaps="false"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPresencial"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Presencial"
+                app:cornerRadius="16dp"
+                app:icon="@drawable/ic_loc"
+                android:textAllCaps="false"/>
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnConfirmarAgendamento"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="Confirmar Agendamento"
+            android:textSize="16sp"
+            android:fontFamily="@font/montserrat_bold"
+            app:cornerRadius="30dp"
+            android:backgroundTint="@color/azul"
+            android:layout_marginTop="32dp"/>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

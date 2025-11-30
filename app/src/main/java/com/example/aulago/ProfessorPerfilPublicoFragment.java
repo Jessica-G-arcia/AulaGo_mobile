@@ -56,6 +56,8 @@ public class ProfessorPerfilPublicoFragment extends Fragment {
     private ReviewAdapter reviewAdapter;
     private List<ReviewModel> reviewList = new ArrayList<>();
 
+    private String currentProfessorAvatarUrl; // <--- NOVA VARIÁVEL
+
     // -------------------------------------------------------------------
     // METODOLOGIA DE CRIAÇÃO (Factory Pattern)
     // -------------------------------------------------------------------
@@ -191,6 +193,7 @@ public class ProfessorPerfilPublicoFragment extends Fragment {
 
                     // Avatar
                     String urlFotoPerfil = documentSnapshot.getString("urlFotoPerfil");
+                    this.currentProfessorAvatarUrl = urlFotoPerfil;
                     Glide.with(requireContext()).load(urlFotoPerfil).placeholder(R.drawable.img_avatar_circle).error(R.drawable.img_avatar_circle).into(ivAvatar);
 
 
@@ -298,11 +301,22 @@ public class ProfessorPerfilPublicoFragment extends Fragment {
     }
 
     private void mostrarDialogoContratar() {
-        if (getContext() == null) return;
-        new AlertDialog.Builder(getContext())
-                .setTitle("Contratar Professor")
-                .setMessage("Solicitação de contrato enviada!") // TODO: Implementar lógica
-                .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
-                .show();
+        if (getContext() == null || tvNomeProfessor == null) return;
+
+        // Pega o nome do professor que já está na tela
+        String nomeProfessor = tvNomeProfessor.getText().toString();
+
+        // 1. Cria o Fragmento de Agendamento passando ID e Nome
+        AgendarAulaFragment fragmentAgendamento = AgendarAulaFragment.newInstance(
+                professorId, // ID do professor (variável da classe)
+                nomeProfessor, // Nome para exibir na tela de agendamento
+                currentProfessorAvatarUrl
+        );
+
+        // 2. Navega para ele
+        getParentFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, fragmentAgendamento) // Verifique se o ID é fragment_container
+                .addToBackStack(null) // Permite voltar com o botão 'Back'
+                .commit();
     }
 }
